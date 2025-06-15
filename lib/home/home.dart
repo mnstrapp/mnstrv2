@@ -33,7 +33,7 @@ class HomeView extends StatelessWidget {
                   fontSize: buttonFontSize,
                   width: buttonWidth,
                   height: buttonHeight,
-                  color: buttonColor,
+                  foregroundColor: buttonColor,
                 ),
               ),
               Center(
@@ -46,7 +46,7 @@ class HomeView extends StatelessWidget {
                   fontSize: buttonFontSize,
                   width: buttonWidth,
                   height: buttonHeight,
-                  color: buttonColor,
+                  foregroundColor: buttonColor,
                 ),
               ),
               Center(
@@ -59,7 +59,7 @@ class HomeView extends StatelessWidget {
                   fontSize: buttonFontSize,
                   width: buttonWidth,
                   height: buttonHeight,
-                  color: buttonColor,
+                  foregroundColor: buttonColor,
                 ),
               ),
             ],

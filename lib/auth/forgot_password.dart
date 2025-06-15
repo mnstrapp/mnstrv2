@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import '../ui/button.dart';
 import 'login.dart';
 import 'register.dart';
+import '../qr/scanner.dart';
 
 class ForgotPasswordView extends StatefulWidget {
   const ForgotPasswordView({super.key});
@@ -12,12 +15,52 @@ class ForgotPasswordView extends StatefulWidget {
 
 class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   final TextEditingController _emailController = TextEditingController();
+  Uint8List? _qrCode;
+
+  void _scanQRCode(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => ScannerView(
+        onScan: (data) {
+          if (data != null) {
+            setState(() {
+              _qrCode = data;
+            });
+          }
+          Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
+
+  void _sendResetEmail(BuildContext context) {
+    if (_emailController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Email is required')));
+      return;
+    }
+
+    // TODO: Send reset email
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
+          Positioned(
+            bottom: 0,
+            left: 32,
+            right: 0,
+            child: Center(child: Image.asset('assets/loading_figure.png')),
+          ),
           Center(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -40,37 +83,51 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            TextField(
-                              controller: _emailController,
-                              decoration: InputDecoration(labelText: 'Email'),
-                            ),
                             UIButton(
-                              onPressed: () {},
-                              text: 'Forgot Password',
+                              onPressed: () => _scanQRCode(context),
+                              text: 'QR Code',
                               margin: 16,
                               padding: 16,
-                              icon: Icons.password,
+                              icon: _qrCode != null
+                                  ? Icons.check_circle
+                                  : Icons.qr_code_scanner,
+                              backgroundColor: _qrCode != null
+                                  ? Colors.green
+                                  : Theme.of(context).colorScheme.secondary,
                             ),
-                            Divider(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                            TextButton.icon(
-                              onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => LoginView(),
-                                ),
+                            if (_qrCode != null) ...[
+                              TextField(
+                                controller: _emailController,
+                                decoration: InputDecoration(labelText: 'Email'),
+                                autofocus: true,
                               ),
+                              UIButton(
+                                onPressed: () => _sendResetEmail(context),
+                                text: 'Reset Password',
+                                margin: 16,
+                                padding: 16,
+                                icon: Icons.password,
+                              ),
+                            ],
+
+                            Divider(),
+                            TextButton.icon(
+                              onPressed: () =>
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                      builder: (context) => LoginView(),
+                                    ),
+                                  ),
                               icon: const Icon(Icons.login),
                               label: Text('Login?'),
                             ),
                             TextButton.icon(
-                              onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => RegisterView(),
-                                ),
-                              ),
+                              onPressed: () =>
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                      builder: (context) => RegisterView(),
+                                    ),
+                                  ),
                               icon: const Icon(Icons.person_add),
                               label: Text('Register?'),
                             ),
@@ -82,12 +139,6 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                 ],
               ),
             ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 32,
-            right: 0,
-            child: Center(child: Image.asset('assets/loading_figure.png')),
           ),
         ],
       ),

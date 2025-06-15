@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import '../ui/button.dart';
+import '../qr/scanner.dart';
 import 'forgot_password.dart';
 import 'register.dart';
 
@@ -14,12 +17,68 @@ class _LoginViewState extends State<LoginView> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _passwordVisible = false;
+  Uint8List? _qrCode;
+
+  void _scanQRCode(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => ScannerView(
+        onScan: (data) {
+          if (data != null) {
+            setState(() {
+              _qrCode = data;
+            });
+          }
+          Navigator.of(context).pop();
+        },
+      ),
+    );
+  }
+
+  void _login(BuildContext context) {
+    if (_qrCode == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('QR Code is required')));
+      return;
+    }
+
+    if (_emailController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Email is required')));
+      return;
+    }
+
+    if (_passwordController.text.isEmpty) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Password is required')));
+      return;
+    }
+
+    // TODO: Login user
+  }
+
+  @override
+  void dispose() {
+    _emailController.dispose();
+    _passwordController.dispose();
+    _qrCode = null;
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Stack(
         children: [
+          Positioned(
+            bottom: 0,
+            left: 32,
+            right: 0,
+            child: Center(child: Image.asset('assets/loading_figure.png')),
+          ),
           Center(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -28,7 +87,7 @@ class _LoginViewState extends State<LoginView> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Login',
+                    'User Login',
                     style: Theme.of(context).textTheme.titleLarge?.copyWith(
                       color: Theme.of(context).colorScheme.onPrimary,
                     ),
@@ -42,46 +101,61 @@ class _LoginViewState extends State<LoginView> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            TextField(
-                              controller: _emailController,
-                              decoration: InputDecoration(labelText: 'Email'),
+                            UIButton(
+                              onPressed: () => _scanQRCode(context),
+                              text: 'QR Code',
+                              margin: 16,
+                              padding: 16,
+                              icon: _qrCode != null
+                                  ? Icons.check_circle
+                                  : Icons.qr_code_scanner,
+                              backgroundColor: _qrCode != null
+                                  ? Colors.green
+                                  : Theme.of(context).colorScheme.secondary,
+                              foregroundColor: Colors.white,
                             ),
-                            TextField(
-                              controller: _passwordController,
-                              obscureText: !_passwordVisible,
-                              decoration: InputDecoration(
-                                labelText: 'Password',
-                                suffixIcon: IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _passwordVisible = !_passwordVisible;
-                                    });
-                                  },
-                                  icon: Icon(
-                                    _passwordVisible
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
+                            if (_qrCode != null) ...[
+                              TextField(
+                                controller: _emailController,
+                                decoration: InputDecoration(labelText: 'Email'),
+                                autofocus: true,
+                              ),
+                              TextField(
+                                controller: _passwordController,
+                                obscureText: !_passwordVisible,
+                                decoration: InputDecoration(
+                                  labelText: 'Password',
+                                  suffixIcon: IconButton(
+                                    onPressed: () {
+                                      setState(() {
+                                        _passwordVisible = !_passwordVisible;
+                                      });
+                                    },
+                                    icon: Icon(
+                                      _passwordVisible
+                                          ? Icons.visibility
+                                          : Icons.visibility_off,
+                                    ),
                                   ),
                                 ),
                               ),
-                            ),
-                            UIButton(
-                              onPressed: () {},
-                              text: 'Login',
-                              margin: 16,
-                              padding: 16,
-                              icon: Icons.login,
-                            ),
-                            Divider(
-                              color: Theme.of(context).colorScheme.onPrimary,
-                            ),
-                            TextButton.icon(
-                              onPressed: () => Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => RegisterView(),
-                                ),
+                              UIButton(
+                                onPressed: () => _login(context),
+                                text: 'Login',
+                                margin: 16,
+                                padding: 16,
+                                icon: Icons.login,
                               ),
+                            ],
+
+                            Divider(),
+                            TextButton.icon(
+                              onPressed: () =>
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                      builder: (context) => RegisterView(),
+                                    ),
+                                  ),
                               icon: const Icon(Icons.person_add),
                               label: Text('Register'),
                             ),
@@ -90,7 +164,12 @@ class _LoginViewState extends State<LoginView> {
                       ),
                     ),
                   ),
-                  TextButton.icon(
+                  FilledButton.icon(
+                    style: FilledButton.styleFrom(
+                      backgroundColor: Theme.of(context).colorScheme.onPrimary,
+                      foregroundColor: Theme.of(context).colorScheme.primary,
+                      elevation: 4,
+                    ),
                     onPressed: () => Navigator.push(
                       context,
                       MaterialPageRoute(
@@ -103,12 +182,6 @@ class _LoginViewState extends State<LoginView> {
                 ],
               ),
             ),
-          ),
-          Positioned(
-            bottom: 0,
-            left: 32,
-            right: 0,
-            child: Center(child: Image.asset('assets/loading_figure.png')),
           ),
         ],
       ),

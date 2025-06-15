@@ -11,7 +11,8 @@ class UIButton extends StatelessWidget {
     this.width,
     this.height,
     this.fontSize,
-    this.color,
+    this.foregroundColor,
+    this.backgroundColor,
     this.iconSize,
     this.center = true,
   });
@@ -20,7 +21,8 @@ class UIButton extends StatelessWidget {
   final IconData? icon;
   final String text;
   final double? fontSize;
-  final Color? color;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
   final double? iconSize;
   final double? margin;
   final double? padding;
@@ -36,7 +38,7 @@ class UIButton extends StatelessWidget {
     final padding = this.padding ?? 8;
     final margin = this.margin ?? 0;
     final textStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
-      color: color ?? Theme.of(context).colorScheme.onPrimary,
+      color: foregroundColor ?? Theme.of(context).colorScheme.onPrimary,
       fontSize: fontSize,
     );
     return Padding(
@@ -46,6 +48,7 @@ class UIButton extends StatelessWidget {
         height: height,
         child: FilledButton(
           onPressed: onPressed,
+          style: FilledButton.styleFrom(backgroundColor: backgroundColor),
           child: Padding(
             padding: EdgeInsets.all(padding),
             child: Row(
@@ -57,11 +60,11 @@ class UIButton extends StatelessWidget {
               children: [
                 if (icon != null && !center) ...[
                   SizedBox(width: padding),
-                  Icon(icon!, size: iconSize, color: color),
+                  Icon(icon!, size: iconSize, color: foregroundColor),
                   SizedBox(width: padding),
                 ],
                 if (icon != null && center) ...[
-                  Icon(icon!, size: iconSize, color: color),
+                  Icon(icon!, size: iconSize, color: foregroundColor),
                   SizedBox(width: padding),
                 ],
                 Text(text, style: textStyle),
