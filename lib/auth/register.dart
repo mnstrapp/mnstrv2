@@ -14,6 +14,7 @@ class _RegisterViewState extends State<RegisterView> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+  bool _passwordVisible = false;
 
   @override
   Widget build(BuildContext context) {
@@ -48,14 +49,40 @@ class _RegisterViewState extends State<RegisterView> {
                             ),
                             TextField(
                               controller: _passwordController,
+                              obscureText: !_passwordVisible,
                               decoration: InputDecoration(
                                 labelText: 'Password',
+                                suffixIcon: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _passwordVisible = !_passwordVisible;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    _passwordVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                  ),
+                                ),
                               ),
                             ),
                             TextField(
                               controller: _confirmPasswordController,
+                              obscureText: !_passwordVisible,
                               decoration: InputDecoration(
                                 labelText: 'Confirm Password',
+                                suffixIcon: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _passwordVisible = !_passwordVisible;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    _passwordVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                  ),
+                                ),
                               ),
                             ),
                             UIButton(
