@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import '../collect/collect.dart';
 import '../ui/button.dart';
 
-class Home extends StatelessWidget {
-  const Home({super.key});
+class HomeView extends StatelessWidget {
+  const HomeView({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -13,6 +13,7 @@ class UIButton extends StatelessWidget {
     this.fontSize,
     this.color,
     this.iconSize,
+    this.center = true,
   });
 
   final VoidCallback onPressed;
@@ -25,6 +26,7 @@ class UIButton extends StatelessWidget {
   final double? padding;
   final double? width;
   final double? height;
+  final bool center;
 
   @override
   Widget build(BuildContext context) {
@@ -47,12 +49,18 @@ class UIButton extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.all(padding),
             child: Row(
-              mainAxisAlignment: icon != null
+              mainAxisAlignment: center
+                  ? MainAxisAlignment.center
+                  : icon != null
                   ? MainAxisAlignment.start
                   : MainAxisAlignment.center,
               children: [
-                if (icon != null) ...[
+                if (icon != null && !center) ...[
                   SizedBox(width: padding),
+                  Icon(icon!, size: iconSize, color: color),
+                  SizedBox(width: padding),
+                ],
+                if (icon != null && center) ...[
                   Icon(icon!, size: iconSize, color: color),
                   SizedBox(width: padding),
                 ],

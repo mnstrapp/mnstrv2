@@ -1,22 +1,35 @@
-import 'package:flutter/material.dart';
-import 'home/home.dart';
+import 'dart:developer';
 
-class App extends StatelessWidget {
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'theme.dart';
+import 'providers/auth.dart';
+import 'home/home.dart';
+import 'auth/auth.dart';
+
+class App extends ConsumerWidget {
   const App({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final auth = ref.watch(authProvider);
     return MaterialApp(
-      home: Home(),
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Color(0xff00f0ff)),
-        primaryColor: Color(0xff00f0ff),
-        primaryColorLight: Color(0xff7cf7ff),
-        primaryColorDark: Color(0xff00c0ff),
-        scaffoldBackgroundColor: Color(0xff00f0ff),
-        appBarTheme: AppBarTheme(backgroundColor: Color(0xff00f0ff)),
+      home: auth.when(
+        data: (auth) {
+          if (auth == null) {
+            return AuthView();
+          }
+          return HomeView();
+        },
+        error: (error, stack) {
+          log('Error: $error\n$stack');
+          return const AuthView();
+        },
+        loading: () =>
+            const Scaffold(body: Center(child: CircularProgressIndicator())),
       ),
+      debugShowCheckedModeBanner: false,
+      theme: theme,
     );
   }
 }
