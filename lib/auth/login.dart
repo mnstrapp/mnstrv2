@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart';
 import '../ui/button.dart';
+import 'forgot_password.dart';
+import 'register.dart';
 
-class AuthView extends StatefulWidget {
-  const AuthView({super.key});
+class LoginView extends StatefulWidget {
+  const LoginView({super.key});
 
   @override
-  State<AuthView> createState() => _AuthViewState();
+  State<LoginView> createState() => _LoginViewState();
 }
 
-class _AuthViewState extends State<AuthView> {
+class _LoginViewState extends State<LoginView> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
@@ -54,10 +56,33 @@ class _AuthViewState extends State<AuthView> {
                               padding: 16,
                               icon: Icons.login,
                             ),
+                            Divider(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                            ),
+                            TextButton.icon(
+                              onPressed: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => RegisterView(),
+                                ),
+                              ),
+                              icon: const Icon(Icons.person_add),
+                              label: Text('Register'),
+                            ),
                           ],
                         ),
                       ),
                     ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => ForgotPasswordView(),
+                      ),
+                    ),
+                    icon: const Icon(Icons.password),
+                    label: Text('Forgot password?'),
                   ),
                 ],
               ),

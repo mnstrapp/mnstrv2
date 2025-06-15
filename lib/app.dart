@@ -5,7 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'theme.dart';
 import 'providers/auth.dart';
 import 'home/home.dart';
-import 'auth/auth.dart';
+import 'auth/login.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
@@ -17,13 +17,13 @@ class App extends ConsumerWidget {
       home: auth.when(
         data: (auth) {
           if (auth == null) {
-            return AuthView();
+            return LoginView();
           }
           return HomeView();
         },
         error: (error, stack) {
           log('Error: $error\n$stack');
-          return const AuthView();
+          return const LoginView();
         },
         loading: () =>
             const Scaffold(body: Center(child: CircularProgressIndicator())),
