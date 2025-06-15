@@ -42,7 +42,7 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                           children: [
                             TextField(
                               controller: _emailController,
-                              decoration: InputDecoration(hintText: 'Email'),
+                              decoration: InputDecoration(labelText: 'Email'),
                             ),
                             UIButton(
                               onPressed: () {},

@@ -43,11 +43,13 @@ class _LoginViewState extends State<LoginView> {
                           children: [
                             TextField(
                               controller: _emailController,
-                              decoration: InputDecoration(hintText: 'Email'),
+                              decoration: InputDecoration(labelText: 'Email'),
                             ),
                             TextField(
                               controller: _passwordController,
-                              decoration: InputDecoration(hintText: 'Password'),
+                              decoration: InputDecoration(
+                                labelText: 'Password',
+                              ),
                             ),
                             UIButton(
                               onPressed: () {},

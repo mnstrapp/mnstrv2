@@ -44,16 +44,18 @@ class _RegisterViewState extends State<RegisterView> {
                           children: [
                             TextField(
                               controller: _emailController,
-                              decoration: InputDecoration(hintText: 'Email'),
+                              decoration: InputDecoration(labelText: 'Email'),
                             ),
                             TextField(
                               controller: _passwordController,
-                              decoration: InputDecoration(hintText: 'Password'),
+                              decoration: InputDecoration(
+                                labelText: 'Password',
+                              ),
                             ),
                             TextField(
                               controller: _confirmPasswordController,
                               decoration: InputDecoration(
-                                hintText: 'Confirm Password',
+                                labelText: 'Confirm Password',
                               ),
                             ),
                             UIButton(
