@@ -1,8 +1,5 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import '../ui/button.dart';
-import '../qr/scanner.dart';
 import 'forgot_password.dart';
 import 'register.dart';
 
@@ -17,32 +14,8 @@ class _LoginViewState extends State<LoginView> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _passwordVisible = false;
-  Uint8List? _qrCode;
-
-  void _scanQRCode(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => ScannerView(
-        onScan: (data) {
-          if (data != null) {
-            setState(() {
-              _qrCode = data;
-            });
-          }
-          Navigator.of(context).pop();
-        },
-      ),
-    );
-  }
 
   void _login(BuildContext context) {
-    if (_qrCode == null) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('QR Code is required')));
-      return;
-    }
-
     if (_emailController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
@@ -64,7 +37,6 @@ class _LoginViewState extends State<LoginView> {
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _qrCode = null;
     super.dispose();
   }
 
@@ -101,52 +73,37 @@ class _LoginViewState extends State<LoginView> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            UIButton(
-                              onPressed: () => _scanQRCode(context),
-                              text: 'QR Code',
-                              margin: 16,
-                              padding: 16,
-                              icon: _qrCode != null
-                                  ? Icons.check_circle
-                                  : Icons.qr_code_scanner,
-                              backgroundColor: _qrCode != null
-                                  ? Colors.green
-                                  : Theme.of(context).colorScheme.secondary,
-                              foregroundColor: Colors.white,
+                            TextField(
+                              controller: _emailController,
+                              decoration: InputDecoration(labelText: 'Email'),
+                              autofocus: true,
                             ),
-                            if (_qrCode != null) ...[
-                              TextField(
-                                controller: _emailController,
-                                decoration: InputDecoration(labelText: 'Email'),
-                                autofocus: true,
-                              ),
-                              TextField(
-                                controller: _passwordController,
-                                obscureText: !_passwordVisible,
-                                decoration: InputDecoration(
-                                  labelText: 'Password',
-                                  suffixIcon: IconButton(
-                                    onPressed: () {
-                                      setState(() {
-                                        _passwordVisible = !_passwordVisible;
-                                      });
-                                    },
-                                    icon: Icon(
-                                      _passwordVisible
-                                          ? Icons.visibility
-                                          : Icons.visibility_off,
-                                    ),
+                            TextField(
+                              controller: _passwordController,
+                              obscureText: !_passwordVisible,
+                              decoration: InputDecoration(
+                                labelText: 'Password',
+                                suffixIcon: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _passwordVisible = !_passwordVisible;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    _passwordVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
                                   ),
                                 ),
                               ),
-                              UIButton(
-                                onPressed: () => _login(context),
-                                text: 'Login',
-                                margin: 16,
-                                padding: 16,
-                                icon: Icons.login,
-                              ),
-                            ],
+                            ),
+                            UIButton(
+                              onPressed: () => _login(context),
+                              text: 'Login',
+                              margin: 16,
+                              padding: 16,
+                              icon: Icons.login,
+                            ),
 
                             Divider(),
                             TextButton.icon(

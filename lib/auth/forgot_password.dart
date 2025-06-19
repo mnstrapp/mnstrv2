@@ -1,10 +1,7 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import '../ui/button.dart';
 import 'login.dart';
 import 'register.dart';
-import '../qr/scanner.dart';
 
 class ForgotPasswordView extends StatefulWidget {
   const ForgotPasswordView({super.key});
@@ -15,23 +12,6 @@ class ForgotPasswordView extends StatefulWidget {
 
 class _ForgotPasswordViewState extends State<ForgotPasswordView> {
   final TextEditingController _emailController = TextEditingController();
-  Uint8List? _qrCode;
-
-  void _scanQRCode(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => ScannerView(
-        onScan: (data) {
-          if (data != null) {
-            setState(() {
-              _qrCode = data;
-            });
-          }
-          Navigator.of(context).pop();
-        },
-      ),
-    );
-  }
 
   void _sendResetEmail(BuildContext context) {
     if (_emailController.text.isEmpty) {
@@ -83,32 +63,18 @@ class _ForgotPasswordViewState extends State<ForgotPasswordView> {
                         child: Column(
                           mainAxisSize: MainAxisSize.min,
                           children: [
+                            TextField(
+                              controller: _emailController,
+                              decoration: InputDecoration(labelText: 'Email'),
+                              autofocus: true,
+                            ),
                             UIButton(
-                              onPressed: () => _scanQRCode(context),
-                              text: 'QR Code',
+                              onPressed: () => _sendResetEmail(context),
+                              text: 'Reset',
                               margin: 16,
                               padding: 16,
-                              icon: _qrCode != null
-                                  ? Icons.check_circle
-                                  : Icons.qr_code_scanner,
-                              backgroundColor: _qrCode != null
-                                  ? Colors.green
-                                  : Theme.of(context).colorScheme.secondary,
+                              icon: Icons.password,
                             ),
-                            if (_qrCode != null) ...[
-                              TextField(
-                                controller: _emailController,
-                                decoration: InputDecoration(labelText: 'Email'),
-                                autofocus: true,
-                              ),
-                              UIButton(
-                                onPressed: () => _sendResetEmail(context),
-                                text: 'Reset Password',
-                                margin: 16,
-                                padding: 16,
-                                icon: Icons.password,
-                              ),
-                            ],
 
                             Divider(),
                             TextButton.icon(
