@@ -50,7 +50,7 @@ class UserNotifier extends AsyncNotifier<User?> {
 
   Future<void> register(RegistrationRequest request) async {
     final response = await http.post(
-      Uri.parse(endpoints.register),
+      Uri.parse(endpoints.users),
       body: jsonEncode(request.toJson()),
     );
 

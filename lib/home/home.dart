@@ -7,7 +7,7 @@ class HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final buttonWidth = 200.0;
+    final buttonWidth = 220.0;
     final buttonHeight = 70.0;
     final buttonPadding = 8.0;
     final buttonFontSize = 24.0;

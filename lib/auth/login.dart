@@ -1,25 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../providers/auth.dart';
 import '../ui/button.dart';
+import '../home/home.dart';
 import 'forgot_password.dart';
 import 'register.dart';
 
-class LoginView extends StatefulWidget {
+class LoginView extends ConsumerStatefulWidget {
   const LoginView({super.key});
 
   @override
-  State<LoginView> createState() => _LoginViewState();
+  ConsumerState<LoginView> createState() => _LoginViewState();
 }
 
-class _LoginViewState extends State<LoginView> {
+class _LoginViewState extends ConsumerState<LoginView> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _passwordVisible = false;
+  bool _isLoading = false;
 
-  void _login(BuildContext context) {
+  Future<void> _login(BuildContext context) async {
+    setState(() {
+      _isLoading = true;
+    });
+
     if (_emailController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Email is required')));
+      setState(() {
+        _isLoading = false;
+      });
       return;
     }
 
@@ -27,10 +38,38 @@ class _LoginViewState extends State<LoginView> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Password is required')));
+      setState(() {
+        _isLoading = false;
+      });
       return;
     }
 
-    // TODO: Login user
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    await ref
+        .read(authProvider.notifier)
+        .login(
+          LoginRequest(
+            email: _emailController.text,
+            password: _passwordController.text,
+          ),
+        );
+
+    if (ref.read(authProvider).value != null) {
+      navigator.pushReplacement(
+        MaterialPageRoute(builder: (context) => HomeView()),
+      );
+      messenger.showSnackBar(SnackBar(content: Text('Login successful')));
+    } else {
+      messenger.showSnackBar(
+        SnackBar(content: Text(ref.read(authProvider).error.toString())),
+      );
+    }
+
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   @override
@@ -70,54 +109,60 @@ class _LoginViewState extends State<LoginView> {
                       elevation: 16,
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            TextField(
-                              controller: _emailController,
-                              decoration: InputDecoration(labelText: 'Email'),
-                              autofocus: true,
-                            ),
-                            TextField(
-                              controller: _passwordController,
-                              obscureText: !_passwordVisible,
-                              decoration: InputDecoration(
-                                labelText: 'Password',
-                                suffixIcon: IconButton(
-                                  onPressed: () {
-                                    setState(() {
-                                      _passwordVisible = !_passwordVisible;
-                                    });
-                                  },
-                                  icon: Icon(
-                                    _passwordVisible
-                                        ? Icons.visibility
-                                        : Icons.visibility_off,
+                        child: _isLoading
+                            ? const Center(child: CircularProgressIndicator())
+                            : Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  TextField(
+                                    controller: _emailController,
+                                    decoration: InputDecoration(
+                                      labelText: 'Email',
+                                    ),
+                                    autofocus: true,
                                   ),
-                                ),
-                              ),
-                            ),
-                            UIButton(
-                              onPressed: () => _login(context),
-                              text: 'Login',
-                              margin: 16,
-                              padding: 16,
-                              icon: Icons.login,
-                            ),
-
-                            Divider(),
-                            TextButton.icon(
-                              onPressed: () =>
-                                  Navigator.of(context).pushReplacement(
-                                    MaterialPageRoute(
-                                      builder: (context) => RegisterView(),
+                                  TextField(
+                                    controller: _passwordController,
+                                    obscureText: !_passwordVisible,
+                                    decoration: InputDecoration(
+                                      labelText: 'Password',
+                                      suffixIcon: IconButton(
+                                        onPressed: () {
+                                          setState(() {
+                                            _passwordVisible =
+                                                !_passwordVisible;
+                                          });
+                                        },
+                                        icon: Icon(
+                                          _passwordVisible
+                                              ? Icons.visibility
+                                              : Icons.visibility_off,
+                                        ),
+                                      ),
                                     ),
                                   ),
-                              icon: const Icon(Icons.person_add),
-                              label: Text('Register'),
-                            ),
-                          ],
-                        ),
+                                  UIButton(
+                                    onPressed: () => _login(context),
+                                    text: 'Login',
+                                    margin: 16,
+                                    padding: 16,
+                                    icon: Icons.login,
+                                  ),
+
+                                  Divider(),
+                                  TextButton.icon(
+                                    onPressed: () =>
+                                        Navigator.of(context).pushReplacement(
+                                          MaterialPageRoute(
+                                            builder: (context) =>
+                                                RegisterView(),
+                                          ),
+                                        ),
+                                    icon: const Icon(Icons.person_add),
+                                    label: Text('Register'),
+                                  ),
+                                ],
+                              ),
                       ),
                     ),
                   ),

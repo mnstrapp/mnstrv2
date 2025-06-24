@@ -52,6 +52,7 @@ class UIButton extends StatelessWidget {
           child: Padding(
             padding: EdgeInsets.all(padding),
             child: Row(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: center
                   ? MainAxisAlignment.center
                   : icon != null
