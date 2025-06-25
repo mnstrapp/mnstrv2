@@ -1,12 +1,14 @@
 import 'package:flutter/material.dart';
 import '../collect/collect.dart';
 import '../ui/button.dart';
+import '../providers/auth.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class HomeView extends StatelessWidget {
+class HomeView extends ConsumerWidget {
   const HomeView({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final buttonWidth = 220.0;
     final buttonHeight = 70.0;
     final buttonPadding = 8.0;
@@ -15,6 +17,12 @@ class HomeView extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
+          Positioned(
+            bottom: 0,
+            left: 32,
+            right: 0,
+            child: Center(child: Image.asset('assets/loading_figure.png')),
+          ),
           Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -62,13 +70,35 @@ class HomeView extends StatelessWidget {
                   foregroundColor: buttonColor,
                 ),
               ),
+              Center(
+                child: UIButton(
+                  onPressed: () {},
+                  icon: Icons.person,
+                  text: 'Profile',
+                  margin: buttonPadding,
+                  padding: buttonPadding,
+                  fontSize: buttonFontSize,
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  foregroundColor: buttonColor,
+                ),
+              ),
+              Center(
+                child: UIButton(
+                  onPressed: () async {
+                    await ref.read(authProvider.notifier).logout();
+                  },
+                  icon: Icons.logout,
+                  text: 'Logout',
+                  margin: buttonPadding,
+                  padding: buttonPadding,
+                  fontSize: buttonFontSize,
+                  width: buttonWidth,
+                  height: buttonHeight,
+                  foregroundColor: buttonColor,
+                ),
+              ),
             ],
-          ),
-          Positioned(
-            bottom: 0,
-            left: 32,
-            right: 0,
-            child: Center(child: Image.asset('assets/loading_figure.png')),
           ),
         ],
       ),

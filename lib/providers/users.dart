@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/endpoints.dart' as endpoints;
 import '../models/user.dart';
@@ -43,9 +44,13 @@ class RegistrationResponse {
 }
 
 class UserNotifier extends AsyncNotifier<User?> {
+  User? user;
+
+  UserNotifier({this.user});
+
   @override
   Future<User?> build() async {
-    return null;
+    return user;
   }
 
   Future<void> register(RegistrationRequest request) async {
@@ -66,4 +71,27 @@ class UserNotifier extends AsyncNotifier<User?> {
       );
     }
   }
+
+  Future<void> logout() async {
+    await removeUser();
+    state = AsyncData(null);
+  }
+}
+
+enum UserKey { user }
+
+Future<void> saveUser(User user) async {
+  final prefs = await SharedPreferences.getInstance();
+  prefs.setString(UserKey.user.name, jsonEncode(user.toJson()));
+}
+
+Future<User?> getUser() async {
+  final prefs = await SharedPreferences.getInstance();
+  final user = prefs.getString(UserKey.user.name);
+  return user != null ? User.fromJson(jsonDecode(user)) : null;
+}
+
+Future<void> removeUser() async {
+  final prefs = await SharedPreferences.getInstance();
+  prefs.remove(UserKey.user.name);
 }

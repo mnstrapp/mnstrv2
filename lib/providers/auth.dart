@@ -4,8 +4,11 @@ import 'dart:io';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
 import '../models/auth.dart';
 import '../models/user.dart';
+import 'users.dart';
 import '../config/endpoints.dart' as endpoints;
 
 part 'auth.g.dart';
@@ -39,9 +42,13 @@ class LoginResponse {
 }
 
 class AuthNotifier extends AsyncNotifier<Auth?> {
+  Auth? auth;
+
+  AuthNotifier({this.auth});
+
   @override
   Future<Auth?> build() async {
-    return null;
+    return auth;
   }
 
   Future<void> login(LoginRequest request) async {
@@ -55,6 +62,8 @@ class AuthNotifier extends AsyncNotifier<Auth?> {
 
     if (response.statusCode == HttpStatus.ok) {
       state = AsyncData(requestResponse.auth);
+      await saveAuth(requestResponse.auth!);
+      await saveUser(requestResponse.user!);
     } else {
       state = AsyncError(
         Exception('Failed to login: ${requestResponse.error}'),
@@ -62,4 +71,29 @@ class AuthNotifier extends AsyncNotifier<Auth?> {
       );
     }
   }
+
+  Future<void> logout() async {
+    await removeAuth();
+    await removeUser();
+    state = AsyncData(null);
+    ref.read(userProvider.notifier).logout();
+  }
+}
+
+enum AuthKey { auth, user }
+
+Future<void> saveAuth(Auth auth) async {
+  final prefs = await SharedPreferences.getInstance();
+  prefs.setString(AuthKey.auth.name, jsonEncode(auth.toJson()));
+}
+
+Future<Auth?> getAuth() async {
+  final prefs = await SharedPreferences.getInstance();
+  final auth = prefs.getString(AuthKey.auth.name);
+  return auth != null ? Auth.fromJson(jsonDecode(auth)) : null;
+}
+
+Future<void> removeAuth() async {
+  final prefs = await SharedPreferences.getInstance();
+  prefs.remove(AuthKey.auth.name);
 }
