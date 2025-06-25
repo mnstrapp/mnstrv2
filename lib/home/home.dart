@@ -3,6 +3,8 @@ import '../collect/collect.dart';
 import '../ui/button.dart';
 import '../providers/auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../profile/profile.dart';
+import '../auth/login.dart';
 
 class HomeView extends ConsumerWidget {
   const HomeView({super.key});
@@ -72,7 +74,10 @@ class HomeView extends ConsumerWidget {
               ),
               Center(
                 child: UIButton(
-                  onPressed: () {},
+                  onPressed: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ProfileView()),
+                  ),
                   icon: Icons.person,
                   text: 'Profile',
                   margin: buttonPadding,
@@ -86,7 +91,11 @@ class HomeView extends ConsumerWidget {
               Center(
                 child: UIButton(
                   onPressed: () async {
+                    final navigator = Navigator.of(context);
                     await ref.read(authProvider.notifier).logout();
+                    navigator.pushReplacement(
+                      MaterialPageRoute(builder: (context) => LoginView()),
+                    );
                   },
                   icon: Icons.logout,
                   text: 'Logout',

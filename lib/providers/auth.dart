@@ -62,6 +62,7 @@ class AuthNotifier extends AsyncNotifier<Auth?> {
 
     if (response.statusCode == HttpStatus.ok) {
       state = AsyncData(requestResponse.auth);
+      ref.read(userProvider.notifier).state = AsyncData(requestResponse.user);
       await saveAuth(requestResponse.auth!);
       await saveUser(requestResponse.user!);
     } else {
@@ -76,7 +77,7 @@ class AuthNotifier extends AsyncNotifier<Auth?> {
     await removeAuth();
     await removeUser();
     state = AsyncData(null);
-    ref.read(userProvider.notifier).logout();
+    await ref.read(userProvider.notifier).logout();
   }
 }
 
