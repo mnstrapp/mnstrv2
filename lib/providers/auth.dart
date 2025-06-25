@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:http/http.dart' as http;
@@ -62,7 +63,7 @@ class AuthNotifier extends AsyncNotifier<Auth?> {
 
     if (response.statusCode == HttpStatus.ok) {
       state = AsyncData(requestResponse.auth);
-      ref.read(userProvider.notifier).state = AsyncData(requestResponse.user);
+      ref.read(userProvider.notifier).setUser(requestResponse.user!);
       await saveAuth(requestResponse.auth!);
       await saveUser(requestResponse.user!);
     } else {

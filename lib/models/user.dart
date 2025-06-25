@@ -6,8 +6,9 @@ part 'user.g.dart';
 class User {
   String? id;
   String? displayName;
+  String? qrCode;
 
-  User({this.id, this.displayName});
+  User({this.id, this.displayName, this.qrCode});
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);
 
