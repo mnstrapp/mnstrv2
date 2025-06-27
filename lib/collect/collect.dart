@@ -52,7 +52,7 @@ class _CollectState extends ConsumerState<Collect> {
                       left: size.width * 0.05,
                       right: size.width * 0.05,
                       child: UIButton(
-                        onPressed: () async {
+                        onPressedAsync: () async {
                           final messenger = ScaffoldMessenger.of(context);
                           final navigator = Navigator.of(context);
                           await ref
