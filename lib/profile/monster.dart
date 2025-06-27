@@ -56,14 +56,14 @@ class MonsterView extends ConsumerWidget {
               ),
               monster.legs == 0
                   ? Positioned(
-                      bottom: middle.height - 89,
+                      bottom: middle.height - 189,
                       left: middle.width,
                       child: monsterParts[MonsterPart.legs]!,
                     )
                   : const SizedBox.shrink(),
               monster.legs == 1
                   ? Positioned(
-                      bottom: middle.height - 89,
+                      bottom: middle.height - 189,
                       left: middle.width + 1,
                       child: monsterParts[MonsterPart.legs]!,
                     )

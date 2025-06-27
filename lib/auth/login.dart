@@ -120,6 +120,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                       labelText: 'Email',
                                     ),
                                     autofocus: true,
+                                    onEditingComplete: () => _login(context),
                                   ),
                                   TextField(
                                     controller: _passwordController,
@@ -140,6 +141,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                         ),
                                       ),
                                     ),
+                                    onEditingComplete: () => _login(context),
                                   ),
                                   UIButton(
                                     onPressed: () => _login(context),
