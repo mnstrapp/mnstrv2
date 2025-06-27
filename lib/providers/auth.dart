@@ -79,6 +79,16 @@ class AuthNotifier extends AsyncNotifier<Auth?> {
     await removeUser();
     state = AsyncData(null);
     await ref.read(userProvider.notifier).logout();
+    final response = await http.delete(
+      Uri.parse(endpoints.auth),
+      headers: {'Authorization': 'Bearer ${auth?.token}'},
+    );
+
+    if (response.statusCode == HttpStatus.ok) {
+      state = AsyncData(null);
+    } else {
+      state = AsyncError(Exception('Failed to logout'), StackTrace.current);
+    }
   }
 }
 

@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../profile/monster.dart';
+import '../shared/monster.dart';
+import '../shared/monster_model.dart';
 import '../providers/users.dart';
 
 class ProfileView extends ConsumerWidget {
@@ -15,6 +16,7 @@ class ProfileView extends ConsumerWidget {
     return Scaffold(
       body: user.when(
         data: (user) {
+          final monster = Monster.fromQRCode(user?.qrCode ?? '');
           return Center(
             child: SafeArea(
               child: Stack(
@@ -23,7 +25,7 @@ class ProfileView extends ConsumerWidget {
                     bottom: 40,
                     left: 0,
                     right: 0,
-                    child: MonsterView(),
+                    child: MonsterView(monster: monster),
                   ),
                   Positioned(
                     bottom: size.height * 0.05,

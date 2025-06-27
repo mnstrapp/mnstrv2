@@ -19,6 +19,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
   bool _passwordVisible = false;
   bool _isLoading = false;
 
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+
   Future<void> _login(BuildContext context) async {
     setState(() {
       _isLoading = true;
@@ -120,7 +123,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                       labelText: 'Email',
                                     ),
                                     autofocus: true,
-                                    onEditingComplete: () => _login(context),
+                                    focusNode: _emailFocusNode,
+                                    onEditingComplete: () =>
+                                        _passwordFocusNode.requestFocus(),
                                   ),
                                   TextField(
                                     controller: _passwordController,
@@ -141,6 +146,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
                                         ),
                                       ),
                                     ),
+                                    focusNode: _passwordFocusNode,
                                     onEditingComplete: () => _login(context),
                                   ),
                                   UIButton(
