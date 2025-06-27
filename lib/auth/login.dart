@@ -17,23 +17,15 @@ class _LoginViewState extends ConsumerState<LoginView> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _passwordVisible = false;
-  bool _isLoading = false;
 
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
 
   Future<void> _login(BuildContext context) async {
-    setState(() {
-      _isLoading = true;
-    });
-
     if (_emailController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Email is required')));
-      setState(() {
-        _isLoading = false;
-      });
       return;
     }
 
@@ -41,9 +33,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Password is required')));
-      setState(() {
-        _isLoading = false;
-      });
       return;
     }
 
@@ -69,10 +58,6 @@ class _LoginViewState extends ConsumerState<LoginView> {
         SnackBar(content: Text(ref.read(authProvider).error.toString())),
       );
     }
-
-    setState(() {
-      _isLoading = false;
-    });
   }
 
   @override
@@ -112,65 +97,59 @@ class _LoginViewState extends ConsumerState<LoginView> {
                       elevation: 16,
                       child: Padding(
                         padding: const EdgeInsets.all(16.0),
-                        child: _isLoading
-                            ? const Center(child: CircularProgressIndicator())
-                            : Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  TextField(
-                                    controller: _emailController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Email',
-                                    ),
-                                    autofocus: true,
-                                    focusNode: _emailFocusNode,
-                                    onEditingComplete: () =>
-                                        _passwordFocusNode.requestFocus(),
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            TextField(
+                              controller: _emailController,
+                              decoration: InputDecoration(labelText: 'Email'),
+                              autofocus: true,
+                              focusNode: _emailFocusNode,
+                              onEditingComplete: () =>
+                                  _passwordFocusNode.requestFocus(),
+                            ),
+                            TextField(
+                              controller: _passwordController,
+                              obscureText: !_passwordVisible,
+                              decoration: InputDecoration(
+                                labelText: 'Password',
+                                suffixIcon: IconButton(
+                                  onPressed: () {
+                                    setState(() {
+                                      _passwordVisible = !_passwordVisible;
+                                    });
+                                  },
+                                  icon: Icon(
+                                    _passwordVisible
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
                                   ),
-                                  TextField(
-                                    controller: _passwordController,
-                                    obscureText: !_passwordVisible,
-                                    decoration: InputDecoration(
-                                      labelText: 'Password',
-                                      suffixIcon: IconButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            _passwordVisible =
-                                                !_passwordVisible;
-                                          });
-                                        },
-                                        icon: Icon(
-                                          _passwordVisible
-                                              ? Icons.visibility
-                                              : Icons.visibility_off,
-                                        ),
-                                      ),
-                                    ),
-                                    focusNode: _passwordFocusNode,
-                                    onEditingComplete: () => _login(context),
-                                  ),
-                                  UIButton(
-                                    onPressed: () => _login(context),
-                                    text: 'Login',
-                                    margin: 16,
-                                    padding: 16,
-                                    icon: Icons.login,
-                                  ),
-
-                                  Divider(),
-                                  TextButton.icon(
-                                    onPressed: () =>
-                                        Navigator.of(context).pushReplacement(
-                                          MaterialPageRoute(
-                                            builder: (context) =>
-                                                RegisterView(),
-                                          ),
-                                        ),
-                                    icon: const Icon(Icons.person_add),
-                                    label: Text('Register'),
-                                  ),
-                                ],
+                                ),
                               ),
+                              focusNode: _passwordFocusNode,
+                              onEditingComplete: () => _login(context),
+                            ),
+                            UIButton(
+                              onPressedAsync: () async => _login(context),
+                              text: 'Login',
+                              margin: 16,
+                              padding: 16,
+                              icon: Icons.login,
+                            ),
+
+                            Divider(),
+                            TextButton.icon(
+                              onPressed: () =>
+                                  Navigator.of(context).pushReplacement(
+                                    MaterialPageRoute(
+                                      builder: (context) => RegisterView(),
+                                    ),
+                                  ),
+                              icon: const Icon(Icons.person_add),
+                              label: Text('Register'),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

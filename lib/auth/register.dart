@@ -24,7 +24,6 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
       TextEditingController();
   bool _passwordVisible = false;
   Uint8List? _qrCode;
-  bool _isLoading = false;
 
   void _scanQRCode(BuildContext context) {
     showDialog(
@@ -43,17 +42,10 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
   }
 
   void _register(BuildContext context) async {
-    setState(() {
-      _isLoading = true;
-    });
-
     if (_displayNameController.text.isEmpty) {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Display name is required')));
-      setState(() {
-        _isLoading = false;
-      });
       return;
     }
 
@@ -61,9 +53,6 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Email is required')));
-      setState(() {
-        _isLoading = false;
-      });
       return;
     }
 
@@ -71,9 +60,6 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Password is required')));
-      setState(() {
-        _isLoading = false;
-      });
       return;
     }
 
@@ -81,9 +67,6 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('Passwords do not match')));
-      setState(() {
-        _isLoading = false;
-      });
       return;
     }
 
@@ -91,9 +74,6 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('QR Code is required')));
-      setState(() {
-        _isLoading = false;
-      });
       return;
     }
 
@@ -123,10 +103,6 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
         SnackBar(content: Text(ref.read(userProvider).error.toString())),
       );
     }
-
-    setState(() {
-      _isLoading = false;
-    });
   }
 
   @override
@@ -169,101 +145,96 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                         elevation: 16,
                         child: Padding(
                           padding: const EdgeInsets.all(16.0),
-                          child: _isLoading
-                              ? Center(child: CircularProgressIndicator())
-                              : Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    UIButton(
-                                      onPressed: () => _scanQRCode(context),
-                                      text: 'QR Code',
-                                      margin: 16,
-                                      padding: 16,
-                                      icon: _qrCode != null
-                                          ? Icons.check_circle
-                                          : Icons.qr_code_scanner,
-                                      backgroundColor: _qrCode != null
-                                          ? Colors.green
-                                          : Theme.of(
-                                              context,
-                                            ).colorScheme.secondary,
-                                    ),
-                                    if (_qrCode != null) ...[
-                                      TextField(
-                                        controller: _displayNameController,
-                                        decoration: InputDecoration(
-                                          labelText: 'Display Name',
-                                        ),
-                                        autofocus: true,
-                                      ),
-                                      TextField(
-                                        controller: _emailController,
-                                        decoration: InputDecoration(
-                                          labelText: 'Email',
-                                        ),
-                                      ),
-                                      TextField(
-                                        controller: _passwordController,
-                                        obscureText: !_passwordVisible,
-                                        decoration: InputDecoration(
-                                          labelText: 'Password',
-                                          suffixIcon: IconButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                _passwordVisible =
-                                                    !_passwordVisible;
-                                              });
-                                            },
-                                            icon: Icon(
-                                              _passwordVisible
-                                                  ? Icons.visibility
-                                                  : Icons.visibility_off,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      TextField(
-                                        controller: _confirmPasswordController,
-                                        obscureText: !_passwordVisible,
-                                        decoration: InputDecoration(
-                                          labelText: 'Confirm Password',
-                                          suffixIcon: IconButton(
-                                            onPressed: () {
-                                              setState(() {
-                                                _passwordVisible =
-                                                    !_passwordVisible;
-                                              });
-                                            },
-                                            icon: Icon(
-                                              _passwordVisible
-                                                  ? Icons.visibility
-                                                  : Icons.visibility_off,
-                                            ),
-                                          ),
-                                        ),
-                                      ),
-                                      UIButton(
-                                        onPressed: () => _register(context),
-                                        text: 'Register',
-                                        margin: 16,
-                                        padding: 16,
-                                        icon: Icons.person_add,
-                                      ),
-                                    ],
-
-                                    Divider(),
-                                    TextButton.icon(
-                                      onPressed: () =>
-                                          Navigator.of(context).pushReplacement(
-                                            MaterialPageRoute(
-                                              builder: (context) => LoginView(),
-                                            ),
-                                          ),
-                                      icon: const Icon(Icons.login),
-                                      label: Text('Login?'),
-                                    ),
-                                  ],
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              UIButton(
+                                onPressed: () => _scanQRCode(context),
+                                text: 'QR Code',
+                                margin: 16,
+                                padding: 16,
+                                icon: _qrCode != null
+                                    ? Icons.check_circle
+                                    : Icons.qr_code_scanner,
+                                backgroundColor: _qrCode != null
+                                    ? Colors.green
+                                    : Theme.of(context).colorScheme.secondary,
+                              ),
+                              if (_qrCode != null) ...[
+                                TextField(
+                                  controller: _displayNameController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Display Name',
+                                  ),
+                                  autofocus: true,
                                 ),
+                                TextField(
+                                  controller: _emailController,
+                                  decoration: InputDecoration(
+                                    labelText: 'Email',
+                                  ),
+                                ),
+                                TextField(
+                                  controller: _passwordController,
+                                  obscureText: !_passwordVisible,
+                                  decoration: InputDecoration(
+                                    labelText: 'Password',
+                                    suffixIcon: IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _passwordVisible = !_passwordVisible;
+                                        });
+                                      },
+                                      icon: Icon(
+                                        _passwordVisible
+                                            ? Icons.visibility
+                                            : Icons.visibility_off,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                TextField(
+                                  controller: _confirmPasswordController,
+                                  obscureText: !_passwordVisible,
+                                  decoration: InputDecoration(
+                                    labelText: 'Confirm Password',
+                                    suffixIcon: IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          _passwordVisible = !_passwordVisible;
+                                        });
+                                      },
+                                      icon: Icon(
+                                        _passwordVisible
+                                            ? Icons.visibility
+                                            : Icons.visibility_off,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                UIButton(
+                                  onPressedAsync: () async =>
+                                      _register(context),
+                                  text: 'Register',
+                                  margin: 16,
+                                  padding: 16,
+                                  icon: Icons.person_add,
+                                ),
+                              ],
+
+                              Divider(),
+                              TextButton.icon(
+                                onPressed: () =>
+                                    Navigator.of(context).pushReplacement(
+                                      MaterialPageRoute(
+                                        builder: (context) => LoginView(),
+                                      ),
+                                    ),
+                                icon: const Icon(Icons.login),
+                                label: Text('Login?'),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     ),

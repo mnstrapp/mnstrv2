@@ -90,7 +90,7 @@ class HomeView extends ConsumerWidget {
               ),
               Center(
                 child: UIButton(
-                  onPressed: () async {
+                  onPressedAsync: () async {
                     final navigator = Navigator.of(context);
                     await ref.read(authProvider.notifier).logout();
                     navigator.pushReplacement(
