@@ -3,9 +3,9 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mnstrv2/shared/monster.dart';
-import 'package:mnstrv2/ui/button.dart';
 
+import '../shared/monster.dart';
+import '../ui/button.dart';
 import '../providers/collect.dart';
 import '../qr/scanner.dart';
 import '../shared/monster_model.dart';
