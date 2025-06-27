@@ -1,5 +1,4 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:json_annotation/json_annotation.dart';
@@ -49,7 +48,6 @@ class CollectNotifier extends AsyncNotifier<Monster?> {
 
   Future<void> collect(String qrCode) async {
     final auth = ref.read(authProvider);
-    log('auth: ${auth.value?.token}');
     final response = await http.post(
       Uri.parse(endpoints.collect),
       body: jsonEncode(CollectRequest(qrCode: qrCode).toJson()),
@@ -59,7 +57,6 @@ class CollectNotifier extends AsyncNotifier<Monster?> {
       },
     );
     final body = jsonDecode(response.body);
-    log('body: $body');
     final collectResponse = CollectResponse.fromJson(body);
 
     if (response.statusCode == HttpStatus.ok) {
