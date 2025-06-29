@@ -29,6 +29,7 @@ class _CollectState extends ConsumerState<Collect> {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
+      backgroundColor: Color.lerp(monster?.color, Colors.white, 0.5),
       body: Center(
         child: _qrCode == null
             ? ScannerView(
@@ -77,6 +78,11 @@ class _CollectState extends ConsumerState<Collect> {
                         iconSize: 24,
                         fontSize: 24,
                         padding: 8,
+                        backgroundColor: Color.lerp(
+                          monster.color,
+                          Colors.black,
+                          0.5,
+                        ),
                       ),
                     ),
                   ],
