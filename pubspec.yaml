@@ -46,6 +46,7 @@ dependencies:
   riverpod: ^2.6.1
   google_fonts: ^6.2.1
   shared_preferences: ^2.5.3
+  flutter_launcher_icons: ^0.14.4
 
 dev_dependencies:
   flutter_test:
@@ -79,6 +80,24 @@ flutter:
     - assets/
     - assets/google_fonts/
     - assets/mnstr_parts/
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/loading_figure.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/loading_figure.png"
+    background_color: "#00f0ff"
+    theme_color: "#00f0ff"
+  windows:
+    generate: true
+    image_path: "assets/loading_figure.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/loading_figure.png"
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

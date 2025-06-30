@@ -4,15 +4,25 @@ import 'monster_model.dart';
 
 class MonsterView extends StatelessWidget {
   final Monster monster;
+  final double? monsterScale;
+  final double? height;
+  final double? width;
 
-  const MonsterView({super.key, required this.monster});
+  const MonsterView({
+    super.key,
+    required this.monster,
+    this.monsterScale,
+    this.height,
+    this.width,
+  });
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
     final middle = Size(
-      (size.width - (size.width - (size.width / scale))) / 4,
-      (size.height - (size.height - (size.height / scale))) / 3,
+      (size.width - (size.width - (size.width / (monsterScale ?? scale)))) / 4,
+      (size.height - (size.height - (size.height / (monsterScale ?? scale)))) /
+          3,
     );
     final monsterParts = monster.monsterParts;
 

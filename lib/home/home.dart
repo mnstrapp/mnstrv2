@@ -5,6 +5,7 @@ import '../providers/auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../profile/profile.dart';
 import '../auth/login.dart';
+import '../manage/list.dart';
 
 class HomeView extends ConsumerWidget {
   const HomeView({super.key});
@@ -48,7 +49,12 @@ class HomeView extends ConsumerWidget {
               ),
               Center(
                 child: UIButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ManageListView()),
+                    );
+                  },
                   icon: Icons.settings,
                   text: 'Manage',
                   margin: buttonPadding,
