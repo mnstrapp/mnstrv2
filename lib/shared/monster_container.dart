@@ -23,6 +23,7 @@ class MonsterContainer extends StatelessWidget {
     final width = this.width ?? size.width;
     final height = this.height ?? size.height;
     final backgroundColor = Color.lerp(monster.color, Colors.white, 0.5);
+    final uiColor = Color.lerp(monster.color, Colors.black, 0.5);
     final theme = Theme.of(context);
 
     return Container(
@@ -56,13 +57,13 @@ class MonsterContainer extends StatelessWidget {
                   vertical: size.height * 0.02,
                 ),
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.surface,
+                  color: uiColor,
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   monster.name ?? 'unnamed',
                   style: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.colorScheme.onSurface,
+                    color: theme.colorScheme.surface,
                   ),
                 ),
               ),
