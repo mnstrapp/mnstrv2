@@ -1,10 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
-
 import 'package:http/http.dart' as http;
+
 import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/endpoints.dart' as endpoints;
 import '../models/user.dart';
@@ -16,86 +15,37 @@ final userProvider = AsyncNotifierProvider<UserNotifier, User?>(
 );
 
 @JsonSerializable()
-class RegistrationRequest {
-  final String qrCode;
-  final String displayName;
-  final String email;
-  final String password;
-
-  RegistrationRequest({
-    required this.qrCode,
-    required this.displayName,
-    required this.email,
-    required this.password,
-  });
-
-  Map<String, dynamic> toJson() => _$RegistrationRequestToJson(this);
-}
-
-@JsonSerializable()
-class RegistrationResponse {
+class UserResponse {
   String? error;
   User? user;
 
-  RegistrationResponse({this.error, this.user});
+  UserResponse({this.error, this.user});
 
-  factory RegistrationResponse.fromJson(Map<String, dynamic> json) =>
-      _$RegistrationResponseFromJson(json);
+  factory UserResponse.fromJson(Map<String, dynamic> json) =>
+      _$UserResponseFromJson(json);
 }
 
 class UserNotifier extends AsyncNotifier<User?> {
-  User? user;
-
-  UserNotifier({this.user});
+  UserNotifier();
 
   @override
   Future<User?> build() async {
-    return user;
+    return null;
   }
 
-  Future<void> register(RegistrationRequest request) async {
-    final response = await http.post(
-      Uri.parse(endpoints.users),
-      body: jsonEncode(request.toJson()),
-    );
+  Future<void> getUser(String id) async {
+    final response = await http.get(Uri.parse('${endpoints.users}/$id'));
 
     final body = jsonDecode(response.body);
-    final requestResponse = RegistrationResponse.fromJson(body);
+    final userResponse = UserResponse.fromJson(body);
 
     if (response.statusCode == HttpStatus.ok) {
-      state = AsyncData(requestResponse.user);
+      state = AsyncData(userResponse.user);
     } else {
       state = AsyncError(
-        Exception('Failed to register user: ${requestResponse.error}'),
+        Exception('Failed to get user: ${userResponse.error}'),
         StackTrace.current,
       );
     }
   }
-
-  void setUser(User user) {
-    state = AsyncData(user);
-  }
-
-  Future<void> logout() async {
-    await removeUser();
-    state = AsyncData(null);
-  }
-}
-
-enum UserKey { user }
-
-Future<void> saveUser(User user) async {
-  final prefs = await SharedPreferences.getInstance();
-  prefs.setString(UserKey.user.name, jsonEncode(user.toJson()));
-}
-
-Future<User?> getUser() async {
-  final prefs = await SharedPreferences.getInstance();
-  final user = prefs.getString(UserKey.user.name);
-  return user != null ? User.fromJson(jsonDecode(user)) : null;
-}
-
-Future<void> removeUser() async {
-  final prefs = await SharedPreferences.getInstance();
-  prefs.remove(UserKey.user.name);
 }

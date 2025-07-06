@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../providers/session_users.dart';
 import '../shared/monster.dart';
 import '../shared/monster_model.dart';
-import '../providers/users.dart';
 
 class ProfileView extends ConsumerWidget {
   const ProfileView({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final user = ref.watch(userProvider);
+    final user = ref.watch(sessionUserProvider);
     final size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
     return Scaffold(

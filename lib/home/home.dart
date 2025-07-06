@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../profile/profile.dart';
 import '../auth/login.dart';
 import '../manage/list.dart';
+import '../shared/stat_bar.dart';
 
 class HomeView extends ConsumerWidget {
   const HomeView({super.key});
@@ -115,6 +116,7 @@ class HomeView extends ConsumerWidget {
               ),
             ],
           ),
+          Positioned(top: 0, left: 0, right: 0, child: StatBar()),
         ],
       ),
     );

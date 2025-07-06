@@ -8,6 +8,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/auth.dart';
 import '../models/monster.dart';
 import '../config/endpoints.dart' as endpoints;
+import '../providers/session_users.dart';
 
 part 'collect.g.dart';
 
@@ -61,6 +62,7 @@ class CollectNotifier extends AsyncNotifier<Monster?> {
 
     if (response.statusCode == HttpStatus.ok) {
       state = AsyncData(collectResponse.mnstr);
+      ref.read(sessionUserProvider.notifier).refresh();
     } else {
       state = AsyncError(
         Exception('Failed to collect monster: ${collectResponse.error}'),

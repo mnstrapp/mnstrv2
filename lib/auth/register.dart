@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../providers/users.dart';
+import '../providers/session_users.dart';
 import '../ui/button.dart';
 import '../qr/scanner.dart';
 import 'forgot_password.dart';
@@ -81,7 +81,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
     final navigator = Navigator.of(context);
 
     await ref
-        .read(userProvider.notifier)
+        .read(sessionUserProvider.notifier)
         .register(
           RegistrationRequest(
             qrCode: base64Encode(_qrCode!),
@@ -91,7 +91,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
           ),
         );
 
-    if (ref.read(userProvider).value != null) {
+    if (ref.read(sessionUserProvider).value != null) {
       navigator.pushReplacement(
         MaterialPageRoute(builder: (context) => LoginView()),
       );
@@ -100,7 +100,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
       );
     } else {
       messenger.showSnackBar(
-        SnackBar(content: Text(ref.read(userProvider).error.toString())),
+        SnackBar(content: Text(ref.read(sessionUserProvider).error.toString())),
       );
     }
   }

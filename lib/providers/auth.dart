@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
 
-import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:http/http.dart' as http;
@@ -9,7 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/auth.dart';
 import '../models/user.dart';
-import 'users.dart';
+import 'session_users.dart';
 import '../config/endpoints.dart' as endpoints;
 
 part 'auth.g.dart';
@@ -63,9 +62,9 @@ class AuthNotifier extends AsyncNotifier<Auth?> {
 
     if (response.statusCode == HttpStatus.ok) {
       state = AsyncData(requestResponse.auth);
-      ref.read(userProvider.notifier).setUser(requestResponse.user!);
+      ref.read(sessionUserProvider.notifier).setUser(requestResponse.user!);
       await saveAuth(requestResponse.auth!);
-      await saveUser(requestResponse.user!);
+      await saveSessionUser(requestResponse.user!);
     } else {
       state = AsyncError(
         Exception('Failed to login: ${requestResponse.error}'),
@@ -76,9 +75,9 @@ class AuthNotifier extends AsyncNotifier<Auth?> {
 
   Future<void> logout() async {
     await removeAuth();
-    await removeUser();
+    await removeSessionUser();
     state = AsyncData(null);
-    await ref.read(userProvider.notifier).logout();
+    await ref.read(sessionUserProvider.notifier).logout();
     final response = await http.delete(
       Uri.parse(endpoints.auth),
       headers: {'Authorization': 'Bearer ${auth?.token}'},
