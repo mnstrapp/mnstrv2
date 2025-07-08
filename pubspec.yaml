@@ -80,6 +80,8 @@ flutter:
     - assets/
     - assets/google_fonts/
     - assets/mnstr_parts/
+    - assets/items/
+    - assets/stars/
 
 flutter_launcher_icons:
   android: "launcher_icon"

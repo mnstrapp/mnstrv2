@@ -10,6 +10,7 @@ class User {
   int? experienceLevel;
   int? experiencePoints;
   int? experienceToNextLevel;
+  int? coins;
 
   User({
     this.id,
@@ -18,6 +19,7 @@ class User {
     this.experienceLevel,
     this.experiencePoints,
     this.experienceToNextLevel,
+    this.coins,
   });
 
   factory User.fromJson(Map<String, dynamic> json) => _$UserFromJson(json);

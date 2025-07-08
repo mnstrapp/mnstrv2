@@ -13,6 +13,7 @@ User _$UserFromJson(Map<String, dynamic> json) => User(
   experienceLevel: (json['experienceLevel'] as num?)?.toInt(),
   experiencePoints: (json['experiencePoints'] as num?)?.toInt(),
   experienceToNextLevel: (json['experienceToNextLevel'] as num?)?.toInt(),
+  coins: (json['coins'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
@@ -22,4 +23,5 @@ Map<String, dynamic> _$UserToJson(User instance) => <String, dynamic>{
   'experienceLevel': instance.experienceLevel,
   'experiencePoints': instance.experiencePoints,
   'experienceToNextLevel': instance.experienceToNextLevel,
+  'coins': instance.coins,
 };

@@ -5,11 +5,24 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/session_users.dart';
 
-class StatBar extends ConsumerWidget {
+class StatBar extends ConsumerStatefulWidget {
   const StatBar({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<StatBar> createState() => _StatBarState();
+}
+
+class _StatBarState extends ConsumerState<StatBar> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(sessionUserProvider.notifier).refresh();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final user = ref.watch(sessionUserProvider);
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
@@ -69,6 +82,20 @@ class StatBar extends ConsumerWidget {
                     ),
                   ],
                 ),
+                const SizedBox(width: 8),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset('assets/items/coin.png', width: 20, height: 20),
+                    Text(
+                      user.value?.coins.toString() ?? '0',
+                      style: theme.textTheme.bodyLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(width: 8),
               ],
             ),
           ),

@@ -44,6 +44,17 @@ class RegistrationResponse {
       _$RegistrationResponseFromJson(json);
 }
 
+@JsonSerializable()
+class UserResponse {
+  String? error;
+  User? user;
+
+  UserResponse({this.error, this.user});
+
+  factory UserResponse.fromJson(Map<String, dynamic> json) =>
+      _$UserResponseFromJson(json);
+}
+
 class SessionUserNotifier extends AsyncNotifier<User?> {
   User? user;
 
@@ -89,7 +100,8 @@ class SessionUserNotifier extends AsyncNotifier<User?> {
     );
 
     final body = jsonDecode(response.body);
-    final requestResponse = RegistrationResponse.fromJson(body);
+    log(body.toString());
+    final requestResponse = UserResponse.fromJson(body);
 
     if (response.statusCode == HttpStatus.ok) {
       state = AsyncData(requestResponse.user);
