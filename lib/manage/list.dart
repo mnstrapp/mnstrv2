@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mnstrv2/providers/session_users.dart';
 
+import '../shared/layout_scaffold.dart';
 import '../shared/monster_container.dart';
 import '../shared/monster_model.dart';
 import '../providers/manage.dart';
@@ -36,41 +37,35 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
   @override
   Widget build(BuildContext context) {
     final monsters = ref.watch(manageProvider);
-    return Scaffold(
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : monsters.when(
-              data: (monsters) {
-                return _isLoading
-                    ? const Center(child: CircularProgressIndicator())
-                    : SingleChildScrollView(
-                        child: Column(
-                          children: monsters
-                              .map(
-                                (monster) => InkWell(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (context) =>
-                                            ManageEditView(monster: monster),
-                                      ),
-                                    );
-                                  },
-                                  child: MonsterContainer(
-                                    monster: Monster.fromQRCode(
-                                      monster.qrCode ?? '',
-                                    ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
+    return LayoutScaffold(
+      child: monsters.when(
+        data: (monsters) {
+          return _isLoading
+              ? const Center(child: CircularProgressIndicator())
+              : Column(
+                  children: monsters
+                      .map(
+                        (monster) => InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ManageEditView(monster: monster),
+                              ),
+                            );
+                          },
+                          child: MonsterContainer(
+                            monster: Monster.fromQRCode(monster.qrCode ?? ''),
+                          ),
                         ),
-                      );
-              },
-              error: (error, stackTrace) => Text('Error: $error'),
-              loading: () => const Center(child: CircularProgressIndicator()),
-            ),
+                      )
+                      .toList(),
+                );
+        },
+        error: (error, stackTrace) => Text('Error: $error'),
+        loading: () => const Center(child: CircularProgressIndicator()),
+      ),
     );
   }
 }

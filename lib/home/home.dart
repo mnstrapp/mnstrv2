@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../profile/profile.dart';
 import '../auth/login.dart';
 import '../manage/list.dart';
+import '../shared/layout_scaffold.dart';
 import '../shared/stat_bar.dart';
 
 class HomeView extends ConsumerWidget {
@@ -18,106 +19,111 @@ class HomeView extends ConsumerWidget {
     final buttonPadding = 8.0;
     final buttonFontSize = 24.0;
     final buttonColor = Theme.of(context).colorScheme.onPrimary;
-    return Scaffold(
-      body: Stack(
-        children: [
-          Positioned(
-            bottom: 0,
-            left: 32,
-            right: 0,
-            child: Center(child: Image.asset('assets/loading_figure.png')),
-          ),
-          Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Center(
-                child: UIButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => Collect()),
-                    );
-                  },
-                  icon: Icons.add,
-                  text: 'Collect',
-                  margin: buttonPadding,
-                  padding: buttonPadding,
-                  fontSize: buttonFontSize,
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  foregroundColor: buttonColor,
-                ),
-              ),
-              Center(
-                child: UIButton(
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => ManageListView()),
-                    );
-                  },
-                  icon: Icons.settings,
-                  text: 'Manage',
-                  margin: buttonPadding,
-                  padding: buttonPadding,
-                  fontSize: buttonFontSize,
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  foregroundColor: buttonColor,
-                ),
-              ),
-              Center(
-                child: UIButton(
-                  onPressed: () {},
-                  icon: Icons.sports_esports,
-                  text: 'Battle',
-                  margin: buttonPadding,
-                  padding: buttonPadding,
-                  fontSize: buttonFontSize,
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  foregroundColor: buttonColor,
-                ),
-              ),
-              Center(
-                child: UIButton(
-                  onPressed: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => ProfileView()),
+    return LayoutScaffold(
+      child: SizedBox(
+        width: MediaQuery.of(context).size.width,
+        height: MediaQuery.of(context).size.height,
+        child: Stack(
+          children: [
+            Positioned(
+              bottom: 0,
+              left: 32,
+              right: 0,
+              child: Center(child: Image.asset('assets/loading_figure.png')),
+            ),
+            Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Center(
+                  child: UIButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => Collect()),
+                      );
+                    },
+                    icon: Icons.add,
+                    text: 'Collect',
+                    margin: buttonPadding,
+                    padding: buttonPadding,
+                    fontSize: buttonFontSize,
+                    width: buttonWidth,
+                    height: buttonHeight,
+                    foregroundColor: buttonColor,
                   ),
-                  icon: Icons.person,
-                  text: 'Profile',
-                  margin: buttonPadding,
-                  padding: buttonPadding,
-                  fontSize: buttonFontSize,
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  foregroundColor: buttonColor,
                 ),
-              ),
-              Center(
-                child: UIButton(
-                  onPressedAsync: () async {
-                    final navigator = Navigator.of(context);
-                    await ref.read(authProvider.notifier).logout();
-                    navigator.pushReplacement(
-                      MaterialPageRoute(builder: (context) => LoginView()),
-                    );
-                  },
-                  icon: Icons.logout,
-                  text: 'Logout',
-                  margin: buttonPadding,
-                  padding: buttonPadding,
-                  fontSize: buttonFontSize,
-                  width: buttonWidth,
-                  height: buttonHeight,
-                  foregroundColor: buttonColor,
+                Center(
+                  child: UIButton(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => ManageListView(),
+                        ),
+                      );
+                    },
+                    icon: Icons.settings,
+                    text: 'Manage',
+                    margin: buttonPadding,
+                    padding: buttonPadding,
+                    fontSize: buttonFontSize,
+                    width: buttonWidth,
+                    height: buttonHeight,
+                    foregroundColor: buttonColor,
+                  ),
                 ),
-              ),
-            ],
-          ),
-          Positioned(top: 0, left: 0, right: 0, child: StatBar()),
-        ],
+                Center(
+                  child: UIButton(
+                    onPressed: () {},
+                    icon: Icons.sports_esports,
+                    text: 'Battle',
+                    margin: buttonPadding,
+                    padding: buttonPadding,
+                    fontSize: buttonFontSize,
+                    width: buttonWidth,
+                    height: buttonHeight,
+                    foregroundColor: buttonColor,
+                  ),
+                ),
+                Center(
+                  child: UIButton(
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => ProfileView()),
+                    ),
+                    icon: Icons.person,
+                    text: 'Profile',
+                    margin: buttonPadding,
+                    padding: buttonPadding,
+                    fontSize: buttonFontSize,
+                    width: buttonWidth,
+                    height: buttonHeight,
+                    foregroundColor: buttonColor,
+                  ),
+                ),
+                Center(
+                  child: UIButton(
+                    onPressedAsync: () async {
+                      final navigator = Navigator.of(context);
+                      await ref.read(authProvider.notifier).logout();
+                      navigator.pushReplacement(
+                        MaterialPageRoute(builder: (context) => LoginView()),
+                      );
+                    },
+                    icon: Icons.logout,
+                    text: 'Logout',
+                    margin: buttonPadding,
+                    padding: buttonPadding,
+                    fontSize: buttonFontSize,
+                    width: buttonWidth,
+                    height: buttonHeight,
+                    foregroundColor: buttonColor,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
