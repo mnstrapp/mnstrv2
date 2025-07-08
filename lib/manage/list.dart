@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mnstrv2/providers/session_users.dart';
 
 import '../shared/monster_container.dart';
 import '../shared/monster_model.dart';
@@ -39,23 +40,34 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
           : monsters.when(
-              data: (monsters) => ListView.builder(
-                itemCount: monsters.length,
-                itemBuilder: (context, index) => InkWell(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) =>
-                            ManageEditView(monster: monsters[index]),
-                      ),
-                    );
-                  },
-                  child: MonsterContainer(
-                    monster: Monster.fromQRCode(monsters[index].qrCode ?? ''),
-                  ),
-                ),
-              ),
+              data: (monsters) {
+                return _isLoading
+                    ? const Center(child: CircularProgressIndicator())
+                    : SingleChildScrollView(
+                        child: Column(
+                          children: monsters
+                              .map(
+                                (monster) => InkWell(
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            ManageEditView(monster: monster),
+                                      ),
+                                    );
+                                  },
+                                  child: MonsterContainer(
+                                    monster: Monster.fromQRCode(
+                                      monster.qrCode ?? '',
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        ),
+                      );
+              },
               error: (error, stackTrace) => Text('Error: $error'),
               loading: () => const Center(child: CircularProgressIndicator()),
             ),

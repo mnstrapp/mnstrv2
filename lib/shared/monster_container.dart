@@ -29,10 +29,7 @@ class MonsterContainer extends StatelessWidget {
     return Container(
       width: width,
       height: height,
-      decoration: BoxDecoration(
-        color: backgroundColor,
-        borderRadius: borderRadius ?? BorderRadius.circular(4),
-      ),
+      decoration: BoxDecoration(color: backgroundColor),
       child: Stack(
         children: [
           Positioned(
