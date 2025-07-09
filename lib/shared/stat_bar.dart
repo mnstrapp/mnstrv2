@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/session_users.dart';
 
 class StatBar extends ConsumerStatefulWidget {
-  const StatBar({super.key});
+  const StatBar({super.key, this.color});
+  final Color? color;
 
   @override
   ConsumerState<StatBar> createState() => _StatBarState();
@@ -24,11 +25,17 @@ class _StatBarState extends ConsumerState<StatBar> {
     final user = ref.watch(sessionUserProvider);
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
-    final backgroundColor = _lightenColor(theme.primaryColor);
+    final backgroundColor = _lightenColor(widget.color ?? theme.primaryColor);
     final margin = EdgeInsets.only(left: 32, right: 32);
     final height = 40.0;
-    final barBackgroundColor = _darkenColor(theme.primaryColor, 0.1);
-    final barForegroundColor = _darkenColor(theme.primaryColor, 0.2);
+    final barBackgroundColor = _darkenColor(
+      widget.color ?? theme.primaryColor,
+      0.1,
+    );
+    final barForegroundColor = _darkenColor(
+      widget.color ?? theme.primaryColor,
+      0.2,
+    );
     final barWidth = size.width * 0.33;
     final barHeight = 20.0;
     final barExperience = user.value?.experiencePoints ?? 1;

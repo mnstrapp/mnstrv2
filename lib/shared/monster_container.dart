@@ -8,6 +8,7 @@ class MonsterContainer extends StatelessWidget {
   final double? height;
   final double? monsterScale;
   final BorderRadius? borderRadius;
+
   const MonsterContainer({
     super.key,
     required this.monster,

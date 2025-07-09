@@ -30,69 +30,66 @@ class _CollectState extends ConsumerState<Collect> {
     final size = MediaQuery.of(context).size;
 
     return LayoutScaffold(
+      useSizedBox: true,
       backgroundColor: Color.lerp(monster?.color, Colors.white, 0.5),
-      child: SizedBox(
-        width: size.width,
-        height: size.height,
-        child: Center(
-          child: _qrCode == null
-              ? ScannerView(
-                  onScan: (data) {
-                    setState(() {
-                      _qrCode = data;
-                    });
-                  },
-                )
-              : SafeArea(
-                  child: Stack(
-                    children: [
-                      Positioned(
-                        bottom: 40,
-                        left: 0,
-                        right: 0,
-                        child: Center(child: MonsterView(monster: monster!)),
-                      ),
-                      Positioned(
-                        bottom: size.height * 0.05,
-                        left: size.width * 0.05,
-                        right: size.width * 0.05,
-                        child: UIButton(
-                          onPressedAsync: () async {
-                            final messenger = ScaffoldMessenger.of(context);
-                            final navigator = Navigator.of(context);
-                            await ref
-                                .read(collectProvider.notifier)
-                                .collect(base64Encode(_qrCode!));
-                            final mnstr = ref.read(collectProvider);
-                            if (mnstr.value != null) {
-                              navigator.pop();
-                              messenger.showSnackBar(
-                                SnackBar(content: Text('Monster collected')),
-                              );
-                              return;
-                            }
+      child: Center(
+        child: _qrCode == null
+            ? ScannerView(
+                onScan: (data) {
+                  setState(() {
+                    _qrCode = data;
+                  });
+                },
+              )
+            : SafeArea(
+                child: Stack(
+                  children: [
+                    Positioned(
+                      bottom: 40,
+                      left: 0,
+                      right: 0,
+                      child: Center(child: MonsterView(monster: monster!)),
+                    ),
+                    Positioned(
+                      bottom: size.height * 0.05,
+                      left: size.width * 0.05,
+                      right: size.width * 0.05,
+                      child: UIButton(
+                        onPressedAsync: () async {
+                          final messenger = ScaffoldMessenger.of(context);
+                          final navigator = Navigator.of(context);
+                          await ref
+                              .read(collectProvider.notifier)
+                              .collect(base64Encode(_qrCode!));
+                          final mnstr = ref.read(collectProvider);
+                          if (mnstr.value != null) {
+                            navigator.pop();
                             messenger.showSnackBar(
-                              SnackBar(
-                                content: Text('Failed to collect monster'),
-                              ),
+                              SnackBar(content: Text('Monster collected')),
                             );
-                          },
-                          text: 'Collect',
-                          icon: Icons.add,
-                          iconSize: 24,
-                          fontSize: 24,
-                          padding: 8,
-                          backgroundColor: Color.lerp(
-                            monster.color,
-                            Colors.black,
-                            0.5,
-                          ),
+                            return;
+                          }
+                          messenger.showSnackBar(
+                            SnackBar(
+                              content: Text('Failed to collect monster'),
+                            ),
+                          );
+                        },
+                        text: 'Collect',
+                        icon: Icons.add,
+                        iconSize: 24,
+                        fontSize: 24,
+                        padding: 8,
+                        backgroundColor: Color.lerp(
+                          monster.color,
+                          Colors.black,
+                          0.5,
                         ),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-        ),
+              ),
       ),
     );
   }

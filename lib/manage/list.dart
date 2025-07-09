@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mnstrv2/providers/session_users.dart';
 
 import '../shared/layout_scaffold.dart';
 import '../shared/monster_container.dart';
-import '../shared/monster_model.dart';
+import '../shared/monster_model.dart' as model;
 import '../providers/manage.dart';
 import 'edit.dart';
 
@@ -17,11 +16,14 @@ class ManageListView extends ConsumerStatefulWidget {
 
 class _ManageListViewState extends ConsumerState<ManageListView> {
   bool _isLoading = false;
+  Color? backgroundColor;
 
   @override
   void initState() {
     super.initState();
-    _getMonsters();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      await _getMonsters();
+    });
   }
 
   Future<void> _getMonsters() async {
@@ -38,29 +40,28 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
   Widget build(BuildContext context) {
     final monsters = ref.watch(manageProvider);
     return LayoutScaffold(
+      backgroundColor: backgroundColor,
       child: monsters.when(
         data: (monsters) {
           return _isLoading
               ? const Center(child: CircularProgressIndicator())
               : Column(
-                  children: monsters
-                      .map(
-                        (monster) => InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    ManageEditView(monster: monster),
-                              ),
-                            );
-                          },
-                          child: MonsterContainer(
-                            monster: Monster.fromQRCode(monster.qrCode ?? ''),
+                  children: monsters.map((monster) {
+                    return InkWell(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                ManageEditView(monster: monster),
                           ),
-                        ),
-                      )
-                      .toList(),
+                        );
+                      },
+                      child: MonsterContainer(
+                        monster: model.Monster.fromQRCode(monster.qrCode ?? ''),
+                      ),
+                    );
+                  }).toList(),
                 );
         },
         error: (error, stackTrace) => Text('Error: $error'),

@@ -17,53 +17,50 @@ class ProfileView extends ConsumerWidget {
     final monster = Monster.fromQRCode(user.value?.qrCode ?? '');
 
     return LayoutScaffold(
+      useSizedBox: true,
       backgroundColor: Color.lerp(monster.color, Colors.white, 0.5),
-      child: SizedBox(
-        width: size.width,
-        height: size.height,
-        child: user.when(
-          data: (user) {
-            return Center(
-              child: SafeArea(
-                child: Stack(
-                  children: [
-                    Positioned(
-                      bottom: 40,
-                      left: 0,
-                      right: 0,
-                      child: MonsterView(monster: monster),
-                    ),
-                    Positioned(
-                      bottom: size.height * 0.05,
-                      left: 0,
-                      right: 0,
-                      child: Center(
-                        child: Container(
-                          padding: EdgeInsets.symmetric(
-                            horizontal: size.width * 0.05,
-                            vertical: size.height * 0.02,
-                          ),
-                          decoration: BoxDecoration(
-                            color: theme.colorScheme.surface,
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            user?.displayName ?? 'No user',
-                            style: theme.textTheme.titleLarge?.copyWith(
-                              color: theme.colorScheme.onSurface,
-                            ),
+      child: user.when(
+        data: (user) {
+          return Center(
+            child: SafeArea(
+              child: Stack(
+                children: [
+                  Positioned(
+                    bottom: 40,
+                    left: 0,
+                    right: 0,
+                    child: MonsterView(monster: monster),
+                  ),
+                  Positioned(
+                    bottom: size.height * 0.05,
+                    left: 0,
+                    right: 0,
+                    child: Center(
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: size.width * 0.05,
+                          vertical: size.height * 0.02,
+                        ),
+                        decoration: BoxDecoration(
+                          color: theme.colorScheme.surface,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Text(
+                          user?.displayName ?? 'No user',
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-            );
-          },
-          error: (error, stackTrace) => Center(child: Text(error.toString())),
-          loading: () => const Center(child: CircularProgressIndicator()),
-        ),
+            ),
+          );
+        },
+        error: (error, stackTrace) => Center(child: Text(error.toString())),
+        loading: () => const Center(child: CircularProgressIndicator()),
       ),
     );
   }

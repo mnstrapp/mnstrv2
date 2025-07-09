@@ -1,6 +1,5 @@
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
-import 'dart:developer';
 import 'package:flutter/material.dart';
 
 class Monster {
@@ -28,7 +27,6 @@ class Monster {
     final hash = sha1.convert(utf8.encode(qrCode));
     final parts = hash.bytes;
     final color = Color.fromRGBO(parts[5], parts[10], parts[15], 100);
-    log('color: $color, r: ${parts[5]}, g: ${parts[10]}, b: ${parts[15]}');
     final head = parts
         .sublist(0, 1)
         .reduce((value, element) => value + element);
