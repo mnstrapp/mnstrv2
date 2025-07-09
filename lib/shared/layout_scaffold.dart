@@ -24,11 +24,9 @@ class LayoutScaffold extends StatelessWidget {
       backgroundColor: backgroundColor,
       body: Stack(
         children: [
-          SingleChildScrollView(
-            child: useSizedBox
-                ? SizedBox(height: size.height, width: size.width, child: child)
-                : child,
-          ),
+          useSizedBox
+              ? SizedBox(height: size.height, width: size.width, child: child)
+              : child,
           Positioned(
             top: 0,
             left: 0,
