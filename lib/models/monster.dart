@@ -15,4 +15,11 @@ class Monster {
       _$MonsterFromJson(json);
 
   Map<String, dynamic> toJson() => _$MonsterToJson(this);
+
+  Monster copyWith({String? name, String? description}) => Monster(
+    id: id,
+    name: name ?? this.name,
+    description: description ?? this.description,
+    qrCode: qrCode,
+  );
 }
