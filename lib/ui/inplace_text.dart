@@ -49,7 +49,7 @@ class _InplaceTextState extends State<InplaceText> {
           ? Container(
               padding: const EdgeInsets.all(8),
               decoration: BoxDecoration(
-                color: Color.lerp(widget.backgroundColor, Colors.white, 0.5),
+                color: widget.backgroundColor,
                 borderRadius: BorderRadius.circular(20),
               ),
               child: TextField(
@@ -91,17 +91,25 @@ class _InplaceTextState extends State<InplaceText> {
                   _isEditing = true;
                 });
               },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: widget.backgroundColor,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  widget.text ?? '',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: widget.foregroundColor,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  widget.label ?? const SizedBox.shrink(),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    width: MediaQuery.of(context).size.width,
+                    decoration: BoxDecoration(
+                      color: widget.backgroundColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      widget.text ?? '',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: widget.foregroundColor,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ),
     );

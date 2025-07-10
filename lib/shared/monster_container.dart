@@ -8,6 +8,7 @@ class MonsterContainer extends StatelessWidget {
   final double? height;
   final double? monsterScale;
   final BorderRadius? borderRadius;
+  final bool showName;
 
   const MonsterContainer({
     super.key,
@@ -16,6 +17,7 @@ class MonsterContainer extends StatelessWidget {
     this.height,
     this.monsterScale,
     this.borderRadius,
+    this.showName = true,
   });
 
   @override
@@ -44,29 +46,30 @@ class MonsterContainer extends StatelessWidget {
               width: width,
             ),
           ),
-          Positioned(
-            bottom: size.height * 0.05,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                padding: EdgeInsets.symmetric(
-                  horizontal: size.width * 0.05,
-                  vertical: size.height * 0.02,
-                ),
-                decoration: BoxDecoration(
-                  color: uiColor,
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  monster.name ?? 'unnamed',
-                  style: theme.textTheme.titleLarge?.copyWith(
-                    color: theme.colorScheme.surface,
+          if (showName)
+            Positioned(
+              bottom: size.height * 0.05,
+              left: 0,
+              right: 0,
+              child: Center(
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: size.width * 0.05,
+                    vertical: size.height * 0.02,
+                  ),
+                  decoration: BoxDecoration(
+                    color: uiColor,
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    monster.name ?? 'unnamed',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      color: theme.colorScheme.surface,
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
         ],
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/session_users.dart';
+import '../utils/color.dart';
 
 class StatBar extends ConsumerStatefulWidget {
   const StatBar({super.key, this.color});
@@ -25,14 +26,14 @@ class _StatBarState extends ConsumerState<StatBar> {
     final user = ref.watch(sessionUserProvider);
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
-    final backgroundColor = _lightenColor(widget.color ?? theme.primaryColor);
+    final backgroundColor = lightenColor(widget.color ?? theme.primaryColor);
     final margin = EdgeInsets.only(left: 32, right: 32);
     final height = 40.0;
-    final barBackgroundColor = _darkenColor(
+    final barBackgroundColor = darkenColor(
       widget.color ?? theme.primaryColor,
       0.1,
     );
-    final barForegroundColor = _darkenColor(
+    final barForegroundColor = darkenColor(
       widget.color ?? theme.primaryColor,
       0.2,
     );
@@ -108,16 +109,4 @@ class _StatBarState extends ConsumerState<StatBar> {
       ),
     );
   }
-}
-
-Color _lightenColor(Color color, [double amount = 0.3]) {
-  return HSLColor.fromColor(color)
-      .withLightness((HSLColor.fromColor(color).lightness + amount).clamp(0, 1))
-      .toColor();
-}
-
-Color _darkenColor(Color color, [double amount = 0.5]) {
-  return HSLColor.fromColor(color)
-      .withLightness((HSLColor.fromColor(color).lightness - amount).clamp(0, 1))
-      .toColor();
 }
