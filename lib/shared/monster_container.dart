@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'monster_model.dart';
 import 'monster.dart';
+import '../utils/color.dart';
 
 class MonsterContainer extends StatelessWidget {
   final Monster monster;
@@ -26,7 +27,10 @@ class MonsterContainer extends StatelessWidget {
     final width = this.width ?? size.width;
     final height = this.height ?? size.height;
     final backgroundColor = Color.lerp(monster.color, Colors.white, 0.5);
-    final uiColor = Color.lerp(monster.color, Colors.black, 0.5);
+    final uiColor = lightenColor(
+      Color.lerp(monster.color, Colors.black, 0.5) ?? Colors.black,
+      0.1,
+    );
     final theme = Theme.of(context);
 
     return Container(
