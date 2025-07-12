@@ -54,7 +54,7 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
   void _setBackgroundColor(double height) {
     final index = _scrollController.position.pixels ~/ height;
     final monster = _monsters[index];
-    final m = model.Monster.fromQRCode(monster.qrCode ?? '');
+    final m = model.MonsterModel.fromQRCode(monster.qrCode ?? '');
     setState(() {
       _backgroundColor = Color.lerp(m.color, Colors.white, 0.25);
     });
@@ -92,7 +92,7 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
                           );
                         },
                         child: MonsterContainer(
-                          monster: model.Monster.fromQRCode(
+                          monster: model.MonsterModel.fromQRCode(
                             monster.qrCode ?? '',
                           ),
                         ),

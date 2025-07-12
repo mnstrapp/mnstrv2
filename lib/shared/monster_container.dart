@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'monster_model.dart';
-import 'monster.dart';
+import 'monster_view.dart';
 import '../utils/color.dart';
 
 class MonsterContainer extends StatelessWidget {
-  final Monster monster;
+  final MonsterModel monster;
   final double? width;
   final double? height;
   final double? monsterScale;

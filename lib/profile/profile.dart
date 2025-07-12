@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/session_users.dart';
 import '../shared/layout_scaffold.dart';
-import '../shared/monster.dart';
+import '../shared/monster_view.dart';
 import '../shared/monster_model.dart';
 
 class ProfileView extends ConsumerWidget {
@@ -14,7 +14,7 @@ class ProfileView extends ConsumerWidget {
     final user = ref.watch(sessionUserProvider);
     final size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
-    final monster = Monster.fromQRCode(user.value?.qrCode ?? '');
+    final monster = MonsterModel.fromQRCode(user.value?.qrCode ?? '');
 
     return LayoutScaffold(
       useSizedBox: true,

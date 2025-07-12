@@ -4,7 +4,8 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../shared/monster.dart';
+import '../shared/stars.dart';
+import '../shared/monster_view.dart';
 import '../ui/button.dart';
 import '../providers/collect.dart';
 import '../qr/scanner.dart';
@@ -23,9 +24,9 @@ class _CollectState extends ConsumerState<Collect> {
 
   @override
   Widget build(BuildContext context) {
-    Monster? monster;
+    MonsterModel? monster;
     if (_qrCode != null) {
-      monster = Monster.fromQRCode(base64Encode(_qrCode!));
+      monster = MonsterModel.fromQRCode(base64Encode(_qrCode!));
     }
     final size = MediaQuery.of(context).size;
 
@@ -44,6 +45,13 @@ class _CollectState extends ConsumerState<Collect> {
             : SafeArea(
                 child: Stack(
                   children: [
+                    Positioned(
+                      top: 0,
+                      bottom: 0,
+                      left: 0,
+                      right: 0,
+                      child: StarsView(),
+                    ),
                     Positioned(
                       bottom: 40,
                       left: 0,
@@ -81,7 +89,7 @@ class _CollectState extends ConsumerState<Collect> {
                         fontSize: 24,
                         padding: 8,
                         backgroundColor: Color.lerp(
-                          monster.color,
+                          monster?.color,
                           Colors.black,
                           0.5,
                         ),

@@ -2,7 +2,7 @@ import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 
-class Monster {
+class MonsterModel {
   String? id;
   String? name;
   Color? color;
@@ -12,7 +12,7 @@ class Monster {
   int? legs;
   int? tail;
 
-  Monster({
+  MonsterModel({
     this.id,
     this.name,
     this.color,
@@ -23,7 +23,7 @@ class Monster {
     this.tail,
   });
 
-  static Monster fromQRCode(String qrCode) {
+  static MonsterModel fromQRCode(String qrCode) {
     final hash = sha1.convert(utf8.encode(qrCode));
     final parts = hash.bytes;
     final color = Color.fromRGBO(parts[5], parts[10], parts[15], 100);
@@ -43,7 +43,7 @@ class Monster {
         .sublist(11, 15)
         .reduce((value, element) => value + element);
 
-    return Monster(
+    return MonsterModel(
       color: color,
       head: head % 2,
       horns: horns % 4,
@@ -62,7 +62,7 @@ const scale = 1.7;
 class MonsterParts {
   MonsterParts({required this.monster});
 
-  Monster monster;
+  MonsterModel monster;
 
   Widget get head {
     if (monster.head == 0) {

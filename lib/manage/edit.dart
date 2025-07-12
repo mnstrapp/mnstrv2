@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mnstrv2/shared/monster_container.dart';
+import '../shared/monster_container.dart';
 import '../models/monster.dart' as mc;
 import '../shared/monster_model.dart' as mcl;
 import '../utils/color.dart';
@@ -64,7 +64,7 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
 
   @override
   Widget build(BuildContext context) {
-    final mnstr = mcl.Monster.fromQRCode(monster.qrCode ?? '');
+    final mnstr = mcl.MonsterModel.fromQRCode(monster.qrCode ?? '');
     return LayoutScaffold(
       backgroundColor: Color.lerp(
         mnstr.color ?? Colors.white,

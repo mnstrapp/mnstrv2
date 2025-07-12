@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'monster_model.dart';
 
 class MonsterView extends StatelessWidget {
-  final Monster monster;
+  final MonsterModel monster;
   final double? monsterScale;
   final double? height;
   final double? width;
