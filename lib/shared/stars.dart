@@ -20,19 +20,33 @@ class _StarsViewState extends State<StarsView> with TickerProviderStateMixin {
   }
 
   void _setupAnimations() {
-    for (var i = 0; i < 150; i++) {
+    for (var i = 0; i < 300; i++) {
       final controller = AnimationController(
         duration: Duration(milliseconds: 1000 + Random().nextInt(1000)),
         vsync: this,
+        reverseDuration: Duration(milliseconds: 1000 + Random().nextInt(1000)),
       );
+      controller.addStatusListener((status) async {
+        if (status == AnimationStatus.completed) {
+          await Future.delayed(Duration(milliseconds: 3000));
+          controller.reverse();
+        }
+      });
 
       final targetPosition = _generateRandomTarget();
       _targetPositions.add(targetPosition);
 
-      final animation = Tween<Offset>(
-        begin: const Offset(0.5, 0.5), // Center
-        end: targetPosition,
-      ).animate(CurvedAnimation(parent: controller, curve: Curves.easeOutExpo));
+      final animation =
+          Tween<Offset>(
+            begin: const Offset(0.5, 0.5), // Center
+            end: targetPosition,
+          ).animate(
+            CurvedAnimation(
+              parent: controller,
+              curve: Curves.easeOutExpo,
+              reverseCurve: Curves.easeInExpo,
+            ),
+          );
 
       _controllers.add(controller);
       _animations.add(animation);
@@ -42,6 +56,15 @@ class _StarsViewState extends State<StarsView> with TickerProviderStateMixin {
         if (mounted) controller.forward();
       });
     }
+  }
+
+  void Function(AnimationStatus) _checkStatus(int index) {
+    return (status) async {
+      if (status == AnimationStatus.completed) {
+        await Future.delayed(Duration(milliseconds: 3000));
+        _controllers[index].reverse();
+      }
+    };
   }
 
   Offset _generateRandomTarget() {
@@ -55,6 +78,7 @@ class _StarsViewState extends State<StarsView> with TickerProviderStateMixin {
   @override
   void dispose() {
     for (final controller in _controllers) {
+      controller.removeStatusListener((status) {});
       controller.dispose();
     }
     super.dispose();
@@ -65,14 +89,14 @@ class _StarsViewState extends State<StarsView> with TickerProviderStateMixin {
     final size = MediaQuery.of(context).size;
     final List<Widget> stars = [];
 
-    for (var i = 0; i < 150; i++) {
+    for (var i = 0; i < 300; i++) {
       stars.add(
         AnimatedBuilder(
           animation: _animations[i],
           builder: (context, child) {
             return Positioned(
-              left: _animations[i].value.dx * size.width,
-              top: _animations[i].value.dy * size.height,
+              left: (_animations[i].value.dx * size.width) - 12.5,
+              top: (_animations[i].value.dy * size.height) - 12.5,
               child: const _StarView(),
             );
           },
