@@ -7,20 +7,12 @@ import 'theme.dart';
 import 'providers/auth.dart';
 import 'home/home.dart';
 import 'auth/login.dart';
-import 'providers/sounds.dart';
-import 'shared/sounds.dart';
 
 class App extends ConsumerWidget {
   const App({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final backgroundSound = BackgroundMusic();
-    final isMuted = ref.watch(backgroundSoundProvider);
-    if (!isMuted) {
-      backgroundSound.play();
-    }
-
     final auth = ref.watch(authProvider);
     return MaterialApp(
       home: auth.when(

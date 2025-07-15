@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../shared/layout_scaffold.dart';
 import '../providers/auth.dart';
 import '../ui/button.dart';
 import '../home/home.dart';
@@ -69,8 +70,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Stack(
+    return LayoutScaffold(
+      showStatBar: false,
+      child: Stack(
         children: [
           Positioned(
             bottom: 0,

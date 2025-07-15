@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:just_audio/just_audio.dart';
 
 class BackgroundMusic {
@@ -6,8 +8,12 @@ class BackgroundMusic {
   static final AudioPlayer _audioPlayer = AudioPlayer();
 
   Future<void> play() async {
-    await _audioPlayer.setAudioSource(AudioSource.asset(_backgroundMusic));
-    await _audioPlayer.play();
+    try {
+      await _audioPlayer.setAudioSource(AudioSource.asset(_backgroundMusic));
+      await _audioPlayer.play();
+    } catch (e) {
+      log('Error playing background music: $e');
+    }
   }
 
   Future<void> pause() async {

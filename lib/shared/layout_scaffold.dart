@@ -33,12 +33,13 @@ class LayoutScaffold extends ConsumerWidget {
           useSizedBox
               ? SizedBox(height: size.height, width: size.width, child: child)
               : child,
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: SafeArea(child: StatBar(color: backgroundColor)),
-          ),
+          if (showStatBar)
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              child: SafeArea(child: StatBar(color: backgroundColor)),
+            ),
           Positioned(
             bottom: 16,
             right: 16,
@@ -49,12 +50,12 @@ class LayoutScaffold extends ConsumerWidget {
                   0.5,
                 ).withAlpha(128),
               ),
-              onPressed: () {
+              onPressed: () async {
                 ref.read(backgroundSoundProvider.notifier).toggleMute();
                 if (isMuted) {
-                  BackgroundMusic().play();
+                  await BackgroundMusic().play();
                 } else {
-                  BackgroundMusic().pause();
+                  await BackgroundMusic().pause();
                 }
               },
               icon: Icon(isMuted ? Icons.volume_off : Icons.volume_up),
