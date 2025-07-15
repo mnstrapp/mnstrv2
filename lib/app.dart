@@ -2,12 +2,12 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:just_audio/just_audio.dart';
 
 import 'theme.dart';
 import 'providers/auth.dart';
 import 'home/home.dart';
 import 'auth/login.dart';
+import 'shared/sounds.dart';
 
 class App extends ConsumerStatefulWidget {
   const App({super.key});
@@ -17,22 +17,17 @@ class App extends ConsumerStatefulWidget {
 }
 
 class _AppState extends ConsumerState<App> {
-  late final _audioPlayer = AudioPlayer();
+  late final _backgroundMusic = BackgroundMusic();
 
   @override
   void initState() {
     super.initState();
-    _audioPlayer.setAudioSource(
-      AudioSource.asset('assets/sound/mnstr-game-music.m4a'),
-    );
-    _audioPlayer.setLoopMode(LoopMode.all);
-    _audioPlayer.play();
-    _audioPlayer.setVolume(1);
+    _backgroundMusic.play();
   }
 
   @override
   void dispose() {
-    _audioPlayer.dispose();
+    _backgroundMusic.pause();
     super.dispose();
   }
 
