@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../utils/color.dart';
 
+import '../providers/sounds.dart';
 import 'sounds.dart';
 import 'stat_bar.dart';
 
-class LayoutScaffold extends StatefulWidget {
+class LayoutScaffold extends ConsumerWidget {
   final Widget child;
   final Color? backgroundColor;
   final bool showStatBar;
@@ -19,32 +21,23 @@ class LayoutScaffold extends StatefulWidget {
   });
 
   @override
-  State<LayoutScaffold> createState() => _LayoutScaffoldState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final isMuted = ref.watch(backgroundSoundProvider);
 
-class _LayoutScaffoldState extends State<LayoutScaffold> {
-  bool _isMuted = false;
-
-  @override
-  Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
-      backgroundColor: widget.backgroundColor,
+      backgroundColor: backgroundColor,
       body: Stack(
         children: [
-          widget.useSizedBox
-              ? SizedBox(
-                  height: size.height,
-                  width: size.width,
-                  child: widget.child,
-                )
-              : widget.child,
+          useSizedBox
+              ? SizedBox(height: size.height, width: size.width, child: child)
+              : child,
           Positioned(
             top: 0,
             left: 0,
             right: 0,
-            child: SafeArea(child: StatBar(color: widget.backgroundColor)),
+            child: SafeArea(child: StatBar(color: backgroundColor)),
           ),
           Positioned(
             bottom: 16,
@@ -52,21 +45,19 @@ class _LayoutScaffoldState extends State<LayoutScaffold> {
             child: IconButton.filled(
               style: IconButton.styleFrom(
                 backgroundColor: darkenColor(
-                  widget.backgroundColor ?? Colors.white,
+                  backgroundColor ?? Colors.white,
                   0.5,
                 ).withAlpha(128),
               ),
               onPressed: () {
-                if (_isMuted) {
+                ref.read(backgroundSoundProvider.notifier).toggleMute();
+                if (isMuted) {
                   BackgroundMusic().play();
                 } else {
                   BackgroundMusic().pause();
                 }
-                setState(() {
-                  _isMuted = !_isMuted;
-                });
               },
-              icon: Icon(_isMuted ? Icons.volume_off : Icons.volume_up),
+              icon: Icon(isMuted ? Icons.volume_off : Icons.volume_up),
             ),
           ),
         ],
