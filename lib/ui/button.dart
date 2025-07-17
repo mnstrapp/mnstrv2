@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:mnstrv2/utils/color.dart';
+import '../shared/sounds.dart';
 
 class UIButton extends StatefulWidget {
   const UIButton({
@@ -42,6 +44,25 @@ class UIButton extends StatefulWidget {
 
 class _UIButtonState extends State<UIButton> {
   bool _isLoading = false;
+  final _buttonSound = ButtonSound();
+
+  Future<void> _onPressed() async {
+    _buttonSound.play();
+    if (_isLoading) {
+      return;
+    }
+    if (widget.onPressedAsync != null) {
+      setState(() {
+        _isLoading = true;
+      });
+      await widget.onPressedAsync!();
+      setState(() {
+        _isLoading = false;
+      });
+    } else {
+      widget.onPressed?.call();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -54,27 +75,18 @@ class _UIButtonState extends State<UIButton> {
       color: widget.foregroundColor ?? Theme.of(context).colorScheme.onPrimary,
       fontSize: fontSize,
     );
+
     return Padding(
       padding: EdgeInsets.all(margin),
       child: SizedBox(
         width: widget.width,
         height: widget.height,
         child: FilledButton(
-          onPressed: _isLoading
-              ? null
-              : widget.onPressedAsync != null
-              ? () async {
-                  setState(() {
-                    _isLoading = true;
-                  });
-                  await widget.onPressedAsync!();
-                  setState(() {
-                    _isLoading = false;
-                  });
-                }
-              : widget.onPressed ?? () {},
+          onPressed: _onPressed,
           style: FilledButton.styleFrom(
-            backgroundColor: widget.backgroundColor,
+            backgroundColor: _isLoading
+                ? lightenColor(widget.backgroundColor ?? Colors.grey)
+                : widget.backgroundColor,
           ),
           child: Padding(
             padding: EdgeInsets.all(padding),

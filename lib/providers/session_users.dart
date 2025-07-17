@@ -100,7 +100,6 @@ class SessionUserNotifier extends AsyncNotifier<User?> {
     );
 
     final body = jsonDecode(response.body);
-    log(body.toString());
     final requestResponse = UserResponse.fromJson(body);
 
     if (response.statusCode == HttpStatus.ok) {

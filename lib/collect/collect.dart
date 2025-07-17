@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../shared/sounds.dart';
 import '../shared/stars.dart';
 import '../shared/monster_view.dart';
 import '../ui/button.dart';
@@ -21,12 +22,29 @@ class Collect extends ConsumerStatefulWidget {
 
 class _CollectState extends ConsumerState<Collect> {
   Uint8List? _qrCode;
+  final _collectSound = CollectSound();
+
+  Future<void> _playCollectSound() async {
+    await _collectSound.play();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+  }
+
+  @override
+  void dispose() {
+    _collectSound.pause();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     MonsterModel? monster;
     if (_qrCode != null) {
       monster = MonsterModel.fromQRCode(base64Encode(_qrCode!));
+      _playCollectSound();
     }
     final size = MediaQuery.of(context).size;
 

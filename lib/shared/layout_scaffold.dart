@@ -50,12 +50,12 @@ class LayoutScaffold extends ConsumerWidget {
                   0.5,
                 ).withAlpha(128),
               ),
-              onPressed: () async {
+              onPressed: () {
                 ref.read(backgroundSoundProvider.notifier).toggleMute();
                 if (isMuted) {
-                  await BackgroundMusic().play();
+                  BackgroundMusic().play();
                 } else {
-                  await BackgroundMusic().pause();
+                  BackgroundMusic().pause();
                 }
               },
               icon: Icon(isMuted ? Icons.volume_off : Icons.volume_up),
