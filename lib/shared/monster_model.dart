@@ -1,10 +1,12 @@
 import 'package:crypto/crypto.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import '../models/monster.dart';
 
 class MonsterModel {
   String? id;
   String? name;
+  String? qrCode;
   Color? color;
   int? head;
   int? horns;
@@ -15,6 +17,7 @@ class MonsterModel {
   MonsterModel({
     this.id,
     this.name,
+    this.qrCode,
     this.color,
     this.head,
     this.horns,
@@ -44,6 +47,7 @@ class MonsterModel {
         .reduce((value, element) => value + element);
 
     return MonsterModel(
+      qrCode: qrCode,
       color: color,
       head: head % 2,
       horns: horns % 4,
@@ -55,6 +59,15 @@ class MonsterModel {
 
   Map<MonsterPart, Widget?> get monsterParts =>
       MonsterParts(monster: this).monsterParts;
+
+  Monster toMonster() => Monster(id: id, name: name, qrCode: qrCode);
+
+  static MonsterModel fromMonster(Monster monster) {
+    MonsterModel model = MonsterModel.fromQRCode(monster.qrCode!);
+    model.id = monster.id;
+    model.name = monster.name;
+    return model;
+  }
 }
 
 const scale = 1.7;

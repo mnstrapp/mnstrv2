@@ -12,10 +12,17 @@ ManageResponse _$ManageResponseFromJson(Map<String, dynamic> json) =>
       monsters: (json['mnstrs'] as List<dynamic>?)
           ?.map((e) => Monster.fromJson(e as Map<String, dynamic>))
           .toList(),
+      monster: json['mnstr'] == null
+          ? null
+          : Monster.fromJson(json['mnstr'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$ManageResponseToJson(ManageResponse instance) =>
-    <String, dynamic>{'error': instance.error, 'mnstrs': instance.monsters};
+    <String, dynamic>{
+      'error': instance.error,
+      'mnstrs': instance.monsters,
+      'mnstr': instance.monster,
+    };
 
 ManageEditRequest _$ManageEditRequestFromJson(Map<String, dynamic> json) =>
     ManageEditRequest(

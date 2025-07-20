@@ -10,8 +10,10 @@ import '../shared/stars.dart';
 import '../shared/monster_view.dart';
 import '../ui/button.dart';
 import '../providers/collect.dart';
+import '../providers/manage.dart';
 import '../qr/scanner.dart';
 import '../shared/monster_model.dart';
+import '../models/monster.dart';
 import '../shared/layout_scaffold.dart';
 
 class Collect extends ConsumerStatefulWidget {
@@ -24,9 +26,29 @@ class Collect extends ConsumerStatefulWidget {
 class _CollectState extends ConsumerState<Collect> {
   Uint8List? _qrCode;
   final _collectSound = CollectSound();
+  MonsterModel? _monster;
 
   Future<void> _playCollectSound() async {
     await _collectSound.play();
+  }
+
+  Future<MonsterModel?> _getMonster(String qrCode) async {
+    await ref.read(manageGetByQRProvider.notifier).get(qrCode);
+    final existingMonster = ref.read(manageGetByQRProvider);
+    MonsterModel? monster;
+    existingMonster.when(
+      data: (data) {
+        debugPrint('data: $data');
+        if (data != null) {
+          monster = data.toMonsterModel();
+        }
+      },
+      error: (error, stackTrace) {
+        monster = MonsterModel.fromQRCode(qrCode);
+      },
+      loading: () {},
+    );
+    return monster;
   }
 
   @override
@@ -41,25 +63,33 @@ class _CollectState extends ConsumerState<Collect> {
 
   @override
   Widget build(BuildContext context) {
-    MonsterModel? monster;
-    if (_qrCode != null) {
-      monster = MonsterModel.fromQRCode(base64Encode(_qrCode!));
+    final size = MediaQuery.of(context).size;
+    final color = _monster?.color ?? Theme.of(context).colorScheme.primary;
+
+    if (_monster != null) {
       _playCollectSound();
     }
-    final size = MediaQuery.of(context).size;
 
     return LayoutScaffold(
       useSizedBox: true,
-      backgroundColor: Color.lerp(monster?.color, Colors.white, 0.5),
+      backgroundColor: Color.lerp(color, Colors.white, 0.5),
       child: Center(
         child: _qrCode == null
             ? ScannerView(
-                onScan: (data) {
+                onScan: (data) async {
                   setState(() {
                     _qrCode = data;
                   });
+                  if (data != null) {
+                    final monster = await _getMonster(base64Encode(data));
+                    setState(() {
+                      _monster = monster;
+                    });
+                  }
                 },
               )
+            : _monster == null
+            ? const Center(child: CircularProgressIndicator())
             : SafeArea(
                 child: Stack(
                   children: [
@@ -74,7 +104,7 @@ class _CollectState extends ConsumerState<Collect> {
                       bottom: 40,
                       left: 0,
                       right: 0,
-                      child: Center(child: MonsterView(monster: monster!)),
+                      child: Center(child: MonsterView(monster: _monster!)),
                     ),
                     Positioned(
                       bottom: size.height * 0.05,
@@ -84,6 +114,17 @@ class _CollectState extends ConsumerState<Collect> {
                         onPressedAsync: () async {
                           final messenger = ScaffoldMessenger.of(context);
                           final navigator = Navigator.of(context);
+
+                          if (_monster?.name != null) {
+                            navigator.pop();
+                            messenger.showSnackBar(
+                              SnackBar(
+                                content: Text('Monster already collected'),
+                              ),
+                            );
+                            return;
+                          }
+
                           await ref
                               .read(collectProvider.notifier)
                               .collect(base64Encode(_qrCode!));
@@ -106,16 +147,12 @@ class _CollectState extends ConsumerState<Collect> {
                             ),
                           );
                         },
-                        text: 'Collect',
+                        text: _monster?.name != null ? 'Continue' : 'Collect',
                         icon: Icons.add,
                         iconSize: 24,
                         fontSize: 24,
                         padding: 8,
-                        backgroundColor: Color.lerp(
-                          monster?.color,
-                          Colors.black,
-                          0.5,
-                        ),
+                        backgroundColor: Color.lerp(color, Colors.black, 0.5),
                       ),
                     ),
                   ],

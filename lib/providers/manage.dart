@@ -18,7 +18,10 @@ class ManageResponse {
   @JsonKey(name: 'mnstrs')
   final List<Monster>? monsters;
 
-  ManageResponse({this.error, this.monsters});
+  @JsonKey(name: 'mnstr')
+  final Monster? monster;
+
+  ManageResponse({this.error, this.monsters, this.monster});
 
   factory ManageResponse.fromJson(Map<String, dynamic> json) =>
       _$ManageResponseFromJson(json);
@@ -56,6 +59,41 @@ class ManageNotifier extends AsyncNotifier<List<Monster>> {
         StackTrace.current,
       );
     }
+  }
+}
+
+final manageGetByQRProvider =
+    AsyncNotifierProvider<ManageGetByQRNotifier, Monster?>(
+      () => ManageGetByQRNotifier(),
+    );
+
+class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
+  @override
+  Future<Monster?> build() async {
+    return null;
+  }
+
+  Future<void> get(String qrCode) async {
+    final auth = ref.read(authProvider);
+    final response = await http.get(
+      Uri.parse('${endpoints.manage}/qrcode/$qrCode'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${auth.value?.token}',
+      },
+    );
+    if (response.statusCode != HttpStatus.ok) {
+      state = AsyncError(
+        Exception('Failed to get monster by QR code'),
+        StackTrace.current,
+      );
+      return;
+    }
+
+    final body = jsonDecode(response.body);
+    final manageResponse = ManageResponse.fromJson(body);
+
+    state = AsyncData(manageResponse.monster);
   }
 }
 

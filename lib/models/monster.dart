@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import '../shared/monster_model.dart';
 
 part 'monster.g.dart';
 
@@ -22,4 +23,9 @@ class Monster {
     description: description ?? this.description,
     qrCode: qrCode,
   );
+
+  MonsterModel toMonsterModel() => MonsterModel.fromMonster(this);
+
+  static Monster fromMonsterModel(MonsterModel model) =>
+      Monster(id: model.id, name: model.name, qrCode: model.qrCode);
 }
