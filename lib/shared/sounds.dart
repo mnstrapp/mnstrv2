@@ -5,7 +5,9 @@ import 'package:audioplayers/audioplayers.dart';
 class BackgroundMusic {
   static const String _backgroundMusic = 'sound/mnstr-game-music.m4a';
 
-  static final AudioPlayer _audioPlayer = AudioPlayer();
+  static final AudioPlayer _audioPlayer = AudioPlayer(
+    playerId: 'background-music',
+  );
 
   Future<void> _loop() async {
     final assetSource = AssetSource(_backgroundMusic);
@@ -37,7 +39,7 @@ class BackgroundMusic {
 class ButtonSound {
   static const String _buttonSound = 'sound/accept-2.mp3';
 
-  static final AudioPlayer _audioPlayer = AudioPlayer();
+  static final AudioPlayer _audioPlayer = AudioPlayer(playerId: 'button-sound');
 
   Future<void> play() async {
     final assetSource = AssetSource(_buttonSound);
@@ -52,10 +54,11 @@ class ButtonSound {
 class CollectSound {
   static const String _collectSound = 'sound/collect-2.mp3';
 
-  static final AudioPlayer _audioPlayer = AudioPlayer();
+  static final AudioPlayer _audioPlayer = AudioPlayer(
+    playerId: 'collect-sound',
+  );
 
   Future<void> play() async {
-    await BackgroundMusic().pause();
     final assetSource = AssetSource(_collectSound);
     await _audioPlayer.setSource(assetSource);
     final duration = await _audioPlayer.getDuration();

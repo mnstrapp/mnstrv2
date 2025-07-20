@@ -13,7 +13,6 @@ import '../providers/collect.dart';
 import '../providers/manage.dart';
 import '../qr/scanner.dart';
 import '../shared/monster_model.dart';
-import '../models/monster.dart';
 import '../shared/layout_scaffold.dart';
 
 class Collect extends ConsumerStatefulWidget {
@@ -38,10 +37,11 @@ class _CollectState extends ConsumerState<Collect> {
     MonsterModel? monster;
     existingMonster.when(
       data: (data) {
-        debugPrint('data: $data');
         if (data != null) {
           monster = data.toMonsterModel();
+          return;
         }
+        monster = MonsterModel.fromQRCode(qrCode);
       },
       error: (error, stackTrace) {
         monster = MonsterModel.fromQRCode(qrCode);
