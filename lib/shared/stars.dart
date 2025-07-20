@@ -49,17 +49,22 @@ class _StarsViewState extends State<StarsView> with TickerProviderStateMixin {
       _animations.add(animation);
 
       Future.delayed(Duration(milliseconds: Random().nextInt(500)), () {
-        if (mounted) controller.forward();
+        if (!mounted) return;
+        controller.forward();
       });
     }
   }
 
   void Function(AnimationStatus) _checkStatus(int index) {
     return (status) {
+      if (!mounted) return;
       if (status == AnimationStatus.completed) {
         Future.delayed(
           Duration(milliseconds: 3000 + Random().nextInt(1000)),
-          () => _controllers[index].reverse(),
+          () {
+            if (!mounted) return;
+            _controllers[index].reverse();
+          },
         );
       }
     };
@@ -143,13 +148,16 @@ class _StarViewState extends State<_StarView> with TickerProviderStateMixin {
   }
 
   void _checkStatus(AnimationStatus status) {
+    if (!mounted) return;
     if (status == AnimationStatus.completed) {
       Future.delayed(Duration(milliseconds: 100 + Random().nextInt(400)), () {
+        if (!mounted) return;
         _controller?.reverse();
       });
     }
     if (status == AnimationStatus.dismissed) {
       Future.delayed(Duration(milliseconds: 100 + Random().nextInt(400)), () {
+        if (!mounted) return;
         _controller?.forward();
       });
     }

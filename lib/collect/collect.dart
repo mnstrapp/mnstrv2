@@ -35,7 +35,6 @@ class _CollectState extends ConsumerState<Collect> {
 
   @override
   void dispose() {
-    _collectSound.pause();
     super.dispose();
   }
 

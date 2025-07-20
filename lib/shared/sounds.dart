@@ -63,9 +63,4 @@ class CollectSound {
     await Future.delayed(duration!);
     await BackgroundMusic().resume();
   }
-
-  Future<void> pause() async {
-    await _audioPlayer.pause();
-    await BackgroundMusic().resume();
-  }
 }
