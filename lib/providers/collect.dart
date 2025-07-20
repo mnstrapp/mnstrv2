@@ -41,6 +41,31 @@ class CollectResponse {
   Map<String, dynamic> toJson() => _$CollectResponseToJson(this);
 }
 
+@JsonSerializable()
+class ManageRequest {
+  final String name;
+
+  ManageRequest({required this.name});
+
+  factory ManageRequest.fromJson(Map<String, dynamic> json) =>
+      _$ManageRequestFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ManageRequestToJson(this);
+}
+
+@JsonSerializable()
+class ManageResponse {
+  final String? error;
+  final Monster? mnstr;
+
+  ManageResponse({this.error, this.mnstr});
+
+  factory ManageResponse.fromJson(Map<String, dynamic> json) =>
+      _$ManageResponseFromJson(json);
+
+  Map<String, dynamic> toJson() => _$ManageResponseToJson(this);
+}
+
 class CollectNotifier extends AsyncNotifier<Monster?> {
   @override
   Future<Monster?> build() async {
@@ -66,6 +91,33 @@ class CollectNotifier extends AsyncNotifier<Monster?> {
     } else {
       state = AsyncError(
         Exception('Failed to collect monster: ${collectResponse.error}'),
+        StackTrace.current,
+      );
+    }
+  }
+
+  Future<void> setName({
+    required String name,
+    required String monsterId,
+  }) async {
+    final auth = ref.read(authProvider);
+    final response = await http.put(
+      Uri.parse('${endpoints.manage}/$monsterId'),
+      body: jsonEncode(ManageRequest(name: name).toJson()),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${auth.value?.token}',
+      },
+    );
+    final body = jsonDecode(response.body);
+    final manageResponse = ManageResponse.fromJson(body);
+
+    if (response.statusCode == HttpStatus.ok) {
+      state = AsyncData(manageResponse.mnstr);
+      ref.read(sessionUserProvider.notifier).refresh();
+    } else {
+      state = AsyncError(
+        Exception('Failed to set name: ${manageResponse.error}'),
         StackTrace.current,
       );
     }

@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../collect/name.dart';
 import '../shared/sounds.dart';
 import '../shared/stars.dart';
 import '../shared/monster_view.dart';
@@ -88,7 +89,12 @@ class _CollectState extends ConsumerState<Collect> {
                               .collect(base64Encode(_qrCode!));
                           final mnstr = ref.read(collectProvider);
                           if (mnstr.value != null) {
-                            navigator.pop();
+                            navigator.push(
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    SetMonsterNameView(monster: mnstr.value!),
+                              ),
+                            );
                             messenger.showSnackBar(
                               SnackBar(content: Text('Monster collected')),
                             );

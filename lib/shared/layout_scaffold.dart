@@ -11,6 +11,7 @@ class LayoutScaffold extends ConsumerWidget {
   final Color? backgroundColor;
   final bool showStatBar;
   final bool useSizedBox;
+  final bool useSafeArea;
 
   const LayoutScaffold({
     super.key,
@@ -18,6 +19,7 @@ class LayoutScaffold extends ConsumerWidget {
     this.backgroundColor,
     this.showStatBar = true,
     this.useSizedBox = false,
+    this.useSafeArea = false,
   });
 
   @override
@@ -32,6 +34,13 @@ class LayoutScaffold extends ConsumerWidget {
         children: [
           useSizedBox
               ? SizedBox(height: size.height, width: size.width, child: child)
+              : useSafeArea
+              ? SafeArea(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 48),
+                    child: child,
+                  ),
+                )
               : child,
           if (showStatBar)
             Positioned(
