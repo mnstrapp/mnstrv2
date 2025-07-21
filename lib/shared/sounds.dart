@@ -31,6 +31,14 @@ class BackgroundMusic {
     await _audioPlayer.pause();
   }
 
+  Future<void> statefulResume() async {
+    if (_audioPlayer.state == PlayerState.paused ||
+        _audioPlayer.state == PlayerState.stopped) {
+      return;
+    }
+    await _audioPlayer.resume();
+  }
+
   Future<void> resume() async {
     await _audioPlayer.resume();
   }
@@ -47,7 +55,7 @@ class ButtonSound {
     final duration = await _audioPlayer.getDuration();
     await _audioPlayer.play(assetSource);
     await Future.delayed(duration!);
-    await BackgroundMusic().resume();
+    await BackgroundMusic().statefulResume();
   }
 }
 
@@ -64,6 +72,6 @@ class CollectSound {
     final duration = await _audioPlayer.getDuration();
     await _audioPlayer.play(assetSource);
     await Future.delayed(duration!);
-    await BackgroundMusic().resume();
+    await BackgroundMusic().statefulResume();
   }
 }
