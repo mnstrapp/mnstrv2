@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:mnstrv2/utils/color.dart';
 import '../shared/sounds.dart';
@@ -55,6 +57,7 @@ class _UIButtonState extends State<UIButton> {
       setState(() {
         _isLoading = true;
       });
+      log('onPressedAsync');
       await widget.onPressedAsync!();
       setState(() {
         _isLoading = false;

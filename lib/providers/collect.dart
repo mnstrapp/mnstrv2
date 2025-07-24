@@ -44,8 +44,30 @@ class CollectResponse {
 @JsonSerializable()
 class ManageRequest {
   final String name;
+  final int currentHealth;
+  final int maxHealth;
+  final int currentAttack;
+  final int maxAttack;
+  final int currentDefense;
+  final int maxDefense;
+  final int currentSpeed;
+  final int maxSpeed;
+  final int currentMagic;
+  final int maxMagic;
 
-  ManageRequest({required this.name});
+  ManageRequest({
+    required this.name,
+    required this.currentHealth,
+    required this.maxHealth,
+    required this.currentAttack,
+    required this.maxAttack,
+    required this.currentDefense,
+    required this.maxDefense,
+    required this.currentSpeed,
+    required this.maxSpeed,
+    required this.currentMagic,
+    required this.maxMagic,
+  });
 
   factory ManageRequest.fromJson(Map<String, dynamic> json) =>
       _$ManageRequestFromJson(json);
@@ -96,14 +118,24 @@ class CollectNotifier extends AsyncNotifier<Monster?> {
     }
   }
 
-  Future<void> setName({
-    required String name,
-    required String monsterId,
-  }) async {
+  Future<void> saveMonster(Monster monster) async {
     final auth = ref.read(authProvider);
+    final request = ManageRequest(
+      name: monster.name ?? '',
+      currentHealth: monster.currentHealth ?? 0,
+      maxHealth: monster.maxHealth ?? 0,
+      currentAttack: monster.currentAttack ?? 0,
+      maxAttack: monster.maxAttack ?? 0,
+      currentDefense: monster.currentDefense ?? 0,
+      maxDefense: monster.maxDefense ?? 0,
+      currentSpeed: monster.currentSpeed ?? 0,
+      maxSpeed: monster.maxSpeed ?? 0,
+      currentMagic: monster.currentMagic ?? 0,
+      maxMagic: monster.maxMagic ?? 0,
+    );
     final response = await http.put(
-      Uri.parse('${endpoints.manage}/$monsterId'),
-      body: jsonEncode(ManageRequest(name: name).toJson()),
+      Uri.parse('${endpoints.manage}/${monster.id}'),
+      body: jsonEncode(request.toJson()),
       headers: {
         'Content-Type': 'application/json',
         'Authorization': 'Bearer ${auth.value?.token}',
@@ -117,7 +149,7 @@ class CollectNotifier extends AsyncNotifier<Monster?> {
       ref.read(sessionUserProvider.notifier).refresh();
     } else {
       state = AsyncError(
-        Exception('Failed to set name: ${manageResponse.error}'),
+        Exception('Failed to save monster: ${manageResponse.error}'),
         StackTrace.current,
       );
     }

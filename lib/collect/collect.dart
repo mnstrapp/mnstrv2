@@ -1,10 +1,12 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../collect/name.dart';
+import '../collect/dialog.dart';
+import '../home/home.dart';
 import '../shared/sounds.dart';
 import '../shared/stars.dart';
 import '../shared/monster_view.dart';
@@ -26,6 +28,7 @@ class _CollectState extends ConsumerState<Collect> {
   Uint8List? _qrCode;
   final _collectSound = CollectSound();
   MonsterModel? _monster;
+  bool _isCollected = false;
 
   Future<void> _playCollectSound() async {
     await _collectSound.play();
@@ -51,14 +54,41 @@ class _CollectState extends ConsumerState<Collect> {
     return monster;
   }
 
-  @override
-  void initState() {
-    super.initState();
+  Future<void> _collectMonster(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    if (_monster?.name != null) {
+      navigator.pop();
+      messenger.showSnackBar(
+        SnackBar(content: Text('Monster already collected')),
+      );
+      return;
+    }
+
+    if (_monster?.name == null) {
+      setState(() {
+        _isCollected = true;
+      });
+      await _saveMonster(context);
+      return;
+    }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
+  Future<void> _saveMonster(BuildContext context) async {
+    final navigator = Navigator.of(context);
+    final result = await showDialog(
+      context: context,
+      builder: (context) => CollectDialog(monster: _monster!.toMonster()),
+    );
+    if (result == null) {
+      return;
+    }
+    if (context.mounted) {
+      navigator.pushReplacement(
+        MaterialPageRoute(builder: (context) => HomeView()),
+      );
+    }
   }
 
   @override
@@ -111,42 +141,7 @@ class _CollectState extends ConsumerState<Collect> {
                       left: size.width * 0.05,
                       right: size.width * 0.05,
                       child: UIButton(
-                        onPressedAsync: () async {
-                          final messenger = ScaffoldMessenger.of(context);
-                          final navigator = Navigator.of(context);
-
-                          if (_monster?.name != null) {
-                            navigator.pop();
-                            messenger.showSnackBar(
-                              SnackBar(
-                                content: Text('Monster already collected'),
-                              ),
-                            );
-                            return;
-                          }
-
-                          await ref
-                              .read(collectProvider.notifier)
-                              .collect(base64Encode(_qrCode!));
-                          final mnstr = ref.read(collectProvider);
-                          if (mnstr.value != null) {
-                            navigator.push(
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    SetMonsterNameView(monster: mnstr.value!),
-                              ),
-                            );
-                            messenger.showSnackBar(
-                              SnackBar(content: Text('Monster collected')),
-                            );
-                            return;
-                          }
-                          messenger.showSnackBar(
-                            SnackBar(
-                              content: Text('Failed to collect monster'),
-                            ),
-                          );
-                        },
+                        onPressedAsync: () => _collectMonster(context),
                         text: _monster?.name != null ? 'Continue' : 'Collect',
                         icon: Icons.add,
                         iconSize: 24,

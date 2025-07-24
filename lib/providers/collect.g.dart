@@ -24,10 +24,34 @@ Map<String, dynamic> _$CollectResponseToJson(CollectResponse instance) =>
     <String, dynamic>{'error': instance.error, 'mnstr': instance.mnstr};
 
 ManageRequest _$ManageRequestFromJson(Map<String, dynamic> json) =>
-    ManageRequest(name: json['name'] as String);
+    ManageRequest(
+      name: json['name'] as String,
+      currentHealth: (json['currentHealth'] as num).toInt(),
+      maxHealth: (json['maxHealth'] as num).toInt(),
+      currentAttack: (json['currentAttack'] as num).toInt(),
+      maxAttack: (json['maxAttack'] as num).toInt(),
+      currentDefense: (json['currentDefense'] as num).toInt(),
+      maxDefense: (json['maxDefense'] as num).toInt(),
+      currentSpeed: (json['currentSpeed'] as num).toInt(),
+      maxSpeed: (json['maxSpeed'] as num).toInt(),
+      currentMagic: (json['currentMagic'] as num).toInt(),
+      maxMagic: (json['maxMagic'] as num).toInt(),
+    );
 
 Map<String, dynamic> _$ManageRequestToJson(ManageRequest instance) =>
-    <String, dynamic>{'name': instance.name};
+    <String, dynamic>{
+      'name': instance.name,
+      'currentHealth': instance.currentHealth,
+      'maxHealth': instance.maxHealth,
+      'currentAttack': instance.currentAttack,
+      'maxAttack': instance.maxAttack,
+      'currentDefense': instance.currentDefense,
+      'maxDefense': instance.maxDefense,
+      'currentSpeed': instance.currentSpeed,
+      'maxSpeed': instance.maxSpeed,
+      'currentMagic': instance.currentMagic,
+      'maxMagic': instance.maxMagic,
+    };
 
 ManageResponse _$ManageResponseFromJson(Map<String, dynamic> json) =>
     ManageResponse(

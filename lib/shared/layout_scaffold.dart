@@ -4,7 +4,7 @@ import '../utils/color.dart';
 
 import '../providers/sounds.dart';
 import 'sounds.dart';
-import 'stat_bar.dart';
+import 'monster_xp_bar.dart';
 
 class LayoutScaffold extends ConsumerWidget {
   final Widget child;
@@ -47,7 +47,7 @@ class LayoutScaffold extends ConsumerWidget {
               top: 0,
               left: 0,
               right: 0,
-              child: SafeArea(child: StatBar(color: backgroundColor)),
+              child: SafeArea(child: MonsterXpBar(color: backgroundColor)),
             ),
           Positioned(
             bottom: 16,

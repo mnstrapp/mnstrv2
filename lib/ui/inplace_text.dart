@@ -68,7 +68,7 @@ class _InplaceTextState extends State<InplaceText> {
                       setState(() {
                         _isEditing = false;
                       });
-                      widget.onChanged?.call(_controller.text);
+                      widget.onSubmitted?.call(_controller.text);
                     },
                     icon: const Icon(Icons.save_rounded),
                   ),
