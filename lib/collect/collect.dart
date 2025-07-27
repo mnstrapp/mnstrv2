@@ -29,9 +29,15 @@ class _CollectState extends ConsumerState<Collect> {
   final _collectSound = CollectSound();
   MonsterModel? _monster;
   bool _isCollected = false;
+  bool _collectionSoundPlayed = false;
 
   Future<void> _playCollectSound() async {
-    await _collectSound.play();
+    if (!_collectionSoundPlayed) {
+      _collectSound.play();
+      setState(() {
+        _collectionSoundPlayed = true;
+      });
+    }
   }
 
   Future<MonsterModel?> _getMonster(String qrCode) async {
@@ -58,6 +64,8 @@ class _CollectState extends ConsumerState<Collect> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
+    await _collectSound.stop();
+
     if (_monster?.name != null) {
       navigator.pop();
       messenger.showSnackBar(
@@ -70,7 +78,9 @@ class _CollectState extends ConsumerState<Collect> {
       setState(() {
         _isCollected = true;
       });
-      await _saveMonster(context);
+      if (context.mounted) {
+        await _saveMonster(context);
+      }
       return;
     }
   }

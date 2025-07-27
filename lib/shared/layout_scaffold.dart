@@ -64,7 +64,7 @@ class LayoutScaffold extends ConsumerWidget {
                 if (isMuted) {
                   BackgroundMusic().play();
                 } else {
-                  BackgroundMusic().pause();
+                  BackgroundMusic().mute();
                 }
               },
               icon: Icon(isMuted ? Icons.volume_off : Icons.volume_up),

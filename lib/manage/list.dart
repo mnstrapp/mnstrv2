@@ -10,6 +10,8 @@ import '../models/monster.dart' as mnstr;
 import '../providers/manage.dart';
 import 'edit.dart';
 
+enum ScrollDirection { up, down }
+
 class ManageListView extends ConsumerStatefulWidget {
   const ManageListView({super.key});
 
@@ -60,6 +62,21 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
     });
   }
 
+  void _scrollPage(double height, ScrollDirection direction) {
+    final pixels = _scrollController.position.pixels;
+    double targetPixels = pixels;
+    if (direction == ScrollDirection.up) {
+      targetPixels = pixels + height;
+    } else {
+      targetPixels = pixels - height;
+    }
+    _scrollController.animateTo(
+      targetPixels,
+      duration: const Duration(milliseconds: 100),
+      curve: Curves.linear,
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final monsters = ref.watch(manageProvider);
@@ -79,25 +96,35 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
               ? const Center(child: CircularProgressIndicator())
               : SingleChildScrollView(
                   controller: _scrollController,
-                  child: Column(
-                    children: monsters.map((monster) {
-                      return InkWell(
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  ManageEditView(monster: monster),
+                  child: GestureDetector(
+                    onVerticalDragEnd: (details) {
+                      final velocity = details.velocity.pixelsPerSecond.dy;
+                      if (velocity > 0) {
+                        _scrollPage(size.height, ScrollDirection.down);
+                      } else {
+                        _scrollPage(size.height, ScrollDirection.up);
+                      }
+                    },
+                    child: Column(
+                      children: monsters.map((monster) {
+                        return InkWell(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    ManageEditView(monster: monster),
+                              ),
+                            );
+                          },
+                          child: MonsterContainer(
+                            monster: model.MonsterModel.fromQRCode(
+                              monster.qrCode ?? '',
                             ),
-                          );
-                        },
-                        child: MonsterContainer(
-                          monster: model.MonsterModel.fromQRCode(
-                            monster.qrCode ?? '',
                           ),
-                        ),
-                      );
-                    }).toList(),
+                        );
+                      }).toList(),
+                    ),
                   ),
                 );
         },

@@ -4,18 +4,22 @@ import 'package:flame_audio/flame_audio.dart';
 
 class BackgroundMusic {
   static const String _backgroundMusic = 'mnstr-game-music.m4a';
+  static bool _muted = false;
 
   Future<void> loop() async {
-    Timer.periodic(const Duration(microseconds: 100), (timer) async {
+    Timer.periodic(const Duration(seconds: 1), (timer) async {
+      if (_muted) return;
       if (!FlameAudio.bgm.isPlaying) {
-        timer.cancel();
         FlameAudio.bgm.play(_backgroundMusic);
-        loop();
       }
     });
   }
 
   Future<void> play() async {
+    if (_muted) {
+      resume();
+      return;
+    }
     FlameAudio.bgm.initialize();
     FlameAudio.bgm.play(_backgroundMusic);
     loop();
@@ -23,12 +27,16 @@ class BackgroundMusic {
 
   Future<void> pause() async {
     FlameAudio.bgm.pause();
-    loop();
   }
 
   Future<void> resume() async {
+    _muted = false;
     FlameAudio.bgm.resume();
-    loop();
+  }
+
+  Future<void> mute() async {
+    _muted = true;
+    FlameAudio.bgm.pause();
   }
 }
 
@@ -42,8 +50,13 @@ class ButtonSound {
 
 class CollectSound {
   static const String _collectSound = 'collect-2.mp3';
+  static AudioPlayer? _collectSoundPlayer;
 
   Future<void> play() async {
-    FlameAudio.play(_collectSound, volume: 0.5);
+    _collectSoundPlayer = await FlameAudio.play(_collectSound, volume: 0.15);
+  }
+
+  Future<void> stop() async {
+    await _collectSoundPlayer?.stop();
   }
 }
