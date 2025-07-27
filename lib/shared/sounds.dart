@@ -44,6 +44,6 @@ class CollectSound {
   static const String _collectSound = 'collect-2.mp3';
 
   Future<void> play() async {
-    FlameAudio.play(_collectSound);
+    FlameAudio.play(_collectSound, volume: 0.5);
   }
 }
