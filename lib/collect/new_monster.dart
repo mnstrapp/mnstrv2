@@ -3,20 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/monster.dart';
 import '../providers/collect.dart';
+import '../shared/layout_scaffold.dart';
+import '../utils/color.dart';
 import '../ui/button.dart';
 import 'name.dart';
 import 'stats.dart';
 
-class CollectDialog extends ConsumerStatefulWidget {
+class NewMonsterView extends ConsumerStatefulWidget {
   final Monster monster;
 
-  const CollectDialog({super.key, required this.monster});
+  const NewMonsterView({super.key, required this.monster});
 
   @override
-  ConsumerState<CollectDialog> createState() => _CollectDialogState();
+  ConsumerState<NewMonsterView> createState() => _NewMonsterViewState();
 }
 
-class _CollectDialogState extends ConsumerState<CollectDialog> {
+class _NewMonsterViewState extends ConsumerState<NewMonsterView> {
   bool _nameSet = false;
   bool _statsSet = false;
   Monster? _monster;
@@ -61,6 +63,15 @@ class _CollectDialogState extends ConsumerState<CollectDialog> {
           _monster = _monster!.copyWith(
             maxDefense: maxDefense,
             currentDefense: maxDefense,
+          );
+        });
+        break;
+      case Stat.intelligence:
+        final maxIntelligence = total;
+        setState(() {
+          _monster = _monster!.copyWith(
+            maxIntelligence: maxIntelligence,
+            currentIntelligence: maxIntelligence,
           );
         });
         break;
@@ -120,6 +131,15 @@ class _CollectDialogState extends ConsumerState<CollectDialog> {
           );
         });
         break;
+      case Stat.intelligence:
+        final maxIntelligence = total;
+        setState(() {
+          _monster = _monster!.copyWith(
+            maxIntelligence: maxIntelligence,
+            currentIntelligence: maxIntelligence,
+          );
+        });
+        break;
       case Stat.speed:
         final maxSpeed = total;
         setState(() {
@@ -146,8 +166,15 @@ class _CollectDialogState extends ConsumerState<CollectDialog> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     if (_nameSet && _statsSet) {
-      await ref.read(collectProvider.notifier).saveMonster(_monster!);
+      final error = await ref
+          .read(collectProvider.notifier)
+          .createMonster(_monster!);
+      if (error != null) {
+        messenger.showSnackBar(SnackBar(content: Text(error)));
+        return;
+      }
       navigator.pop(true);
+      messenger.showSnackBar(const SnackBar(content: Text('Monster created')));
     } else if (!_nameSet) {
       messenger.showSnackBar(SnackBar(content: Text('Please set a name')));
     } else if (!_statsSet) {
@@ -161,23 +188,43 @@ class _CollectDialogState extends ConsumerState<CollectDialog> {
     final color =
         widget.monster.toMonsterModel().color ?? theme.colorScheme.primary;
     final size = MediaQuery.of(context).size;
-    return AlertDialog(
-      backgroundColor: color,
-      title: Text('New Monster'),
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          NameView(monster: widget.monster, onSubmitted: _setName),
-          StatsView(
-            monster: widget.monster,
-            onStatIncreased: _increaseStat,
-            onStatDecreased: _decreaseStat,
-            width: size.width - 224,
+    return LayoutScaffold(
+      backgroundColor: Color.lerp(color, Colors.white, 0.5),
+      child: SingleChildScrollView(
+        child: SafeArea(
+          child: SizedBox(
+            width: size.width,
+            height: size.height,
+            child: Container(
+              margin: const EdgeInsets.only(top: 32),
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text('New Monster', style: theme.textTheme.titleLarge),
+                  Divider(color: darkenColor(color, 0.5)),
+                  NameView(monster: _monster!, onSubmitted: _setName),
+                  Divider(color: darkenColor(color, 0.5)),
+                  StatsView(
+                    monster: _monster!,
+                    onStatIncreased: _increaseStat,
+                    onStatDecreased: _decreaseStat,
+                    width: size.width - 128,
+                  ),
+                  Divider(color: darkenColor(color, 0.5)),
+                  UIButton(
+                    onPressed: () => _save(context, ref),
+                    text: 'Save',
+                    backgroundColor: Color.lerp(color, Colors.black, 0.5),
+                    // foregroundColor: ,
+                  ),
+                ],
+              ),
+            ),
           ),
-        ],
+        ),
       ),
-      actions: [UIButton(onPressed: () => _save(context, ref), text: 'Save')],
     );
   }
 }

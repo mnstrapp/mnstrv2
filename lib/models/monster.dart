@@ -3,7 +3,7 @@ import '../shared/monster_model.dart';
 
 part 'monster.g.dart';
 
-enum Stat { health, attack, defense, speed, magic }
+enum Stat { health, attack, defense, speed, magic, intelligence }
 
 @JsonSerializable()
 class Monster {
@@ -19,6 +19,8 @@ class Monster {
   int? maxAttack;
   int? currentDefense;
   int? maxDefense;
+  int? currentIntelligence;
+  int? maxIntelligence;
   int? currentSpeed;
   int? maxSpeed;
   int? currentMagic;
@@ -37,6 +39,8 @@ class Monster {
     this.maxAttack,
     this.currentDefense,
     this.maxDefense,
+    this.currentIntelligence,
+    this.maxIntelligence,
     this.currentSpeed,
     this.maxSpeed,
     this.currentMagic,
@@ -59,6 +63,8 @@ class Monster {
     int? maxAttack,
     int? currentDefense,
     int? maxDefense,
+    int? currentIntelligence,
+    int? maxIntelligence,
     int? currentSpeed,
     int? maxSpeed,
     int? currentMagic,
@@ -76,6 +82,8 @@ class Monster {
     maxAttack: maxAttack ?? this.maxAttack,
     currentDefense: currentDefense ?? this.currentDefense,
     maxDefense: maxDefense ?? this.maxDefense,
+    currentIntelligence: currentIntelligence ?? this.currentIntelligence,
+    maxIntelligence: maxIntelligence ?? this.maxIntelligence,
     currentSpeed: currentSpeed ?? this.currentSpeed,
     maxSpeed: maxSpeed ?? this.maxSpeed,
     currentMagic: currentMagic ?? this.currentMagic,

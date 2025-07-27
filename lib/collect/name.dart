@@ -36,13 +36,13 @@ class _NameViewState extends ConsumerState<NameView> {
       children: [
         Text(
           'Set Monster Name',
-          style: theme.textTheme.titleLarge?.copyWith(
+          style: theme.textTheme.titleMedium?.copyWith(
             color: darkenColor(color!, 0.5),
           ),
         ),
         InplaceText(
           text: _nameController.text,
-          backgroundColor: lightenColor(color!),
+          backgroundColor: lightenColor(color!, 0.2),
           foregroundColor: darkenColor(color),
           autofocus: true,
           onChanged: (value) {

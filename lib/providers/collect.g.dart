@@ -6,25 +6,9 @@ part of 'collect.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-CollectRequest _$CollectRequestFromJson(Map<String, dynamic> json) =>
-    CollectRequest(qrCode: json['qrCode'] as String);
-
-Map<String, dynamic> _$CollectRequestToJson(CollectRequest instance) =>
-    <String, dynamic>{'qrCode': instance.qrCode};
-
-CollectResponse _$CollectResponseFromJson(Map<String, dynamic> json) =>
-    CollectResponse(
-      error: json['error'] as String?,
-      mnstr: json['mnstr'] == null
-          ? null
-          : Monster.fromJson(json['mnstr'] as Map<String, dynamic>),
-    );
-
-Map<String, dynamic> _$CollectResponseToJson(CollectResponse instance) =>
-    <String, dynamic>{'error': instance.error, 'mnstr': instance.mnstr};
-
 ManageRequest _$ManageRequestFromJson(Map<String, dynamic> json) =>
     ManageRequest(
+      qrCode: json['qrCode'] as String,
       name: json['name'] as String,
       currentHealth: (json['currentHealth'] as num).toInt(),
       maxHealth: (json['maxHealth'] as num).toInt(),
@@ -32,6 +16,8 @@ ManageRequest _$ManageRequestFromJson(Map<String, dynamic> json) =>
       maxAttack: (json['maxAttack'] as num).toInt(),
       currentDefense: (json['currentDefense'] as num).toInt(),
       maxDefense: (json['maxDefense'] as num).toInt(),
+      currentIntelligence: (json['currentIntelligence'] as num).toInt(),
+      maxIntelligence: (json['maxIntelligence'] as num).toInt(),
       currentSpeed: (json['currentSpeed'] as num).toInt(),
       maxSpeed: (json['maxSpeed'] as num).toInt(),
       currentMagic: (json['currentMagic'] as num).toInt(),
@@ -40,6 +26,7 @@ ManageRequest _$ManageRequestFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$ManageRequestToJson(ManageRequest instance) =>
     <String, dynamic>{
+      'qrCode': instance.qrCode,
       'name': instance.name,
       'currentHealth': instance.currentHealth,
       'maxHealth': instance.maxHealth,
@@ -47,6 +34,8 @@ Map<String, dynamic> _$ManageRequestToJson(ManageRequest instance) =>
       'maxAttack': instance.maxAttack,
       'currentDefense': instance.currentDefense,
       'maxDefense': instance.maxDefense,
+      'currentIntelligence': instance.currentIntelligence,
+      'maxIntelligence': instance.maxIntelligence,
       'currentSpeed': instance.currentSpeed,
       'maxSpeed': instance.maxSpeed,
       'currentMagic': instance.currentMagic,

@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../collect/dialog.dart';
+import 'new_monster.dart';
 import '../home/home.dart';
 import '../shared/sounds.dart';
 import '../shared/stars.dart';
@@ -76,18 +76,24 @@ class _CollectState extends ConsumerState<Collect> {
   }
 
   Future<void> _saveMonster(BuildContext context) async {
+    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
-    final result = await showDialog(
-      context: context,
-      builder: (context) => CollectDialog(monster: _monster!.toMonster()),
+    final result = await Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => NewMonsterView(monster: _monster!.toMonster()),
+      ),
     );
     if (result == null) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Monster not saved')),
+      );
       return;
     }
     if (context.mounted) {
       navigator.pushReplacement(
         MaterialPageRoute(builder: (context) => HomeView()),
       );
+      messenger.showSnackBar(const SnackBar(content: Text('Monster saved')));
     }
   }
 

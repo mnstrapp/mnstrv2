@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:io';
 
 import 'package:json_annotation/json_annotation.dart';
@@ -17,32 +18,8 @@ final collectProvider = AsyncNotifierProvider<CollectNotifier, Monster?>(
 );
 
 @JsonSerializable()
-class CollectRequest {
-  final String qrCode;
-
-  CollectRequest({required this.qrCode});
-
-  factory CollectRequest.fromJson(Map<String, dynamic> json) =>
-      _$CollectRequestFromJson(json);
-
-  Map<String, dynamic> toJson() => _$CollectRequestToJson(this);
-}
-
-@JsonSerializable()
-class CollectResponse {
-  final String? error;
-  final Monster? mnstr;
-
-  CollectResponse({this.error, this.mnstr});
-
-  factory CollectResponse.fromJson(Map<String, dynamic> json) =>
-      _$CollectResponseFromJson(json);
-
-  Map<String, dynamic> toJson() => _$CollectResponseToJson(this);
-}
-
-@JsonSerializable()
 class ManageRequest {
+  final String qrCode;
   final String name;
   final int currentHealth;
   final int maxHealth;
@@ -50,12 +27,15 @@ class ManageRequest {
   final int maxAttack;
   final int currentDefense;
   final int maxDefense;
+  final int currentIntelligence;
+  final int maxIntelligence;
   final int currentSpeed;
   final int maxSpeed;
   final int currentMagic;
   final int maxMagic;
 
   ManageRequest({
+    required this.qrCode,
     required this.name,
     required this.currentHealth,
     required this.maxHealth,
@@ -63,6 +43,8 @@ class ManageRequest {
     required this.maxAttack,
     required this.currentDefense,
     required this.maxDefense,
+    required this.currentIntelligence,
+    required this.maxIntelligence,
     required this.currentSpeed,
     required this.maxSpeed,
     required this.currentMagic,
@@ -94,47 +76,26 @@ class CollectNotifier extends AsyncNotifier<Monster?> {
     return null;
   }
 
-  Future<void> collect(String qrCode) async {
-    final auth = ref.read(authProvider);
-    final response = await http.post(
-      Uri.parse(endpoints.collect),
-      body: jsonEncode(CollectRequest(qrCode: qrCode).toJson()),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${auth.value?.token}',
-      },
-    );
-    final body = jsonDecode(response.body);
-    final collectResponse = CollectResponse.fromJson(body);
-
-    if (response.statusCode == HttpStatus.ok) {
-      state = AsyncData(collectResponse.mnstr);
-      ref.read(sessionUserProvider.notifier).refresh();
-    } else {
-      state = AsyncError(
-        Exception('Failed to collect monster: ${collectResponse.error}'),
-        StackTrace.current,
-      );
-    }
-  }
-
-  Future<void> saveMonster(Monster monster) async {
+  Future<String?> createMonster(Monster monster) async {
     final auth = ref.read(authProvider);
     final request = ManageRequest(
+      qrCode: monster.qrCode ?? '',
       name: monster.name ?? '',
-      currentHealth: monster.currentHealth ?? 0,
-      maxHealth: monster.maxHealth ?? 0,
-      currentAttack: monster.currentAttack ?? 0,
-      maxAttack: monster.maxAttack ?? 0,
-      currentDefense: monster.currentDefense ?? 0,
-      maxDefense: monster.maxDefense ?? 0,
-      currentSpeed: monster.currentSpeed ?? 0,
-      maxSpeed: monster.maxSpeed ?? 0,
-      currentMagic: monster.currentMagic ?? 0,
-      maxMagic: monster.maxMagic ?? 0,
+      currentHealth: monster.currentHealth ?? 10,
+      maxHealth: monster.maxHealth ?? 10,
+      currentAttack: monster.currentAttack ?? 10,
+      maxAttack: monster.maxAttack ?? 10,
+      currentDefense: monster.currentDefense ?? 10,
+      maxDefense: monster.maxDefense ?? 10,
+      currentIntelligence: monster.currentIntelligence ?? 10,
+      maxIntelligence: monster.maxIntelligence ?? 10,
+      currentSpeed: monster.currentSpeed ?? 10,
+      maxSpeed: monster.maxSpeed ?? 10,
+      currentMagic: monster.currentMagic ?? 10,
+      maxMagic: monster.maxMagic ?? 10,
     );
-    final response = await http.put(
-      Uri.parse('${endpoints.manage}/${monster.id}'),
+    final response = await http.post(
+      Uri.parse(endpoints.collect),
       body: jsonEncode(request.toJson()),
       headers: {
         'Content-Type': 'application/json',
@@ -143,15 +104,20 @@ class CollectNotifier extends AsyncNotifier<Monster?> {
     );
     final body = jsonDecode(response.body);
     final manageResponse = ManageResponse.fromJson(body);
+    log(response.body);
 
-    if (response.statusCode == HttpStatus.ok) {
-      state = AsyncData(manageResponse.mnstr);
-      ref.read(sessionUserProvider.notifier).refresh();
-    } else {
+    if (manageResponse.error != null) {
       state = AsyncError(
         Exception('Failed to save monster: ${manageResponse.error}'),
         StackTrace.current,
       );
+      return manageResponse.error;
+    }
+
+    if (response.statusCode == HttpStatus.ok) {
+      state = AsyncData(manageResponse.mnstr);
+      ref.read(sessionUserProvider.notifier).refresh();
+      return null;
     }
   }
 }

@@ -26,6 +26,7 @@ class _StatsViewState extends ConsumerState<StatsView> {
   int _health = 50;
   int _attack = 10;
   int _defense = 10;
+  int _intelligence = 10;
   int _speed = 10;
   int _magic = 10;
   int _availablePoints = 10;
@@ -34,6 +35,7 @@ class _StatsViewState extends ConsumerState<StatsView> {
     Stat.health: 0,
     Stat.attack: 0,
     Stat.defense: 0,
+    Stat.intelligence: 0,
     Stat.speed: 0,
     Stat.magic: 0,
   };
@@ -42,6 +44,7 @@ class _StatsViewState extends ConsumerState<StatsView> {
     Stat.health: 100,
     Stat.attack: 100,
     Stat.defense: 100,
+    Stat.intelligence: 100,
     Stat.speed: 100,
     Stat.magic: 100,
   };
@@ -52,18 +55,22 @@ class _StatsViewState extends ConsumerState<StatsView> {
     _health = widget.monster.maxHealth ?? 10;
     _attack = widget.monster.maxAttack ?? 10;
     _defense = widget.monster.maxDefense ?? 10;
+    _intelligence = widget.monster.maxIntelligence ?? 10;
     _speed = widget.monster.maxSpeed ?? 10;
     _magic = widget.monster.maxMagic ?? 10;
 
     _baseStats[Stat.health] = widget.monster.maxHealth ?? _health;
     _baseStats[Stat.attack] = widget.monster.maxAttack ?? _attack;
     _baseStats[Stat.defense] = widget.monster.maxDefense ?? _defense;
+    _baseStats[Stat.intelligence] =
+        widget.monster.maxIntelligence ?? _intelligence;
     _baseStats[Stat.speed] = widget.monster.maxSpeed ?? _speed;
     _baseStats[Stat.magic] = widget.monster.maxMagic ?? _magic;
 
     _maxStats[Stat.health] = _health + _availablePoints;
     _maxStats[Stat.attack] = _attack + _availablePoints;
     _maxStats[Stat.defense] = _defense + _availablePoints;
+    _maxStats[Stat.intelligence] = _intelligence + _availablePoints;
     _maxStats[Stat.speed] = _speed + _availablePoints;
     _maxStats[Stat.magic] = _magic + _availablePoints;
   }
@@ -96,6 +103,10 @@ class _StatsViewState extends ConsumerState<StatsView> {
         total = _magic + value;
         setState(() => _magic = total);
         break;
+      case Stat.intelligence:
+        total = _intelligence + value;
+        setState(() => _intelligence = total);
+        break;
     }
     setState(() => _availablePoints -= value);
     widget.onStatIncreased(stat, total);
@@ -125,6 +136,13 @@ class _StatsViewState extends ConsumerState<StatsView> {
           return;
         }
         setState(() => _defense = total);
+        break;
+      case Stat.intelligence:
+        total = _intelligence - value;
+        if (total < _baseStats[stat]!) {
+          return;
+        }
+        setState(() => _intelligence = total);
         break;
       case Stat.speed:
         total = _speed - value;
@@ -188,6 +206,16 @@ class _StatsViewState extends ConsumerState<StatsView> {
           onDecrease: (value) => _decreaseStat(Stat.defense, value),
         ),
 
+        Text('Intelligence'),
+        StatChangeBar(
+          currentValue: _intelligence,
+          totalValue: _maxStats[Stat.intelligence]!,
+          color: color,
+          width: widget.width,
+          onIncrease: (value) => _increaseStat(Stat.intelligence, value),
+          onDecrease: (value) => _decreaseStat(Stat.intelligence, value),
+        ),
+
         Text('Speed'),
         StatChangeBar(
           currentValue: _speed,
@@ -197,6 +225,7 @@ class _StatsViewState extends ConsumerState<StatsView> {
           onIncrease: (value) => _increaseStat(Stat.speed, value),
           onDecrease: (value) => _decreaseStat(Stat.speed, value),
         ),
+
         Text('Magic'),
         StatChangeBar(
           currentValue: _magic,
