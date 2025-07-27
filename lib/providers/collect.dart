@@ -104,7 +104,6 @@ class CollectNotifier extends AsyncNotifier<Monster?> {
     );
     final body = jsonDecode(response.body);
     final manageResponse = ManageResponse.fromJson(body);
-    log(response.body);
 
     if (manageResponse.error != null) {
       state = AsyncError(
