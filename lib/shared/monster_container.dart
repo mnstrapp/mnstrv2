@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+
+import '../utils/color.dart';
 import 'monster_model.dart';
 import 'monster_view.dart';
-import '../utils/color.dart';
 
 class MonsterContainer extends StatelessWidget {
   final MonsterModel monster;
@@ -32,6 +33,7 @@ class MonsterContainer extends StatelessWidget {
       0.1,
     );
     final theme = Theme.of(context);
+    final monsterName = monster.toMonster().name ?? 'unnamed';
 
     return Container(
       width: width,
@@ -66,7 +68,7 @@ class MonsterContainer extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    monster.name ?? 'unnamed',
+                    monsterName,
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: theme.colorScheme.surface,
                     ),

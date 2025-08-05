@@ -1,13 +1,11 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../models/monster.dart' as mnstr;
+import '../providers/manage.dart';
 import '../shared/layout_scaffold.dart';
 import '../shared/monster_container.dart';
 import '../shared/monster_model.dart' as model;
-import '../models/monster.dart' as mnstr;
-import '../providers/manage.dart';
 import 'edit.dart';
 
 enum ScrollDirection { up, down }
@@ -28,9 +26,14 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
   @override
   void initState() {
     super.initState();
+    final size = MediaQuery.of(context).size;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _getMonsters();
       _setMonsters();
+      _setBackgroundColor(size.height);
+      _scrollController.addListener(() {
+        _setBackgroundColor(size.height);
+      });
     });
   }
 
@@ -54,7 +57,17 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
   }
 
   void _setBackgroundColor(double height) {
-    final index = _scrollController.position.pixels ~/ height;
+    if (_monsters.isEmpty) {
+      return;
+    }
+    int index = 0;
+    try {
+      if (_scrollController.position.pixels > 0) {
+        index = _scrollController.position.pixels ~/ height;
+      }
+    } catch (e) {
+      index = 0;
+    }
     final monster = _monsters[index];
     final m = model.MonsterModel.fromQRCode(monster.qrCode ?? '');
     setState(() {
@@ -64,11 +77,18 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
 
   void _scrollPage(double height, ScrollDirection direction) {
     final pixels = _scrollController.position.pixels;
+    final maxPixels = _scrollController.position.maxScrollExtent;
     double targetPixels = pixels;
     if (direction == ScrollDirection.up) {
       targetPixels = pixels + height;
     } else {
       targetPixels = pixels - height;
+    }
+    if (targetPixels > maxPixels) {
+      targetPixels = maxPixels;
+    }
+    if (targetPixels < 0) {
+      targetPixels = 0;
     }
     _scrollController.animateTo(
       targetPixels,
@@ -82,12 +102,6 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
     final monsters = ref.watch(manageProvider);
     final size = MediaQuery.of(context).size;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _setBackgroundColor(size.height);
-      _scrollController.addListener(() {
-        _setBackgroundColor(size.height);
-      });
-    });
     return LayoutScaffold(
       backgroundColor: _backgroundColor,
       child: monsters.when(

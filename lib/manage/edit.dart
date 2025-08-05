@@ -1,17 +1,15 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../shared/monster_container.dart';
-import '../models/monster.dart' as mc;
-import '../shared/monster_model.dart' as mcl;
-import '../utils/color.dart';
-import '../ui/inplace_text.dart';
-import '../shared/layout_scaffold.dart';
+
+import '../models/monster.dart';
 import '../providers/manage.dart';
+import '../shared/layout_scaffold.dart';
+import '../shared/monster_container.dart';
+import '../ui/inplace_text.dart';
+import '../utils/color.dart';
 
 class ManageEditView extends ConsumerStatefulWidget {
-  final mc.Monster monster;
+  final Monster monster;
 
   const ManageEditView({super.key, required this.monster});
 
@@ -20,7 +18,7 @@ class ManageEditView extends ConsumerStatefulWidget {
 }
 
 class _ManageEditViewState extends ConsumerState<ManageEditView> {
-  late mc.Monster monster;
+  late Monster monster;
 
   @override
   void initState() {
@@ -64,7 +62,7 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
 
   @override
   Widget build(BuildContext context) {
-    final mnstr = mcl.MonsterModel.fromQRCode(monster.qrCode ?? '');
+    final mnstr = monster.toMonsterModel();
     return LayoutScaffold(
       backgroundColor: Color.lerp(
         mnstr.color ?? Colors.white,
