@@ -26,8 +26,9 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
   @override
   void initState() {
     super.initState();
-    final size = MediaQuery.of(context).size;
+
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final size = MediaQuery.of(context).size;
       await _getMonsters();
       _setMonsters();
       _setBackgroundColor(size.height);
