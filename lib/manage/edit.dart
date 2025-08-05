@@ -10,8 +10,13 @@ import '../utils/color.dart';
 
 class ManageEditView extends ConsumerStatefulWidget {
   final Monster monster;
+  final VoidCallback onUpdate;
 
-  const ManageEditView({super.key, required this.monster});
+  const ManageEditView({
+    super.key,
+    required this.monster,
+    required this.onUpdate,
+  });
 
   @override
   ConsumerState<ManageEditView> createState() => _ManageEditViewState();
@@ -36,6 +41,7 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
       setState(() {
         monster = newMonster;
       });
+      widget.onUpdate();
     } else {
       messenger.showSnackBar(
         SnackBar(content: Text(response.error ?? 'Failed to edit monster')),
@@ -53,6 +59,7 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
       setState(() {
         monster = newMonster;
       });
+      widget.onUpdate();
     } else {
       messenger.showSnackBar(
         SnackBar(content: Text(response.error ?? 'Failed to edit monster')),

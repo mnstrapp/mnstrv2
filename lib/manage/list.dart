@@ -129,8 +129,12 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) =>
-                                    ManageEditView(monster: monster),
+                                builder: (context) => ManageEditView(
+                                  monster: monster,
+                                  onUpdate: () {
+                                    _getMonsters();
+                                  },
+                                ),
                               ),
                             );
                           },
