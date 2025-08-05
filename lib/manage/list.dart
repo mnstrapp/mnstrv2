@@ -121,6 +121,8 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
                     },
                     child: Column(
                       children: monsters.map((monster) {
+                        final m = monster.toMonsterModel();
+
                         return InkWell(
                           onTap: () {
                             Navigator.push(
@@ -131,11 +133,7 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
                               ),
                             );
                           },
-                          child: MonsterContainer(
-                            monster: model.MonsterModel.fromQRCode(
-                              monster.qrCode ?? '',
-                            ),
-                          ),
+                          child: MonsterContainer(monster: m),
                         );
                       }).toList(),
                     ),
