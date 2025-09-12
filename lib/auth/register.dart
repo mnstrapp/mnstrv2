@@ -81,7 +81,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
-    await ref
+    final error = await ref
         .read(sessionUserProvider.notifier)
         .register(
           RegistrationRequest(
@@ -91,19 +91,15 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
             password: _passwordController.text,
           ),
         );
-
-    if (ref.read(sessionUserProvider).value != null) {
-      navigator.pushReplacement(
-        MaterialPageRoute(builder: (context) => LoginView()),
-      );
-      messenger.showSnackBar(
-        SnackBar(content: Text('Registration successful')),
-      );
-    } else {
-      messenger.showSnackBar(
-        SnackBar(content: Text(ref.read(sessionUserProvider).error.toString())),
-      );
+    if (error != null) {
+      messenger.showSnackBar(SnackBar(content: Text(error)));
+      return;
     }
+
+    navigator.pushReplacement(
+      MaterialPageRoute(builder: (context) => LoginView()),
+    );
+    messenger.showSnackBar(SnackBar(content: Text('Registration successful')));
   }
 
   @override

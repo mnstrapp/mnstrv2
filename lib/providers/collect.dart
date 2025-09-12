@@ -94,29 +94,30 @@ class CollectNotifier extends AsyncNotifier<Monster?> {
       currentMagic: monster.currentMagic ?? 10,
       maxMagic: monster.maxMagic ?? 10,
     );
-    final response = await http.post(
-      Uri.parse(endpoints.collect),
-      body: jsonEncode(request.toJson()),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${auth.value?.token}',
-      },
-    );
-    final body = jsonDecode(response.body);
-    final manageResponse = ManageResponse.fromJson(body);
+    // TODO: Implement createMonster
+    // final response = await http.post(
+    //   Uri.parse(endpoints.collect),
+    //   body: jsonEncode(request.toJson()),
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': 'Bearer ${auth.value?.token}',
+    //   },
+    // );
+    // final body = jsonDecode(response.body);
+    // final manageResponse = ManageResponse.fromJson(body);
 
-    if (manageResponse.error != null) {
-      state = AsyncError(
-        Exception('Failed to save monster: ${manageResponse.error}'),
-        StackTrace.current,
-      );
-      return manageResponse.error;
-    }
+    // if (manageResponse.error != null) {
+    //   state = AsyncError(
+    //     Exception('Failed to save monster: ${manageResponse.error}'),
+    //     StackTrace.current,
+    //   );
+    //   return manageResponse.error;
+    // }
 
-    if (response.statusCode == HttpStatus.ok) {
-      state = AsyncData(manageResponse.mnstr);
-      ref.read(sessionUserProvider.notifier).refresh();
-      return null;
-    }
+    // if (response.statusCode == HttpStatus.ok) {
+    //   state = AsyncData(manageResponse.mnstr);
+    //   ref.read(sessionUserProvider.notifier).refresh();
+    //   return null;
+    // }
   }
 }

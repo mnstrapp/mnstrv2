@@ -34,18 +34,19 @@ class UserNotifier extends AsyncNotifier<User?> {
   }
 
   Future<void> getUser(String id) async {
-    final response = await http.get(Uri.parse('${endpoints.users}/$id'));
+    // TODO: Implement getUser
+    // final response = await http.get(Uri.parse('${endpoints.users}/$id'));
 
-    final body = jsonDecode(response.body);
-    final userResponse = UserResponse.fromJson(body);
+    // final body = jsonDecode(response.body);
+    // final userResponse = UserResponse.fromJson(body);
 
-    if (response.statusCode == HttpStatus.ok) {
-      state = AsyncData(userResponse.user);
-    } else {
-      state = AsyncError(
-        Exception('Failed to get user: ${userResponse.error}'),
-        StackTrace.current,
-      );
-    }
+    // if (response.statusCode == HttpStatus.ok) {
+    //   state = AsyncData(userResponse.user);
+    // } else {
+    //   state = AsyncError(
+    //     Exception('Failed to get user: ${userResponse.error}'),
+    //     StackTrace.current,
+    //   );
+    // }
   }
 }

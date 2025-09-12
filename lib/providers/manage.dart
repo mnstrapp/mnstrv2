@@ -40,25 +40,26 @@ class ManageNotifier extends AsyncNotifier<List<Monster>> {
   }
 
   Future<void> getMonsters() async {
-    final auth = ref.read(authProvider);
-    final response = await http.get(
-      Uri.parse(endpoints.manage),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${auth.value?.token}',
-      },
-    );
-    final body = jsonDecode(response.body);
-    final manageResponse = ManageResponse.fromJson(body);
+    // TODO: Implement getMonsters
+    // final auth = ref.read(authProvider);
+    // final response = await http.get(
+    //   Uri.parse(endpoints.manage),
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': 'Bearer ${auth.value?.token}',
+    //   },
+    // );
+    // final body = jsonDecode(response.body);
+    // final manageResponse = ManageResponse.fromJson(body);
 
-    if (response.statusCode == HttpStatus.ok) {
-      state = AsyncData(manageResponse.monsters ?? []);
-    } else {
-      state = AsyncError(
-        Exception('Failed to get monsters: ${manageResponse.error}'),
-        StackTrace.current,
-      );
-    }
+    // if (response.statusCode == HttpStatus.ok) {
+    //   state = AsyncData(manageResponse.monsters ?? []);
+    // } else {
+    //   state = AsyncError(
+    //     Exception('Failed to get monsters: ${manageResponse.error}'),
+    //     StackTrace.current,
+    //   );
+    // }
   }
 }
 
@@ -74,26 +75,27 @@ class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
   }
 
   Future<void> get(String qrCode) async {
-    final auth = ref.read(authProvider);
-    final response = await http.get(
-      Uri.parse('${endpoints.manage}/qrcode/$qrCode'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${auth.value?.token}',
-      },
-    );
-    if (response.statusCode != HttpStatus.ok) {
-      state = AsyncError(
-        Exception('Failed to get monster by QR code'),
-        StackTrace.current,
-      );
-      return;
-    }
+    // TODO: Implement get
+    // final auth = ref.read(authProvider);
+    // final response = await http.get(
+    //   Uri.parse('${endpoints.manage}/qrcode/$qrCode'),
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': 'Bearer ${auth.value?.token}',
+    //   },
+    // );
+    // if (response.statusCode != HttpStatus.ok) {
+    //   state = AsyncError(
+    //     Exception('Failed to get monster by QR code'),
+    //     StackTrace.current,
+    //   );
+    //   return;
+    // }
 
-    final body = jsonDecode(response.body);
-    final manageResponse = ManageResponse.fromJson(body);
+    // final body = jsonDecode(response.body);
+    // final manageResponse = ManageResponse.fromJson(body);
 
-    state = AsyncData(manageResponse.monster);
+    // state = AsyncData(manageResponse.monster);
   }
 }
 
@@ -134,33 +136,35 @@ class ManageEditNotifier extends AsyncNotifier<Monster?> {
   }
 
   Future<ManageEditResponse> editMonster(Monster monster) async {
-    final auth = ref.read(authProvider);
-    final response = await http.put(
-      Uri.parse('${endpoints.manage}/${monster.id}'),
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ${auth.value?.token}',
-      },
-      body: jsonEncode(
-        ManageEditRequest(
-          name: monster.name,
-          description: monster.description,
-        ).toJson(),
-      ),
-    );
-    final body = jsonDecode(response.body);
-    final manageResponse = ManageEditResponse.fromJson(body);
+    // TODO: Implement editMonster
+    // final auth = ref.read(authProvider);
+    // final response = await http.put(
+    //   Uri.parse('${endpoints.manage}/${monster.id}'),
+    //   headers: {
+    //     'Content-Type': 'application/json',
+    //     'Authorization': 'Bearer ${auth.value?.token}',
+    //   },
+    //   body: jsonEncode(
+    //     ManageEditRequest(
+    //       name: monster.name,
+    //       description: monster.description,
+    //     ).toJson(),
+    //   ),
+    // );
+    // final body = jsonDecode(response.body);
+    // final manageResponse = ManageEditResponse.fromJson(body);
 
-    if (response.statusCode == HttpStatus.ok) {
-      state = AsyncData(manageResponse.mnstr);
-      ref.read(manageProvider.notifier).getMonsters();
-      return manageResponse;
-    } else {
-      state = AsyncError(
-        Exception('Failed to edit monster: ${manageResponse.error}'),
-        StackTrace.current,
-      );
-      return manageResponse;
-    }
+    // if (response.statusCode == HttpStatus.ok) {
+    //   state = AsyncData(manageResponse.mnstr);
+    //   ref.read(manageProvider.notifier).getMonsters();
+    //   return manageResponse;
+    // } else {
+    //   state = AsyncError(
+    //     Exception('Failed to edit monster: ${manageResponse.error}'),
+    //     StackTrace.current,
+    //   );
+    //   return manageResponse;
+    // }
+    throw Exception('Not implemented');
   }
 }

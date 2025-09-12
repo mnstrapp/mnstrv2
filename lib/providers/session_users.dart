@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:json_annotation/json_annotation.dart';
+import 'package:mnstrv2/utils/graphql.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -65,22 +66,52 @@ class SessionUserNotifier extends AsyncNotifier<User?> {
     return user;
   }
 
-  Future<void> register(RegistrationRequest request) async {
-    final response = await http.post(
-      Uri.parse(endpoints.users),
-      body: jsonEncode(request.toJson()),
-    );
+  Future<String?> register(RegistrationRequest request) async {
+    final document = r'''
+mutation register(
+  $email: String!,
+  $password: String!,
+  $displayName: String!,
+  $qrCode: String!
+) {
+  users {
+    register(
+      email: $email,
+      password: $password,
+      displayName: $displayName,
+      qrCode: $qrCode
+    ) {
+      id
+      displayName
+    }
+  }
+}
+''';
 
-    final body = jsonDecode(response.body);
-    final requestResponse = RegistrationResponse.fromJson(body);
+    final variables = {
+      'email': request.email,
+      'password': request.password,
+      'displayName': request.displayName,
+      'qrCode': request.qrCode,
+    };
 
-    if (response.statusCode == HttpStatus.ok) {
-      state = AsyncData(requestResponse.user);
-    } else {
-      state = AsyncError(
-        Exception('Failed to register user: ${requestResponse.error}'),
-        StackTrace.current,
+    try {
+      final response = await graphql(
+        url: endpoints.baseUrl,
+        query: document,
+        variables: variables,
       );
+
+      if (response['errors'] != null) {
+        log('[register] errors: ${response['errors']}');
+        return "There was an error registering the user";
+      }
+
+      return null;
+    } catch (e, stackTrace) {
+      log('[register] catch error: $e');
+      log('[register] catch stackTrace: $stackTrace');
+      return "There was an error registering the user";
     }
   }
 
@@ -94,22 +125,23 @@ class SessionUserNotifier extends AsyncNotifier<User?> {
   }
 
   Future<void> refresh() async {
-    final user = await getSessionUser();
-    final response = await http.get(
-      Uri.parse('${endpoints.users}/${user?.id}'),
-    );
+    // TODO: Implement refresh
+    // final user = await getSessionUser();
+    // final response = await http.get(
+    //   Uri.parse('${endpoints.users}/${user?.id}'),
+    // );
 
-    final body = jsonDecode(response.body);
-    final requestResponse = UserResponse.fromJson(body);
+    // final body = jsonDecode(response.body);
+    // final requestResponse = UserResponse.fromJson(body);
 
-    if (response.statusCode == HttpStatus.ok) {
-      state = AsyncData(requestResponse.user);
-    } else {
-      state = AsyncError(
-        Exception('Failed to refresh user: ${requestResponse.error}'),
-        StackTrace.current,
-      );
-    }
+    // if (response.statusCode == HttpStatus.ok) {
+    //   state = AsyncData(requestResponse.user);
+    // } else {
+    //   state = AsyncError(
+    //     Exception('Failed to refresh user: ${requestResponse.error}'),
+    //     StackTrace.current,
+    //   );
+    // }
   }
 }
 
