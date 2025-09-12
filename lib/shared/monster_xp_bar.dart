@@ -16,8 +16,12 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.read(sessionUserProvider.notifier).refresh();
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final messenger = ScaffoldMessenger.of(context);
+      final error = await ref.read(sessionUserProvider.notifier).refresh();
+      if (error != null) {
+        messenger.showSnackBar(SnackBar(content: Text(error)));
+      }
     });
   }
 

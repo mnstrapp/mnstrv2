@@ -40,25 +40,19 @@ class _LoginViewState extends ConsumerState<LoginView> {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
-    await ref
+    final error = await ref
         .read(authProvider.notifier)
-        .login(
-          LoginRequest(
-            email: _emailController.text,
-            password: _passwordController.text,
-          ),
-        );
+        .login(_emailController.text, _passwordController.text);
 
-    if (ref.read(authProvider).value != null) {
-      navigator.pushReplacement(
-        MaterialPageRoute(builder: (context) => HomeView()),
-      );
-      messenger.showSnackBar(SnackBar(content: Text('Login successful')));
-    } else {
-      messenger.showSnackBar(
-        SnackBar(content: Text(ref.read(authProvider).error.toString())),
-      );
+    if (error != null) {
+      messenger.showSnackBar(SnackBar(content: Text(error)));
+      return;
     }
+
+    navigator.pushReplacement(
+      MaterialPageRoute(builder: (context) => HomeView()),
+    );
+    messenger.showSnackBar(SnackBar(content: Text('Login successful')));
   }
 
   @override

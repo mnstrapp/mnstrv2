@@ -1,8 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:http/http.dart' as http;
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mnstrv2/utils/graphql.dart';
 import 'package:riverpod/riverpod.dart';
@@ -10,6 +8,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/endpoints.dart' as endpoints;
 import '../models/user.dart';
+import 'auth.dart';
 
 part 'session_users.g.dart';
 
@@ -124,24 +123,54 @@ mutation register(
     state = AsyncData(null);
   }
 
-  Future<void> refresh() async {
-    // TODO: Implement refresh
-    // final user = await getSessionUser();
-    // final response = await http.get(
-    //   Uri.parse('${endpoints.users}/${user?.id}'),
-    // );
+  Future<String?> refresh() async {
+    final auth = await getAuth();
 
-    // final body = jsonDecode(response.body);
-    // final requestResponse = UserResponse.fromJson(body);
+    if (auth == null) {
+      return "There was an error refreshing the user";
+    }
 
-    // if (response.statusCode == HttpStatus.ok) {
-    //   state = AsyncData(requestResponse.user);
-    // } else {
-    //   state = AsyncError(
-    //     Exception('Failed to refresh user: ${requestResponse.error}'),
-    //     StackTrace.current,
-    //   );
-    // }
+    final document = r'''
+{
+  users {
+    my {
+      id
+      email
+      displayName
+      qrCode
+      experienceLevel
+      experiencePoints
+      experienceToNextLevel
+      coins
+    }
+  }
+}
+''';
+
+    final headers = {'Authorization': 'Bearer ${auth.token}'};
+
+    try {
+      final response = await graphql(
+        url: endpoints.baseUrl,
+        query: document,
+        headers: headers,
+      );
+
+      if (response['errors'] != null) {
+        log('[refresh] errors: ${response['errors']}');
+        return "There was an error refreshing the user";
+      }
+
+      final user = User.fromJson(response['data']['users']['my']);
+      state = AsyncData(user);
+      await saveSessionUser(user);
+
+      return null;
+    } catch (e, stackTrace) {
+      log('[refresh] catch error: $e');
+      log('[refresh] catch stackTrace: $stackTrace');
+      return "There was an error refreshing the user";
+    }
   }
 }
 

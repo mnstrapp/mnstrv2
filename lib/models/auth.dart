@@ -5,11 +5,9 @@ part 'auth.g.dart';
 @JsonSerializable()
 class Auth {
   String? id;
-  @JsonKey(name: 'session_token')
+  @JsonKey(name: 'sessionToken')
   String? token;
-  @JsonKey(name: 'user_id')
   String? userID;
-  @JsonKey(name: 'expires_at')
   DateTime? expiresAt;
 
   Auth({this.id, this.token, this.userID, this.expiresAt});

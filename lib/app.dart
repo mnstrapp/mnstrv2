@@ -20,35 +20,7 @@ class App extends ConsumerWidget {
           if (auth == null) {
             return const LoginView();
           }
-          final response = ref.read(authProvider.notifier).verify(auth);
-          response.then(
-            (error) {
-              if (error != null) {
-                if (context.mounted) {
-                  Navigator.of(context).pushReplacement(
-                    MaterialPageRoute(builder: (context) => const LoginView()),
-                  );
-                }
-                return;
-              }
-              if (context.mounted) {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => const HomeView()),
-                );
-              }
-            },
-            onError: (error, stack) {
-              log('Error: $error\n$stack');
-              if (context.mounted) {
-                Navigator.of(context).pushReplacement(
-                  MaterialPageRoute(builder: (context) => const LoginView()),
-                );
-              }
-            },
-          );
-          return const Scaffold(
-            body: Center(child: CircularProgressIndicator()),
-          );
+          return const HomeView();
         },
         error: (error, stack) {
           log('Error: $error\n$stack');

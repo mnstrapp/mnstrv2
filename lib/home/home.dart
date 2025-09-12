@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import '../collect/collect.dart';
 import '../ui/button.dart';
 import '../providers/auth.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../profile/profile.dart';
 import '../auth/login.dart';
 import '../manage/list.dart';
 import '../shared/layout_scaffold.dart';
@@ -78,7 +78,14 @@ class HomeView extends ConsumerWidget {
                   child: UIButton(
                     onPressedAsync: () async {
                       final navigator = Navigator.of(context);
-                      await ref.read(authProvider.notifier).logout();
+                      final messenger = ScaffoldMessenger.of(context);
+
+                      final error = await ref
+                          .read(authProvider.notifier)
+                          .logout();
+                      if (error != null) {
+                        messenger.showSnackBar(SnackBar(content: Text(error)));
+                      }
                       navigator.pushReplacement(
                         MaterialPageRoute(builder: (context) => LoginView()),
                       );

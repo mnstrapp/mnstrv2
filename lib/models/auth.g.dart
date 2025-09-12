@@ -8,16 +8,16 @@ part of 'auth.dart';
 
 Auth _$AuthFromJson(Map<String, dynamic> json) => Auth(
   id: json['id'] as String?,
-  token: json['token'] as String?,
-  userID: json['user_id'] as String?,
-  expiresAt: json['expires_at'] == null
+  token: json['sessionToken'] as String?,
+  userID: json['userID'] as String?,
+  expiresAt: json['expiresAt'] == null
       ? null
-      : DateTime.parse(json['expires_at'] as String),
+      : DateTime.parse(json['expiresAt'] as String),
 );
 
 Map<String, dynamic> _$AuthToJson(Auth instance) => <String, dynamic>{
   'id': instance.id,
-  'token': instance.token,
-  'user_id': instance.userID,
-  'expires_at': instance.expiresAt?.toIso8601String(),
+  'sessionToken': instance.token,
+  'userID': instance.userID,
+  'expiresAt': instance.expiresAt?.toIso8601String(),
 };

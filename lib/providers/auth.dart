@@ -1,10 +1,7 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
 
-import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/auth.dart';
@@ -13,35 +10,9 @@ import '../utils/graphql.dart';
 import 'session_users.dart';
 import '../config/endpoints.dart' as endpoints;
 
-part 'auth.g.dart';
-
 final authProvider = AsyncNotifierProvider<AuthNotifier, Auth?>(
   () => AuthNotifier(),
 );
-
-@JsonSerializable()
-class LoginRequest {
-  final String email;
-  final String password;
-
-  LoginRequest({required this.email, required this.password});
-
-  Map<String, dynamic> toJson() => _$LoginRequestToJson(this);
-}
-
-@JsonSerializable()
-class LoginResponse {
-  String? error;
-  @JsonKey(name: 'session')
-  Auth? auth;
-  @JsonKey(name: 'user')
-  User? user;
-
-  LoginResponse({this.error, this.auth});
-
-  factory LoginResponse.fromJson(Map<String, dynamic> json) =>
-      _$LoginResponseFromJson(json);
-}
 
 class AuthNotifier extends AsyncNotifier<Auth?> {
   Auth? auth;
@@ -88,45 +59,99 @@ class AuthNotifier extends AsyncNotifier<Auth?> {
     }
   }
 
-  Future<void> login(LoginRequest request) async {
-    // TODO: Implement login
-    // final response = await http.post(
-    //   Uri.parse(endpoints.auth),
-    //   body: jsonEncode(request.toJson()),
-    // );
+  Future<String?> login(String email, String password) async {
+    final document = r'''
+mutation login($email: String!, $password:String!) {
+  session {
+    login(email: $email, password: $password) {
+      id
+      userId
+      sessionToken
+      expiresAt
+      user {
+        id
+        email
+        displayName
+        qrCode
+        experienceLevel
+        experiencePoints
+        experienceToNextLevel
+        coins
+      }
+    }
+  }
+}
+''';
 
-    // final body = jsonDecode(response.body);
-    // final requestResponse = LoginResponse.fromJson(body);
+    final variables = {'email': email, 'password': password};
 
-    // if (response.statusCode == HttpStatus.ok) {
-    //   state = AsyncData(requestResponse.auth);
-    //   ref.read(sessionUserProvider.notifier).setUser(requestResponse.user!);
-    //   await saveAuth(requestResponse.auth!);
-    //   await saveSessionUser(requestResponse.user!);
-    // } else {
-    //   state = AsyncError(
-    //     Exception('Failed to login: ${requestResponse.error}'),
-    //     StackTrace.current,
-    //   );
-    // }
+    try {
+      final response = await graphql(
+        url: endpoints.baseUrl,
+        query: document,
+        variables: variables,
+      );
+
+      if (response['errors'] != null) {
+        log('[login] errors: ${response['errors']}');
+        return "There was an error logging in";
+      }
+
+      final auth = Auth.fromJson(response['data']['session']['login']);
+      final user = User.fromJson(response['data']['session']['login']['user']);
+
+      state = AsyncData(auth);
+      ref.read(sessionUserProvider.notifier).setUser(user);
+      await saveAuth(auth);
+      await saveSessionUser(user);
+
+      return null;
+    } catch (e, stackTrace) {
+      log('[login] catch error: $e');
+      log('[login] catch stackTrace: $stackTrace');
+      return "There was an error logging in";
+    }
   }
 
-  Future<void> logout() async {
+  Future<String?> logout() async {
+    final auth = await getAuth();
+
+    log('[logout] auth: ${auth?.toJson()}');
+
     await removeAuth();
     await removeSessionUser();
     state = AsyncData(null);
-    // TODO: Implement logout
-    // await ref.read(sessionUserProvider.notifier).logout();
-    // final response = await http.delete(
-    //   Uri.parse(endpoints.auth),
-    //   headers: {'Authorization': 'Bearer ${auth?.token}'},
-    // );
 
-    // if (response.statusCode == HttpStatus.ok) {
-    //   state = AsyncData(null);
-    // } else {
-    //   state = AsyncError(Exception('Failed to logout'), StackTrace.current);
-    // }
+    if (auth == null) {
+      return null;
+    }
+
+    final document = r'''
+mutation logout {
+  session {
+    logout
+  }
+}
+''';
+
+    try {
+      final response = await graphql(
+        url: endpoints.baseUrl,
+        query: document,
+        headers: {'Authorization': 'Bearer ${auth.token}'},
+      );
+
+      if (response['errors'] != null) {
+        log('[logout] errors: ${response['errors']}');
+        return "There was an error logging out";
+      }
+
+      return null;
+    } catch (e, stackTrace) {
+      log('[logout] catch error: $e');
+      log('[logout] catch stackTrace: $stackTrace');
+      return "There was an error logging out";
+    }
   }
 }
 
