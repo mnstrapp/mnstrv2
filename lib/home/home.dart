@@ -18,7 +18,11 @@ class HomeView extends ConsumerWidget {
     final buttonPadding = 8.0;
     final buttonFontSize = 24.0;
     final buttonColor = Theme.of(context).colorScheme.onPrimary;
-    final loadingFigureSize = MediaQuery.sizeOf(context).width * 0.55;
+    final size = MediaQuery.sizeOf(context);
+    final loadingFigureSize = (size.width > size.height)
+        ? size.height * 0.55
+        : size.width * 0.55;
+    final displayPortrait = (size.width > size.height);
 
     return LayoutScaffold(
       useSizedBox: true,
@@ -28,9 +32,12 @@ class HomeView extends ConsumerWidget {
         child: Stack(
           children: [
             Positioned(
-              bottom: 0,
-              left: 32,
-              right: 0,
+              bottom: displayPortrait
+                  ? (size.height / 2) - (loadingFigureSize / 2)
+                  : 0,
+              right: displayPortrait
+                  ? (size.width / 8) - (loadingFigureSize / 8)
+                  : (size.width / 2) - (loadingFigureSize / 2),
               child: Center(
                 child: Image.asset(
                   'assets/loading_figure.png',
