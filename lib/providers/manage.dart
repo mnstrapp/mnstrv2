@@ -1,13 +1,12 @@
-import 'dart:convert';
-import 'dart:io';
+import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:http/http.dart' as http;
 import 'package:json_annotation/json_annotation.dart';
 
 import '../config/endpoints.dart' as endpoints;
 import '../providers/auth.dart';
 import '../models/monster.dart';
+import '../utils/graphql.dart';
 
 part 'manage.g.dart';
 
@@ -39,27 +38,67 @@ class ManageNotifier extends AsyncNotifier<List<Monster>> {
     return [];
   }
 
-  Future<void> getMonsters() async {
-    // TODO: Implement getMonsters
-    // final auth = ref.read(authProvider);
-    // final response = await http.get(
-    //   Uri.parse(endpoints.manage),
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': 'Bearer ${auth.value?.token}',
-    //   },
-    // );
-    // final body = jsonDecode(response.body);
-    // final manageResponse = ManageResponse.fromJson(body);
+  Future<String?> getMonsters() async {
+    final auth = ref.read(authProvider);
 
-    // if (response.statusCode == HttpStatus.ok) {
-    //   state = AsyncData(manageResponse.monsters ?? []);
-    // } else {
-    //   state = AsyncError(
-    //     Exception('Failed to get monsters: ${manageResponse.error}'),
-    //     StackTrace.current,
-    //   );
-    // }
+    if (auth.value == null) {
+      return "Invalid login";
+    }
+
+    final document = r'''
+    query getMonsters {
+      mnstrs {
+        list {
+          id
+          name
+          description
+          qrCode
+          currentLevel
+          currentExperience
+          currentHealth
+          maxHealth
+          currentAttack
+          maxAttack
+          currentDefense
+          maxDefense
+          currentIntelligence
+          maxIntelligence
+          currentSpeed
+          maxSpeed
+          currentMagic
+          maxMagic
+        }
+      }
+    }
+    ''';
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${auth.value?.token}',
+    };
+
+    try {
+      final response = await graphql(
+        url: endpoints.baseUrl,
+        query: document,
+        headers: headers,
+      );
+
+      if (response['errors'] != null) {
+        return "There was an error getting the monsters";
+      }
+
+      final monsters = <Monster>[];
+      for (var e in response['data']['mnstrs']['list']) {
+        monsters.add(Monster.fromJson(e as Map<String, dynamic>));
+      }
+      state = AsyncData(monsters);
+      return null;
+    } catch (e, stackTrace) {
+      log('[getMonsters] catch error: $e');
+      log('[getMonsters] catch stackTrace: $stackTrace');
+      return "There was an error getting the monsters";
+    }
   }
 }
 
@@ -74,28 +113,71 @@ class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
     return null;
   }
 
-  Future<void> get(String qrCode) async {
-    // TODO: Implement get
-    // final auth = ref.read(authProvider);
-    // final response = await http.get(
-    //   Uri.parse('${endpoints.manage}/qrcode/$qrCode'),
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': 'Bearer ${auth.value?.token}',
-    //   },
-    // );
-    // if (response.statusCode != HttpStatus.ok) {
-    //   state = AsyncError(
-    //     Exception('Failed to get monster by QR code'),
-    //     StackTrace.current,
-    //   );
-    //   return;
-    // }
+  Future<String?> get(String qrCode) async {
+    final auth = ref.read(authProvider);
 
-    // final body = jsonDecode(response.body);
-    // final manageResponse = ManageResponse.fromJson(body);
+    if (auth.value == null) {
+      return "There was an error getting the monster by QR code";
+    }
 
-    // state = AsyncData(manageResponse.monster);
+    final document = r'''
+    query getMonsterByQRCode($qrCode: String!) {
+      mnstrs {
+        qrCode(qrCode: $qrCode) {
+          id
+          name
+          description
+          qrCode
+          currentLevel
+          currentExperience
+          currentHealth
+          maxHealth
+          currentAttack
+          maxAttack
+          currentDefense
+          maxDefense
+          currentIntelligence
+          maxIntelligence
+          currentSpeed
+          maxSpeed
+          currentMagic
+          maxMagic
+        }
+      }
+    }
+    ''';
+
+    final variables = {'qrCode': qrCode};
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${auth.value?.token}',
+    };
+
+    try {
+      final response = await graphql(
+        url: endpoints.baseUrl,
+        query: document,
+        variables: variables,
+        headers: headers,
+      );
+
+      if (response['errors'] != null) {
+        return "There was an error getting the monster by QR code";
+      }
+
+      if (response['data']['mnstrs']['qrCode'] == null) {
+        return "Monster not found";
+      }
+
+      final monster = Monster.fromJson(response['data']['mnstrs']['qrCode']);
+
+      state = AsyncData(monster);
+
+      return null;
+    } catch (e) {
+      return "There was an error getting the monster by QR code";
+    }
   }
 }
 

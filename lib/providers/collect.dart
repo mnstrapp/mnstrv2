@@ -1,15 +1,13 @@
 import 'dart:convert';
 import 'dart:developer';
-import 'dart:io';
 
 import 'package:json_annotation/json_annotation.dart';
-import 'package:http/http.dart' as http;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/auth.dart';
 import '../models/monster.dart';
 import '../config/endpoints.dart' as endpoints;
-import '../providers/session_users.dart';
+import '../utils/graphql.dart';
 
 part 'collect.g.dart';
 
@@ -78,46 +76,109 @@ class CollectNotifier extends AsyncNotifier<Monster?> {
 
   Future<String?> createMonster(Monster monster) async {
     final auth = ref.read(authProvider);
-    final request = ManageRequest(
-      qrCode: monster.qrCode ?? '',
-      name: monster.name ?? '',
-      currentHealth: monster.currentHealth ?? 10,
-      maxHealth: monster.maxHealth ?? 10,
-      currentAttack: monster.currentAttack ?? 10,
-      maxAttack: monster.maxAttack ?? 10,
-      currentDefense: monster.currentDefense ?? 10,
-      maxDefense: monster.maxDefense ?? 10,
-      currentIntelligence: monster.currentIntelligence ?? 10,
-      maxIntelligence: monster.maxIntelligence ?? 10,
-      currentSpeed: monster.currentSpeed ?? 10,
-      maxSpeed: monster.maxSpeed ?? 10,
-      currentMagic: monster.currentMagic ?? 10,
-      maxMagic: monster.maxMagic ?? 10,
-    );
-    // TODO: Implement createMonster
-    // final response = await http.post(
-    //   Uri.parse(endpoints.collect),
-    //   body: jsonEncode(request.toJson()),
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': 'Bearer ${auth.value?.token}',
-    //   },
-    // );
-    // final body = jsonDecode(response.body);
-    // final manageResponse = ManageResponse.fromJson(body);
 
-    // if (manageResponse.error != null) {
-    //   state = AsyncError(
-    //     Exception('Failed to save monster: ${manageResponse.error}'),
-    //     StackTrace.current,
-    //   );
-    //   return manageResponse.error;
-    // }
+    if (auth.value == null) {
+      return "There was an error creating the monster";
+    }
 
-    // if (response.statusCode == HttpStatus.ok) {
-    //   state = AsyncData(manageResponse.mnstr);
-    //   ref.read(sessionUserProvider.notifier).refresh();
-    //   return null;
-    // }
+    final document = r'''
+    mutation createMonster(
+      $qrCode: String!,
+      $name: String!,
+      $currentHealth: Int!,
+      $maxHealth: Int!,
+      $currentAttack: Int!,
+      $maxAttack: Int!,
+      $currentDefense: Int!,
+      $maxDefense: Int!,
+      $currentIntelligence: Int!,
+      $maxIntelligence: Int!,
+      $currentSpeed: Int!,
+      $maxSpeed: Int!,
+      $currentMagic: Int!,
+      $maxMagic: Int!
+    ) {
+      mnstrs {
+        collect(
+          qrCode: $qrCode,
+          name: $name,
+          currentHealth: $currentHealth,
+          maxHealth: $maxHealth,
+          currentAttack: $currentAttack,
+          maxAttack: $maxAttack,
+          currentDefense: $currentDefense,
+          maxDefense: $maxDefense,
+          currentIntelligence: $currentIntelligence,
+          maxIntelligence: $maxIntelligence,
+          currentSpeed: $currentSpeed,
+          maxSpeed: $maxSpeed,
+          currentMagic: $currentMagic,
+          maxMagic: $maxMagic
+        ) {
+          id
+          name
+          qrCode
+          currentLevel
+          currentExperience
+          currentHealth
+          maxHealth
+          currentAttack
+          maxAttack
+          currentDefense
+          maxDefense
+          currentIntelligence
+          maxIntelligence
+          currentSpeed
+          maxSpeed
+          currentMagic
+          maxMagic
+        }
+      }
+    }
+    ''';
+
+    final variables = {
+      'qrCode': monster.qrCode ?? '',
+      'name': monster.name ?? '',
+      'currentHealth': monster.currentHealth ?? 10,
+      'maxHealth': monster.maxHealth ?? 10,
+      'currentAttack': monster.currentAttack ?? 10,
+      'maxAttack': monster.maxAttack ?? 10,
+      'currentDefense': monster.currentDefense ?? 10,
+      'maxDefense': monster.maxDefense ?? 10,
+      'currentIntelligence': monster.currentIntelligence ?? 10,
+      'maxIntelligence': monster.maxIntelligence ?? 10,
+      'currentSpeed': monster.currentSpeed ?? 10,
+      'maxSpeed': monster.maxSpeed ?? 10,
+      'currentMagic': monster.currentMagic ?? 10,
+      'maxMagic': monster.maxMagic ?? 10,
+    };
+    log('[createMonster] variables: ${jsonEncode(variables)}');
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${auth.value?.token}',
+    };
+
+    try {
+      final response = await graphql(
+        url: endpoints.baseUrl,
+        query: document,
+        variables: variables,
+        headers: headers,
+      );
+
+      if (response['errors'] != null) {
+        return "There was an error creating the monster";
+      }
+
+      final monster = Monster.fromJson(response['data']['mnstrs']['collect']);
+      state = AsyncData(monster);
+      return null;
+    } catch (e, stackTrace) {
+      log('[createMonster] catch error: $e');
+      log('[createMonster] catch stackTrace: $stackTrace');
+      return "There was an error creating the monster";
+    }
   }
 }

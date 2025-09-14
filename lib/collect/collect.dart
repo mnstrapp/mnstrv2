@@ -41,23 +41,23 @@ class _CollectState extends ConsumerState<Collect> {
   }
 
   Future<MonsterModel?> _getMonster(String qrCode) async {
-    await ref.read(manageGetByQRProvider.notifier).get(qrCode);
-    final existingMonster = ref.read(manageGetByQRProvider);
-    MonsterModel? monster;
-    existingMonster.when(
+    final error = await ref.read(manageGetByQRProvider.notifier).get(qrCode);
+    if (error != null) {
+      log('[getMonster] error: $error');
+      return MonsterModel.fromQRCode(qrCode);
+    }
+    final mnstr = ref.read(manageGetByQRProvider);
+    return mnstr.when(
       data: (data) {
-        if (data != null) {
-          monster = data.toMonsterModel();
-          return;
-        }
-        monster = MonsterModel.fromQRCode(qrCode);
+        return data?.toMonsterModel();
       },
       error: (error, stackTrace) {
-        monster = MonsterModel.fromQRCode(qrCode);
+        return null;
       },
-      loading: () {},
+      loading: () {
+        return null;
+      },
     );
-    return monster;
   }
 
   Future<void> _collectMonster(BuildContext context) async {
@@ -158,8 +158,8 @@ class _CollectState extends ConsumerState<Collect> {
                       right: size.width * 0.05,
                       child: UIButton(
                         onPressedAsync: () => _collectMonster(context),
-                        text: _monster?.name != null ? 'Continue' : 'Collect',
-                        icon: Icons.add,
+                        text: _monster?.name != null ? 'Continue' : 'Catch Me!',
+                        // icon: Icons.add,
                         iconSize: 24,
                         fontSize: 24,
                         padding: 8,
