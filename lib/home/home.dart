@@ -57,8 +57,8 @@ class HomeView extends ConsumerWidget {
                         MaterialPageRoute(builder: (context) => Collect()),
                       );
                     },
-                    icon: Icons.add,
-                    text: 'Collect',
+                    icon: Icons.library_add_rounded,
+                    text: 'Catch',
                     margin: buttonPadding,
                     padding: buttonPadding,
                     fontSize: buttonFontSize,
