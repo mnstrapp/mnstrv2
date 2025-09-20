@@ -9,7 +9,7 @@ class UIButton extends StatefulWidget {
     super.key,
     this.onPressed,
     this.icon,
-    required this.text,
+    this.text,
     this.margin = 0,
     this.padding = 0,
     this.width,
@@ -29,7 +29,7 @@ class UIButton extends StatefulWidget {
   final VoidCallback? onPressed;
   final Future<void> Function()? onPressedAsync;
   final IconData? icon;
-  final String text;
+  final String? text;
   final double? fontSize;
   final Color? backgroundColor;
   final Color? foregroundColor;
@@ -120,7 +120,8 @@ class _UIButtonState extends State<UIButton> {
                         ),
                         SizedBox(width: padding),
                       ],
-                      Text(widget.text, style: textStyle),
+                      if (widget.text != null)
+                        Text(widget.text!, style: textStyle),
                     ],
             ),
           ),

@@ -29,7 +29,7 @@ class ProfileView extends ConsumerWidget {
                     bottom: 40,
                     left: 0,
                     right: 0,
-                    child: MonsterView(monster: monster),
+                    child: MonsterView(monster: monster, size: size),
                   ),
                   Positioned(
                     bottom: size.height * 0.05,

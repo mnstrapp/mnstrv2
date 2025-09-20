@@ -7,6 +7,7 @@ class MonsterView extends StatelessWidget {
   final double? monsterScale;
   final double? height;
   final double? width;
+  final Size size;
 
   const MonsterView({
     super.key,
@@ -14,11 +15,11 @@ class MonsterView extends StatelessWidget {
     this.monsterScale,
     this.height,
     this.width,
+    required this.size,
   });
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final middle = Size(
       (size.width - (size.width - (size.width / (monsterScale ?? scale)))) / 4,
       (size.height - (size.height - (size.height / (monsterScale ?? scale)))) /

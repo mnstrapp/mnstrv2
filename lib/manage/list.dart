@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:share_plus/share_plus.dart';
 
+import '../theme.dart';
 import '../models/monster.dart' as mnstr;
 import '../providers/manage.dart';
 import '../shared/layout_scaffold.dart';
 import '../shared/monster_container.dart';
 import '../shared/monster_model.dart' as model;
+import '../ui/button.dart';
+import '../utils/color.dart';
 import 'edit.dart';
 
 enum ScrollDirection { up, down }
@@ -20,6 +25,7 @@ class ManageListView extends ConsumerStatefulWidget {
 class _ManageListViewState extends ConsumerState<ManageListView> {
   bool _isLoading = false;
   final ScrollController _scrollController = ScrollController();
+  final ScreenshotController _screenshotController = ScreenshotController();
   List<mnstr.Monster> _monsters = [];
   Color? _backgroundColor;
 
@@ -103,10 +109,59 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
     final monsters = ref.watch(manageProvider);
     final size = MediaQuery.of(context).size;
 
+    final isTablet = size.width > mobileBreakpoint;
+
+    final mnstrs = <Widget>[];
+    final mnstrsTablet = <Widget>[];
+
     return LayoutScaffold(
       backgroundColor: _backgroundColor,
       child: monsters.when(
         data: (monsters) {
+          if (isTablet) {
+            final row = <mnstr.Monster>[];
+            for (var entry in monsters.asMap().entries) {
+              final index = entry.key;
+              final m = entry.value;
+              if ((index % 2) == 0) {
+                if (row.isNotEmpty) {
+                  mnstrsTablet.add(
+                    Row(
+                      children: row
+                          .map(
+                            (monster) => SizedBox(
+                              width: size.width / 2,
+                              child: _buildMnstrView(
+                                context: context,
+                                monster: monster,
+                                screenshotController: _screenshotController,
+                                onUpdate: _getMonsters,
+                                size: size,
+                              ),
+                            ),
+                          )
+                          .toList(),
+                    ),
+                  );
+                }
+                row.clear();
+              }
+              row.add(m);
+            }
+          } else {
+            mnstrs.addAll(
+              monsters.map(
+                (monster) => _buildMnstrView(
+                  context: context,
+                  monster: monster,
+                  screenshotController: _screenshotController,
+                  onUpdate: _getMonsters,
+                  size: size,
+                ),
+              ),
+            );
+          }
+
           return _isLoading
               ? const Center(child: CircularProgressIndicator())
               : SingleChildScrollView(
@@ -120,28 +175,9 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
                         _scrollPage(size.height, ScrollDirection.up);
                       }
                     },
-                    child: Column(
-                      children: monsters.map((monster) {
-                        final m = monster.toMonsterModel();
-
-                        return InkWell(
-                          onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ManageEditView(
-                                  monster: monster,
-                                  onUpdate: () {
-                                    _getMonsters();
-                                  },
-                                ),
-                              ),
-                            );
-                          },
-                          child: MonsterContainer(monster: m),
-                        );
-                      }).toList(),
-                    ),
+                    child: isTablet
+                        ? Column(children: mnstrsTablet)
+                        : Column(children: mnstrs),
                   ),
                 );
         },
@@ -150,4 +186,70 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
       ),
     );
   }
+}
+
+Widget _buildMnstrView({
+  required BuildContext context,
+  required mnstr.Monster monster,
+  required ScreenshotController screenshotController,
+  required VoidCallback onUpdate,
+  required Size size,
+}) {
+  final m = monster.toMonsterModel();
+  final container = MonsterContainer(monster: m, size: size);
+
+  return InkWell(
+    onTap: () {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => ManageEditView(
+            monster: monster,
+            onUpdate: () {
+              onUpdate();
+            },
+          ),
+        ),
+      );
+    },
+    child: Stack(
+      children: [
+        container,
+        Positioned(
+          bottom: 130,
+          right: 13,
+          child: UIButton(
+            onPressedAsync: () async {
+              final backgroundColor = Color.lerp(m.color, Colors.white, 0.5);
+
+              final image = await screenshotController.captureFromWidget(
+                container,
+              );
+
+              await SharePlus.instance.share(
+                ShareParams(
+                  subject: 'Sharing my MNSTR!',
+                  text: '👋 Check out my MNSTR, ${monster.name}!',
+                  downloadFallbackEnabled: true,
+                  files: [
+                    XFile.fromData(
+                      image,
+                      mimeType: 'image/png',
+                      name: '${monster.name}.png',
+                    ),
+                  ],
+                ),
+              );
+            },
+            // height: 65,
+            icon: Icons.share,
+            backgroundColor: lightenColor(
+              Color.lerp(m.color, Colors.black, 0.5) ?? Colors.black,
+              0.1,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
 }

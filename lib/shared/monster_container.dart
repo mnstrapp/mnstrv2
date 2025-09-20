@@ -6,6 +6,7 @@ import 'monster_view.dart';
 
 class MonsterContainer extends StatelessWidget {
   final MonsterModel monster;
+  final Size size;
   final double? width;
   final double? height;
   final double? monsterScale;
@@ -15,6 +16,7 @@ class MonsterContainer extends StatelessWidget {
   const MonsterContainer({
     super.key,
     required this.monster,
+    required this.size,
     this.width,
     this.height,
     this.monsterScale,
@@ -24,7 +26,6 @@ class MonsterContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final width = this.width ?? size.width;
     final height = this.height ?? size.height;
     final backgroundColor = Color.lerp(monster.color, Colors.white, 0.5);
@@ -50,6 +51,7 @@ class MonsterContainer extends StatelessWidget {
               monsterScale: monsterScale,
               height: height,
               width: width,
+              size: size,
             ),
           ),
           if (showName)
@@ -59,6 +61,9 @@ class MonsterContainer extends StatelessWidget {
               right: 0,
               child: Center(
                 child: Container(
+                  alignment: Alignment.center,
+                  width: width,
+                  margin: EdgeInsets.only(left: 16, right: 16),
                   padding: EdgeInsets.symmetric(
                     horizontal: size.width * 0.05,
                     vertical: size.height * 0.02,
@@ -71,6 +76,7 @@ class MonsterContainer extends StatelessWidget {
                     monsterName,
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: theme.colorScheme.surface,
+                      fontFamily: 'Silkscreen',
                     ),
                   ),
                 ),

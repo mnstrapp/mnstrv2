@@ -70,6 +70,8 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
   @override
   Widget build(BuildContext context) {
     final mnstr = monster.toMonsterModel();
+    final size = MediaQuery.sizeOf(context);
+
     return LayoutScaffold(
       backgroundColor: Color.lerp(
         mnstr.color ?? Colors.white,
@@ -84,7 +86,11 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
               top: 0,
               left: 0,
               right: 0,
-              child: MonsterContainer(monster: mnstr, showName: false),
+              child: MonsterContainer(
+                monster: mnstr,
+                showName: false,
+                size: size,
+              ),
             ),
             ListView(
               children: [

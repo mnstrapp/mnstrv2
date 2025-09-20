@@ -150,7 +150,9 @@ class _CollectState extends ConsumerState<Collect> {
                       bottom: 40,
                       left: 0,
                       right: 0,
-                      child: Center(child: MonsterView(monster: _monster!)),
+                      child: Center(
+                        child: MonsterView(monster: _monster!, size: size),
+                      ),
                     ),
                     Positioned(
                       bottom: size.height * 0.05,
