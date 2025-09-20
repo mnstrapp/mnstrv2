@@ -68,9 +68,14 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
       return;
     }
     int index = 0;
+    final size = MediaQuery.sizeOf(context);
+    final isTablet = size.width > mobileBreakpoint;
+
     try {
       if (_scrollController.position.pixels > 0) {
-        index = _scrollController.position.pixels ~/ height;
+        index =
+            _scrollController.position.pixels ~/
+            (isTablet ? height / 2 : height);
       }
     } catch (e) {
       index = 0;
