@@ -10,50 +10,9 @@ import '../config/endpoints.dart' as endpoints;
 import '../models/user.dart';
 import 'auth.dart';
 
-part 'session_users.g.dart';
-
 final sessionUserProvider = AsyncNotifierProvider<SessionUserNotifier, User?>(
   () => SessionUserNotifier(),
 );
-
-@JsonSerializable()
-class RegistrationRequest {
-  final String qrCode;
-  final String displayName;
-  final String email;
-  final String password;
-
-  RegistrationRequest({
-    required this.qrCode,
-    required this.displayName,
-    required this.email,
-    required this.password,
-  });
-
-  Map<String, dynamic> toJson() => _$RegistrationRequestToJson(this);
-}
-
-@JsonSerializable()
-class RegistrationResponse {
-  String? error;
-  User? user;
-
-  RegistrationResponse({this.error, this.user});
-
-  factory RegistrationResponse.fromJson(Map<String, dynamic> json) =>
-      _$RegistrationResponseFromJson(json);
-}
-
-@JsonSerializable()
-class UserResponse {
-  String? error;
-  User? user;
-
-  UserResponse({this.error, this.user});
-
-  factory UserResponse.fromJson(Map<String, dynamic> json) =>
-      _$UserResponseFromJson(json);
-}
 
 class SessionUserNotifier extends AsyncNotifier<User?> {
   User? user;
@@ -65,7 +24,12 @@ class SessionUserNotifier extends AsyncNotifier<User?> {
     return user;
   }
 
-  Future<String?> register(RegistrationRequest request) async {
+  Future<String?> register({
+    required String email,
+    required String password,
+    required String displayName,
+    required String qrCode,
+  }) async {
     final document = r'''
 mutation register(
   $email: String!,
@@ -88,10 +52,10 @@ mutation register(
 ''';
 
     final variables = {
-      'email': request.email,
-      'password': request.password,
-      'displayName': request.displayName,
-      'qrCode': request.qrCode,
+      'email': email,
+      'password': password,
+      'displayName': displayName,
+      'qrCode': qrCode,
     };
 
     try {
@@ -173,6 +137,86 @@ mutation register(
     }
   }
 }
+
+class ForgotPasswordNotifier extends Notifier<String?> {
+  @override
+  String? build() {
+    return null;
+  }
+
+  Future<String?> forgotPassword({
+    required String email,
+    required String qrCode,
+  }) async {
+    final document = r'''
+query forgotPassword($email: String!, $qrCode: String!) {
+  users {
+    forgotPassword(email: $email, qrCode: $qrCode)
+    }
+}
+''';
+
+    final variables = {'email': email, 'qrCode': qrCode};
+
+    try {
+      final response = await graphql(
+        url: endpoints.baseUrl,
+        query: document,
+        variables: variables,
+      );
+
+      if (response['errors'] != null) {
+        log('[forgotPassword] errors: ${response['errors']}');
+        return "There was an error resetting the password";
+      }
+
+      state = response['data']['users']['forgotPassword'];
+      return null;
+    } catch (e, stackTrace) {
+      log('[forgotPassword] catch error: $e');
+      log('[forgotPassword] catch stackTrace: $stackTrace');
+      return "There was an error resetting the password";
+    }
+  }
+
+  Future<String?> resetPassword({required String password}) async {
+    final id = state;
+    final document = r'''
+mutation resetPassword($id: String!, $password: String!) {
+  users {
+    resetPassword(id: $id, password: $password)
+    }
+}
+''';
+
+    final variables = {'id': id, 'password': password};
+
+    try {
+      final response = await graphql(
+        url: endpoints.baseUrl,
+        query: document,
+        variables: variables,
+      );
+
+      if (response['errors'] != null) {
+        log('[resetPassword] errors: ${response['errors']}');
+        return "There was an error resetting the password";
+      }
+
+      state = null;
+      return null;
+    } catch (e, stackTrace) {
+      log('[resetPassword] catch error: $e');
+      log('[resetPassword] catch stackTrace: $stackTrace');
+      return "There was an error resetting the password";
+    }
+  }
+}
+
+final forgotPasswordProvider =
+    NotifierProvider<ForgotPasswordNotifier, String?>(
+      () => ForgotPasswordNotifier(),
+    );
 
 enum UserKey { user }
 

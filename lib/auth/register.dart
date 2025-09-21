@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -18,6 +19,7 @@ class RegisterView extends ConsumerStatefulWidget {
 }
 
 class _RegisterViewState extends ConsumerState<RegisterView> {
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final TextEditingController _displayNameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
@@ -25,53 +27,45 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
       TextEditingController();
   bool _passwordVisible = false;
   Uint8List? _qrCode;
+  bool _missingQrCode = false;
+  final FocusNode _displayNameFocusNode = FocusNode();
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
+  final FocusNode _confirmPasswordFocusNode = FocusNode();
 
   void _scanQRCode(BuildContext context) {
-    showDialog(
-      context: context,
-      builder: (context) => ScannerView(
-        onScan: (data) {
-          if (data != null) {
-            setState(() {
-              _qrCode = data;
-            });
-          }
-          Navigator.of(context).pop();
-        },
-      ),
-    );
+    try {
+      showDialog(
+        context: context,
+        builder: (context) => ScannerView(
+          onScan: (data) {
+            if (data != null) {
+              setState(() {
+                _qrCode = data;
+              });
+            }
+            Navigator.of(context).pop();
+          },
+        ),
+      );
+    } catch (e, stackTrace) {
+      log('[scanQRCode] catch error: $e');
+      log('[scanQRCode] catch stackTrace: $stackTrace');
+      setState(() {
+        _missingQrCode = true;
+      });
+    }
   }
 
   void _register(BuildContext context) async {
-    if (_displayNameController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Display name is required')));
-      return;
-    }
-
-    if (_emailController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Email is required')));
-      return;
-    }
-
-    if (_passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Password is required')));
-      return;
-    }
-
-    if (_passwordController.text != _confirmPasswordController.text) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Passwords do not match')));
+    if (!_formKey.currentState!.validate()) {
       return;
     }
 
     if (_qrCode == null) {
+      setState(() {
+        _missingQrCode = true;
+      });
       ScaffoldMessenger.of(
         context,
       ).showSnackBar(SnackBar(content: Text('QR Code is required')));
@@ -84,12 +78,10 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
     final error = await ref
         .read(sessionUserProvider.notifier)
         .register(
-          RegistrationRequest(
-            qrCode: base64Encode(_qrCode!),
-            displayName: _displayNameController.text,
-            email: _emailController.text,
-            password: _passwordController.text,
-          ),
+          qrCode: base64Encode(_qrCode!),
+          displayName: _displayNameController.text,
+          email: _emailController.text,
+          password: _passwordController.text,
         );
     if (error != null) {
       messenger.showSnackBar(SnackBar(content: Text(error)));
@@ -113,12 +105,14 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+
     return LayoutScaffold(
       showStatBar: false,
       child: SingleChildScrollView(
         child: SizedBox(
-          height: MediaQuery.of(context).size.height,
-          width: MediaQuery.of(context).size.width,
+          height: size.height,
+          width: size.width,
           child: Stack(
             children: [
               Positioned(
@@ -130,52 +124,82 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
               Center(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Registration',
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          color: Theme.of(context).colorScheme.onPrimary,
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Registration',
+                          style: Theme.of(context).textTheme.titleLarge
+                              ?.copyWith(
+                                color: Theme.of(context).colorScheme.onPrimary,
+                              ),
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Card(
-                          elevation: 16,
-                          child: Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                UIButton(
-                                  onPressed: () => _scanQRCode(context),
-                                  text: 'QR Code',
-                                  margin: 16,
-                                  padding: 16,
-                                  icon: _qrCode != null
-                                      ? Icons.check_circle
-                                      : Icons.qr_code_scanner,
-                                  backgroundColor: _qrCode != null
-                                      ? Colors.green
-                                      : Theme.of(context).colorScheme.secondary,
-                                ),
-                                if (_qrCode != null) ...[
-                                  TextField(
+                        Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Card(
+                            elevation: 16,
+                            child: Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  UIButton(
+                                    onPressed: () => _scanQRCode(context),
+                                    text: 'QR Code',
+                                    margin: 16,
+                                    padding: 16,
+                                    icon: _qrCode != null
+                                        ? Icons.check_circle
+                                        : Icons.qr_code_scanner,
+                                    backgroundColor: _qrCode != null
+                                        ? Colors.green
+                                        : _missingQrCode
+                                        ? Colors.red
+                                        : Theme.of(
+                                            context,
+                                          ).colorScheme.secondary,
+                                  ),
+                                  TextFormField(
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Display name is required';
+                                      }
+                                      return null;
+                                    },
                                     controller: _displayNameController,
                                     decoration: InputDecoration(
                                       labelText: 'Display Name',
                                     ),
                                     autofocus: true,
+                                    onEditingComplete: () =>
+                                        _emailFocusNode.requestFocus(),
+                                    focusNode: _displayNameFocusNode,
                                   ),
-                                  TextField(
+                                  TextFormField(
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Email is required';
+                                      }
+                                      return null;
+                                    },
                                     controller: _emailController,
                                     decoration: InputDecoration(
                                       labelText: 'Email',
                                     ),
+                                    focusNode: _emailFocusNode,
+                                    onEditingComplete: () =>
+                                        _passwordFocusNode.requestFocus(),
                                   ),
-                                  TextField(
+                                  TextFormField(
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Password is required';
+                                      }
+                                      return null;
+                                    },
                                     controller: _passwordController,
                                     obscureText: !_passwordVisible,
                                     decoration: InputDecoration(
@@ -194,10 +218,23 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                                         ),
                                       ),
                                     ),
+                                    focusNode: _passwordFocusNode,
+                                    onEditingComplete: () =>
+                                        _confirmPasswordFocusNode
+                                            .requestFocus(),
                                   ),
-                                  TextField(
-                                    controller: _confirmPasswordController,
+                                  TextFormField(
+                                    validator: (value) {
+                                      if (value == null || value.isEmpty) {
+                                        return 'Confirm password is required';
+                                      }
+                                      if (value != _passwordController.text) {
+                                        return 'Passwords do not match';
+                                      }
+                                      return null;
+                                    },
                                     obscureText: !_passwordVisible,
+                                    controller: _confirmPasswordController,
                                     decoration: InputDecoration(
                                       labelText: 'Confirm Password',
                                       suffixIcon: IconButton(
@@ -214,6 +251,8 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                                         ),
                                       ),
                                     ),
+                                    focusNode: _confirmPasswordFocusNode,
+                                    onEditingComplete: () => _register(context),
                                   ),
                                   UIButton(
                                     onPressedAsync: () async =>
@@ -223,43 +262,44 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                                     padding: 16,
                                     icon: Icons.person_add,
                                   ),
-                                ],
 
-                                Divider(),
-                                TextButton.icon(
-                                  onPressed: () =>
-                                      Navigator.of(context).pushReplacement(
-                                        MaterialPageRoute(
-                                          builder: (context) => LoginView(),
+                                  Divider(),
+                                  TextButton.icon(
+                                    onPressed: () =>
+                                        Navigator.of(context).pushReplacement(
+                                          MaterialPageRoute(
+                                            builder: (context) => LoginView(),
+                                          ),
                                         ),
-                                      ),
-                                  icon: const Icon(Icons.login),
-                                  label: Text('Login?'),
-                                ),
-                              ],
+                                    icon: const Icon(Icons.login),
+                                    label: Text('Login?'),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                      FilledButton.icon(
-                        style: FilledButton.styleFrom(
-                          backgroundColor: Theme.of(
-                            context,
-                          ).colorScheme.onPrimary,
-                          foregroundColor: Theme.of(
-                            context,
-                          ).colorScheme.primary,
-                          elevation: 4,
-                        ),
-                        onPressed: () => Navigator.of(context).pushReplacement(
-                          MaterialPageRoute(
-                            builder: (context) => ForgotPasswordView(),
+                        FilledButton.icon(
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Theme.of(
+                              context,
+                            ).colorScheme.onPrimary,
+                            foregroundColor: Theme.of(
+                              context,
+                            ).colorScheme.primary,
+                            elevation: 4,
                           ),
+                          onPressed: () =>
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) => ForgotPasswordView(),
+                                ),
+                              ),
+                          icon: const Icon(Icons.password),
+                          label: Text('Forgot password?'),
                         ),
-                        icon: const Icon(Icons.password),
-                        label: Text('Forgot password?'),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
