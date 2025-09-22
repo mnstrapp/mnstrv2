@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:developer';
 
-import 'package:json_annotation/json_annotation.dart';
 import 'package:mnstrv2/utils/graphql.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -28,24 +27,26 @@ class SessionUserNotifier extends AsyncNotifier<User?> {
     required String email,
     required String password,
     required String displayName,
-    required String qrCode,
   }) async {
     final document = r'''
 mutation register(
   $email: String!,
   $password: String!,
   $displayName: String!,
-  $qrCode: String!
 ) {
   users {
     register(
       email: $email,
       password: $password,
       displayName: $displayName,
-      qrCode: $qrCode
     ) {
       id
       displayName
+      email
+      experienceLevel
+      experiencePoints
+      experienceToNextLevel
+      coins
     }
   }
 }
@@ -55,7 +56,6 @@ mutation register(
       'email': email,
       'password': password,
       'displayName': displayName,
-      'qrCode': qrCode,
     };
 
     try {
@@ -69,12 +69,52 @@ mutation register(
         log('[register] errors: ${response['errors']}');
         return "There was an error registering the user";
       }
+      final user = User.fromJson(response['data']['users']['register']);
 
+      state = AsyncData(user);
       return null;
     } catch (e, stackTrace) {
       log('[register] catch error: $e');
       log('[register] catch stackTrace: $stackTrace');
       return "There was an error registering the user";
+    }
+  }
+
+  Future<String?> verifyEmail({
+    required String id,
+    required String code,
+  }) async {
+    final document = r'''
+mutation verifyEmail($id: String!, $code: String!) {
+  users {
+    verifyEmail(id: $id, code: $code)
+  }
+}
+''';
+
+    final variables = {'id': id, 'code': code};
+
+    try {
+      final response = await graphql(
+        url: endpoints.baseUrl,
+        query: document,
+        variables: variables,
+      );
+
+      if (response['errors'] != null) {
+        log('[verifyEmail] errors: ${response['errors']}');
+        return "There was an error verifying the email";
+      }
+
+      if (response['data']['users']['verifyEmail'] != true) {
+        return "There was an error verifying the email";
+      }
+
+      return null;
+    } catch (e, stackTrace) {
+      log('[verifyEmail] catch error: $e');
+      log('[verifyEmail] catch stackTrace: $stackTrace');
+      return "There was an error verifying the email";
     }
   }
 
@@ -101,7 +141,6 @@ mutation register(
       id
       email
       displayName
-      qrCode
       experienceLevel
       experiencePoints
       experienceToNextLevel
@@ -144,19 +183,16 @@ class ForgotPasswordNotifier extends Notifier<String?> {
     return null;
   }
 
-  Future<String?> forgotPassword({
-    required String email,
-    required String qrCode,
-  }) async {
+  Future<String?> forgotPassword({required String email}) async {
     final document = r'''
-query forgotPassword($email: String!, $qrCode: String!) {
+query forgotPassword($email: String!) {
   users {
-    forgotPassword(email: $email, qrCode: $qrCode)
+    forgotPassword(email: $email)
     }
 }
 ''';
 
-    final variables = {'email': email, 'qrCode': qrCode};
+    final variables = {'email': email};
 
     try {
       final response = await graphql(
@@ -176,6 +212,42 @@ query forgotPassword($email: String!, $qrCode: String!) {
       log('[forgotPassword] catch error: $e');
       log('[forgotPassword] catch stackTrace: $stackTrace');
       return "There was an error resetting the password";
+    }
+  }
+
+  Future<String?> verifyCode({required String code}) async {
+    final userId = state;
+    if (userId == null) {
+      return "There was an error verifying the code";
+    }
+
+    final document = r'''
+mutation verifyEmail($id: String!, $code: String!) {
+  users {
+    verifyEmail(id: $id, code: $code)
+    }
+}
+''';
+
+    final variables = {'id': userId, 'code': code};
+
+    try {
+      final response = await graphql(
+        url: endpoints.baseUrl,
+        query: document,
+        variables: variables,
+      );
+
+      if (response['errors'] != null) {
+        log('[verifyCode] errors: ${response['errors']}');
+        return "There was an error verifying the code";
+      }
+
+      return null;
+    } catch (e, stackTrace) {
+      log('[verifyCode] catch error: $e');
+      log('[verifyCode] catch stackTrace: $stackTrace');
+      return "There was an error verifying the code";
     }
   }
 

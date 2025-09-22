@@ -6,7 +6,8 @@ part 'user.g.dart';
 class User {
   String? id;
   String? displayName;
-  String? qrCode;
+  String? email;
+  String? phone;
   int? experienceLevel;
   int? experiencePoints;
   int? experienceToNextLevel;
@@ -15,7 +16,8 @@ class User {
   User({
     this.id,
     this.displayName,
-    this.qrCode,
+    this.email,
+    this.phone,
     this.experienceLevel,
     this.experiencePoints,
     this.experienceToNextLevel,

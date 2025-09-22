@@ -25,50 +25,17 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+  final TextEditingController _codeController = TextEditingController();
   bool _passwordVisible = false;
-  Uint8List? _qrCode;
-  bool _missingQrCode = false;
   final FocusNode _displayNameFocusNode = FocusNode();
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
   final FocusNode _confirmPasswordFocusNode = FocusNode();
-
-  void _scanQRCode(BuildContext context) {
-    try {
-      showDialog(
-        context: context,
-        builder: (context) => ScannerView(
-          onScan: (data) {
-            if (data != null) {
-              setState(() {
-                _qrCode = data;
-              });
-            }
-            Navigator.of(context).pop();
-          },
-        ),
-      );
-    } catch (e, stackTrace) {
-      log('[scanQRCode] catch error: $e');
-      log('[scanQRCode] catch stackTrace: $stackTrace');
-      setState(() {
-        _missingQrCode = true;
-      });
-    }
-  }
+  final FocusNode _codeFocusNode = FocusNode();
+  bool _isVerifying = false;
 
   void _register(BuildContext context) async {
     if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    if (_qrCode == null) {
-      setState(() {
-        _missingQrCode = true;
-      });
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('QR Code is required')));
       return;
     }
 
@@ -78,7 +45,6 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
     final error = await ref
         .read(sessionUserProvider.notifier)
         .register(
-          qrCode: base64Encode(_qrCode!),
           displayName: _displayNameController.text,
           email: _emailController.text,
           password: _passwordController.text,
@@ -88,10 +54,35 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
       return;
     }
 
+    setState(() {
+      _isVerifying = true;
+    });
+  }
+
+  Future<void> _verifyEmail() async {
+    final messenger = ScaffoldMessenger.of(context);
+    final navigator = Navigator.of(context);
+
+    final user = ref.read(sessionUserProvider).value;
+    if (user == null) {
+      return;
+    }
+
+    final error = await ref
+        .read(sessionUserProvider.notifier)
+        .verifyEmail(id: user.id!, code: _codeController.text);
+
+    if (error != null) {
+      messenger.showSnackBar(SnackBar(content: Text(error)));
+      return;
+    }
+
     navigator.pushReplacement(
       MaterialPageRoute(builder: (context) => LoginView()),
     );
-    messenger.showSnackBar(SnackBar(content: Text('Registration successful')));
+    messenger.showSnackBar(
+      SnackBar(content: Text('User registered and verified')),
+    );
   }
 
   @override
@@ -100,6 +91,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
+    _codeController.dispose();
     super.dispose();
   }
 
@@ -146,122 +138,128 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                               child: Column(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  UIButton(
-                                    onPressed: () => _scanQRCode(context),
-                                    text: 'QR Code',
-                                    margin: 16,
-                                    padding: 16,
-                                    icon: _qrCode != null
-                                        ? Icons.check_circle
-                                        : Icons.qr_code_scanner,
-                                    backgroundColor: _qrCode != null
-                                        ? Colors.green
-                                        : _missingQrCode
-                                        ? Colors.red
-                                        : Theme.of(
-                                            context,
-                                          ).colorScheme.secondary,
-                                  ),
-                                  TextFormField(
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Display name is required';
-                                      }
-                                      return null;
-                                    },
-                                    controller: _displayNameController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Display Name',
+                                  if (_isVerifying) ...[
+                                    Text(
+                                      'Verification Code sent to email. Please enter it to verify your email.',
                                     ),
-                                    autofocus: true,
-                                    onEditingComplete: () =>
-                                        _emailFocusNode.requestFocus(),
-                                    focusNode: _displayNameFocusNode,
-                                  ),
-                                  TextFormField(
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Email is required';
-                                      }
-                                      return null;
-                                    },
-                                    controller: _emailController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Email',
+                                    TextFormField(
+                                      controller: _codeController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Verification Code',
+                                      ),
+                                      focusNode: _codeFocusNode,
                                     ),
-                                    focusNode: _emailFocusNode,
-                                    onEditingComplete: () =>
-                                        _passwordFocusNode.requestFocus(),
-                                  ),
-                                  TextFormField(
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Password is required';
-                                      }
-                                      return null;
-                                    },
-                                    controller: _passwordController,
-                                    obscureText: !_passwordVisible,
-                                    decoration: InputDecoration(
-                                      labelText: 'Password',
-                                      suffixIcon: IconButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            _passwordVisible =
-                                                !_passwordVisible;
-                                          });
-                                        },
-                                        icon: Icon(
-                                          _passwordVisible
-                                              ? Icons.visibility
-                                              : Icons.visibility_off,
+                                    UIButton(
+                                      onPressedAsync: () => _verifyEmail(),
+                                      text: 'Verify Email',
+                                      margin: 16,
+                                      padding: 16,
+                                      icon: Icons.check_circle,
+                                    ),
+                                  ],
+                                  if (!_isVerifying) ...[
+                                    TextFormField(
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Display name is required';
+                                        }
+                                        return null;
+                                      },
+                                      controller: _displayNameController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Display Name',
+                                      ),
+                                      autofocus: true,
+                                      onEditingComplete: () =>
+                                          _emailFocusNode.requestFocus(),
+                                      focusNode: _displayNameFocusNode,
+                                    ),
+                                    TextFormField(
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Email is required';
+                                        }
+                                        return null;
+                                      },
+                                      controller: _emailController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Email',
+                                      ),
+                                      focusNode: _emailFocusNode,
+                                      onEditingComplete: () =>
+                                          _passwordFocusNode.requestFocus(),
+                                    ),
+                                    TextFormField(
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Password is required';
+                                        }
+                                        return null;
+                                      },
+                                      controller: _passwordController,
+                                      obscureText: !_passwordVisible,
+                                      decoration: InputDecoration(
+                                        labelText: 'Password',
+                                        suffixIcon: IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              _passwordVisible =
+                                                  !_passwordVisible;
+                                            });
+                                          },
+                                          icon: Icon(
+                                            _passwordVisible
+                                                ? Icons.visibility
+                                                : Icons.visibility_off,
+                                          ),
                                         ),
                                       ),
+                                      focusNode: _passwordFocusNode,
+                                      onEditingComplete: () =>
+                                          _confirmPasswordFocusNode
+                                              .requestFocus(),
                                     ),
-                                    focusNode: _passwordFocusNode,
-                                    onEditingComplete: () =>
-                                        _confirmPasswordFocusNode
-                                            .requestFocus(),
-                                  ),
-                                  TextFormField(
-                                    validator: (value) {
-                                      if (value == null || value.isEmpty) {
-                                        return 'Confirm password is required';
-                                      }
-                                      if (value != _passwordController.text) {
-                                        return 'Passwords do not match';
-                                      }
-                                      return null;
-                                    },
-                                    obscureText: !_passwordVisible,
-                                    controller: _confirmPasswordController,
-                                    decoration: InputDecoration(
-                                      labelText: 'Confirm Password',
-                                      suffixIcon: IconButton(
-                                        onPressed: () {
-                                          setState(() {
-                                            _passwordVisible =
-                                                !_passwordVisible;
-                                          });
-                                        },
-                                        icon: Icon(
-                                          _passwordVisible
-                                              ? Icons.visibility
-                                              : Icons.visibility_off,
+                                    TextFormField(
+                                      validator: (value) {
+                                        if (value == null || value.isEmpty) {
+                                          return 'Confirm password is required';
+                                        }
+                                        if (value != _passwordController.text) {
+                                          return 'Passwords do not match';
+                                        }
+                                        return null;
+                                      },
+                                      obscureText: !_passwordVisible,
+                                      controller: _confirmPasswordController,
+                                      decoration: InputDecoration(
+                                        labelText: 'Confirm Password',
+                                        suffixIcon: IconButton(
+                                          onPressed: () {
+                                            setState(() {
+                                              _passwordVisible =
+                                                  !_passwordVisible;
+                                            });
+                                          },
+                                          icon: Icon(
+                                            _passwordVisible
+                                                ? Icons.visibility
+                                                : Icons.visibility_off,
+                                          ),
                                         ),
                                       ),
+                                      focusNode: _confirmPasswordFocusNode,
+                                      onEditingComplete: () =>
+                                          _register(context),
                                     ),
-                                    focusNode: _confirmPasswordFocusNode,
-                                    onEditingComplete: () => _register(context),
-                                  ),
-                                  UIButton(
-                                    onPressedAsync: () async =>
-                                        _register(context),
-                                    text: 'Register',
-                                    margin: 16,
-                                    padding: 16,
-                                    icon: Icons.person_add,
-                                  ),
+                                    UIButton(
+                                      onPressedAsync: () async =>
+                                          _register(context),
+                                      text: 'Register',
+                                      margin: 16,
+                                      padding: 16,
+                                      icon: Icons.person_add,
+                                    ),
+                                  ],
 
                                   Divider(),
                                   TextButton.icon(

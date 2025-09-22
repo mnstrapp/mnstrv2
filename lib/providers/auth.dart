@@ -72,7 +72,8 @@ mutation login($email: String!, $password:String!) {
         id
         email
         displayName
-        qrCode
+        email
+        phone
         experienceLevel
         experiencePoints
         experienceToNextLevel

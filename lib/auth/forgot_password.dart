@@ -21,64 +21,34 @@ class ForgotPasswordView extends ConsumerStatefulWidget {
 class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   final GlobalKey<FormState> _resetFormKey = GlobalKey<FormState>();
+  final GlobalKey<FormState> _codeFormKey = GlobalKey<FormState>();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final FocusNode _emailFocusNode = FocusNode();
-  final FocusNode _passwordFocusNode = FocusNode();
   final TextEditingController _confirmPasswordController =
       TextEditingController();
+  final TextEditingController _codeController = TextEditingController();
+  final FocusNode _emailFocusNode = FocusNode();
+  final FocusNode _passwordFocusNode = FocusNode();
   final FocusNode _confirmPasswordFocusNode = FocusNode();
-  Uint8List? _qrCode;
-  bool _missingQrCode = false;
+  final FocusNode _codeFocusNode = FocusNode();
   bool _isLoading = false;
   bool _passwordVisible = false;
+  bool _codeVisible = false;
+  bool _resetVisible = false;
 
   @override
   void initState() {
     super.initState();
-    _qrCode = null;
     _emailController.clear();
     _passwordController.clear();
     _confirmPasswordController.clear();
-  }
-
-  Future<void> _scanQRCode() async {
-    try {
-      await showDialog(
-        context: context,
-        builder: (context) => ScannerView(
-          onScan: (data) {
-            if (data != null) {
-              setState(() {
-                _qrCode = data;
-                _emailFocusNode.requestFocus();
-              });
-            }
-            Navigator.of(context).pop();
-          },
-        ),
-      );
-    } catch (e, stackTrace) {
-      log('[scanQRCode] catch error: $e');
-      log('[scanQRCode] catch stackTrace: $stackTrace');
-      setState(() {
-        _missingQrCode = true;
-      });
-    }
+    _codeController.clear();
   }
 
   Future<void> _getUserId() async {
     final messenger = ScaffoldMessenger.of(context);
     if (!_formKey.currentState!.validate()) {
       messenger.showSnackBar(SnackBar(content: Text('Email is required')));
-      return;
-    }
-
-    if (_qrCode == null) {
-      setState(() {
-        _missingQrCode = true;
-      });
-      messenger.showSnackBar(SnackBar(content: Text('QR Code is required')));
       return;
     }
 
@@ -93,25 +63,55 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
 
     final error = await ref
         .read(forgotPasswordProvider.notifier)
-        .forgotPassword(
-          email: _emailController.text,
-          qrCode: base64Encode(_qrCode!),
-        );
-
-    setState(() {
-      _isLoading = false;
-    });
+        .forgotPassword(email: _emailController.text);
 
     if (error != null) {
       messenger.showSnackBar(SnackBar(content: Text(error)));
       return;
     }
+
+    setState(() {
+      _isLoading = false;
+      _codeVisible = true;
+      _codeFocusNode.requestFocus();
+    });
+  }
+
+  Future<void> _verifyCode() async {
+    final messenger = ScaffoldMessenger.of(context);
+    if (!_codeFormKey.currentState!.validate()) {
+      messenger.showSnackBar(SnackBar(content: Text('Code is required')));
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    final error = await ref
+        .read(forgotPasswordProvider.notifier)
+        .verifyCode(code: _codeController.text);
+
+    if (error != null) {
+      messenger.showSnackBar(SnackBar(content: Text(error)));
+      return;
+    }
+
+    setState(() {
+      _isLoading = false;
+      _codeVisible = false;
+      _resetVisible = true;
+      _passwordFocusNode.requestFocus();
+    });
+
+    messenger.showSnackBar(SnackBar(content: Text('Code verified')));
   }
 
   Future<void> _sendReset() async {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     if (!_resetFormKey.currentState!.validate()) {
+      messenger.showSnackBar(SnackBar(content: Text('Code is required')));
       return;
     }
 
@@ -146,7 +146,6 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
 
   @override
   Widget build(BuildContext context) {
-    final userId = ref.watch(forgotPasswordProvider);
     final size = MediaQuery.sizeOf(context);
 
     return LayoutScaffold(
@@ -182,17 +181,23 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
                           elevation: 16,
                           child: Padding(
                             padding: const EdgeInsets.all(16.0),
-                            child: _qrCode == null || userId == null
+                            child: !_codeVisible && !_resetVisible
                                 ? _buildForgotPasswordForm(
                                     context: context,
                                     formKey: _formKey,
                                     emailController: _emailController,
                                     emailFocusNode: _emailFocusNode,
-                                    qrCode: _qrCode,
-                                    scanQRCode: _scanQRCode,
                                     getUserId: _getUserId,
                                     isLoading: _isLoading,
-                                    missingQrCode: _missingQrCode,
+                                  )
+                                : _codeVisible
+                                ? _buildVerifyCodeForm(
+                                    context: context,
+                                    formKey: _codeFormKey,
+                                    codeController: _codeController,
+                                    codeFocusNode: _codeFocusNode,
+                                    verifyCode: _verifyCode,
+                                    isLoading: _isLoading,
                                   )
                                 : _buildResetPasswordForm(
                                     context: context,
@@ -230,11 +235,8 @@ Widget _buildForgotPasswordForm({
   required GlobalKey<FormState> formKey,
   required TextEditingController emailController,
   required FocusNode emailFocusNode,
-  required Uint8List? qrCode,
-  required Function() scanQRCode,
   required Function() getUserId,
   required bool isLoading,
-  required bool missingQrCode,
 }) {
   return isLoading
       ? const Center(child: CircularProgressIndicator())
@@ -243,20 +245,6 @@ Widget _buildForgotPasswordForm({
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              UIButton(
-                onPressed: () => scanQRCode(),
-                text: 'QR Code',
-                margin: 16,
-                padding: 16,
-                icon: qrCode != null
-                    ? Icons.check_circle
-                    : Icons.qr_code_scanner,
-                backgroundColor: qrCode != null
-                    ? Colors.green
-                    : missingQrCode
-                    ? Colors.red
-                    : Theme.of(context).colorScheme.secondary,
-              ),
               TextFormField(
                 validator: (value) {
                   if (value == null || value.isEmpty) {
@@ -276,6 +264,62 @@ Widget _buildForgotPasswordForm({
                 margin: 16,
                 padding: 16,
                 icon: Icons.search_rounded,
+              ),
+
+              Divider(),
+              TextButton.icon(
+                onPressed: () => Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => LoginView()),
+                ),
+                icon: const Icon(Icons.login),
+                label: Text('Login?'),
+              ),
+              TextButton.icon(
+                onPressed: () => Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(builder: (context) => RegisterView()),
+                ),
+                icon: const Icon(Icons.person_add),
+                label: Text('Register?'),
+              ),
+            ],
+          ),
+        );
+}
+
+Widget _buildVerifyCodeForm({
+  required BuildContext context,
+  required GlobalKey<FormState> formKey,
+  required TextEditingController codeController,
+  required FocusNode codeFocusNode,
+  required Function() verifyCode,
+  required bool isLoading,
+}) {
+  return isLoading
+      ? const Center(child: CircularProgressIndicator())
+      : Form(
+          key: formKey,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextFormField(
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Code is required';
+                  }
+                  return null;
+                },
+                controller: codeController,
+                decoration: InputDecoration(labelText: 'Code'),
+                autofocus: true,
+                focusNode: codeFocusNode,
+                onEditingComplete: () => verifyCode(),
+              ),
+              UIButton(
+                onPressed: () => verifyCode(),
+                text: 'Verify Code',
+                margin: 16,
+                padding: 16,
+                icon: Icons.check_circle,
               ),
 
               Divider(),
