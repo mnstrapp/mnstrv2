@@ -8,13 +8,13 @@ import '../models/monster.dart';
 import '../config/endpoints.dart' as endpoints;
 import '../utils/graphql.dart';
 
-final collectProvider = AsyncNotifierProvider<CollectNotifier, Monster?>(
+final collectProvider = NotifierProvider<CollectNotifier, Monster?>(
   () => CollectNotifier(),
 );
 
-class CollectNotifier extends AsyncNotifier<Monster?> {
+class CollectNotifier extends Notifier<Monster?> {
   @override
-  Future<Monster?> build() async {
+  Monster? build() {
     return null;
   }
 
@@ -76,7 +76,7 @@ class CollectNotifier extends AsyncNotifier<Monster?> {
       }
 
       final monster = Monster.fromJson(response['data']['mnstrs']['collect']);
-      state = AsyncData(monster);
+      state = monster;
       return null;
     } catch (e, stackTrace) {
       log('[createMonster] catch error: $e');

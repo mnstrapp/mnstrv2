@@ -1,32 +1,11 @@
 import 'dart:developer';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:json_annotation/json_annotation.dart';
 
 import '../config/endpoints.dart' as endpoints;
 import '../providers/auth.dart';
 import '../models/monster.dart';
 import '../utils/graphql.dart';
-
-part 'manage.g.dart';
-
-@JsonSerializable()
-class ManageResponse {
-  final String? error;
-
-  @JsonKey(name: 'mnstrs')
-  final List<Monster>? monsters;
-
-  @JsonKey(name: 'mnstr')
-  final Monster? monster;
-
-  ManageResponse({this.error, this.monsters, this.monster});
-
-  factory ManageResponse.fromJson(Map<String, dynamic> json) =>
-      _$ManageResponseFromJson(json);
-
-  Map<String, dynamic> toJson() => _$ManageResponseToJson(this);
-}
 
 final manageProvider = AsyncNotifierProvider<ManageNotifier, List<Monster>>(
   () => ManageNotifier(),
@@ -181,72 +160,138 @@ class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
   }
 }
 
-final manageEditProvider = AsyncNotifierProvider<ManageEditNotifier, Monster?>(
+final manageEditProvider = NotifierProvider<ManageEditNotifier, Monster?>(
   () => ManageEditNotifier(),
 );
 
-@JsonSerializable()
-class ManageEditRequest {
-  final String? name;
-  final String? description;
-
-  ManageEditRequest({this.name, this.description});
-
-  factory ManageEditRequest.fromJson(Map<String, dynamic> json) =>
-      _$ManageEditRequestFromJson(json);
-
-  Map<String, dynamic> toJson() => _$ManageEditRequestToJson(this);
-}
-
-@JsonSerializable()
-class ManageEditResponse {
-  final String? error;
-  final Monster? mnstr;
-
-  ManageEditResponse({this.error, this.mnstr});
-
-  factory ManageEditResponse.fromJson(Map<String, dynamic> json) =>
-      _$ManageEditResponseFromJson(json);
-
-  Map<String, dynamic> toJson() => _$ManageEditResponseToJson(this);
-}
-
-class ManageEditNotifier extends AsyncNotifier<Monster?> {
+class ManageEditNotifier extends Notifier<Monster?> {
   @override
-  Future<Monster?> build() async {
+  Monster? build() {
     return null;
   }
 
-  Future<ManageEditResponse> editMonster(Monster monster) async {
-    // TODO: Implement editMonster
-    // final auth = ref.read(authProvider);
-    // final response = await http.put(
-    //   Uri.parse('${endpoints.manage}/${monster.id}'),
-    //   headers: {
-    //     'Content-Type': 'application/json',
-    //     'Authorization': 'Bearer ${auth.value?.token}',
-    //   },
-    //   body: jsonEncode(
-    //     ManageEditRequest(
-    //       name: monster.name,
-    //       description: monster.description,
-    //     ).toJson(),
-    //   ),
-    // );
-    // final body = jsonDecode(response.body);
-    // final manageResponse = ManageEditResponse.fromJson(body);
+  void set(Monster monster) {
+    state = monster;
+  }
 
-    // if (response.statusCode == HttpStatus.ok) {
-    //   state = AsyncData(manageResponse.mnstr);
-    //   ref.read(manageProvider.notifier).getMonsters();
-    //   return manageResponse;
-    // } else {
-    //   state = AsyncError(
-    //     Exception('Failed to edit monster: ${manageResponse.error}'),
-    //     StackTrace.current,
-    //   );
-    //   return manageResponse;
-    // }
-    throw Exception('Not implemented');
+  Future<String?> editMonster(Monster monster) async {
+    final auth = ref.read(authProvider);
+
+    if (auth.value == null) {
+      return "There was an error editing the monster";
+    }
+
+    log('[editMonster] monster: ${monster.toJson()}');
+
+    final document = r'''
+    mutation editMonster(
+      $id: String!,
+      $name: String,
+      $description: String,
+      $qrCode: String,
+      $health: Int,
+      $maxHealth: Int,
+      $attack: Int,
+      $maxAttack: Int,
+      $defense: Int,
+      $maxDefense: Int,
+      $intelligence: Int,
+      $maxIntelligence: Int,
+      $speed: Int,
+      $maxSpeed: Int,
+      $magic: Int,
+      $maxMagic: Int,
+    ) {
+      mnstrs {
+        update(
+          id: $id,
+          name: $name,
+          description: $description,
+          qrCode: $qrCode,
+          health: $health,
+          maxHealth: $maxHealth,
+          attack: $attack,
+          maxAttack: $maxAttack,
+          defense: $defense,
+          maxDefense: $maxDefense,
+          intelligence: $intelligence,
+          maxIntelligence: $maxIntelligence,
+          speed: $speed,
+          maxSpeed: $maxSpeed,
+          magic: $magic,
+          maxMagic: $maxMagic,
+        ) {
+          id
+          name
+          description
+          qrCode
+          currentLevel
+          currentExperience
+          currentHealth
+          maxHealth
+          currentAttack
+          maxAttack
+          currentDefense
+          maxDefense
+          currentIntelligence
+          maxIntelligence
+          currentSpeed
+          maxSpeed
+          currentMagic
+          maxMagic
+        }
+      }
+    }
+    ''';
+
+    final variables = {
+      'id': monster.id,
+      'name': monster.name,
+      'description': monster.description,
+      'qrCode': monster.qrCode,
+      'health': monster.currentHealth,
+      'maxHealth': monster.maxHealth,
+      'attack': monster.currentAttack,
+      'maxAttack': monster.maxAttack,
+      'defense': monster.currentDefense,
+      'maxDefense': monster.maxDefense,
+      'intelligence': monster.currentIntelligence,
+      'maxIntelligence': monster.maxIntelligence,
+      'speed': monster.currentSpeed,
+      'maxSpeed': monster.maxSpeed,
+      'magic': monster.currentMagic,
+      'maxMagic': monster.maxMagic,
+    };
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${auth.value?.token}',
+    };
+
+    try {
+      final response = await graphql(
+        url: endpoints.baseUrl,
+        query: document,
+        variables: variables,
+        headers: headers,
+      );
+
+      if (response['errors'] != null) {
+        return "There was an error editing the monster";
+      }
+
+      final monster = Monster.fromJson(response['data']['mnstrs']['update']);
+      state = monster;
+
+      log('[editMonster] monster: ${monster.toJson()}');
+
+      ref.read(manageProvider.notifier).getMonsters();
+
+      return null;
+    } catch (e, stackTrace) {
+      log('[editMonster] catch error: $e');
+      log('[editMonster] catch stackTrace: $stackTrace');
+      return "There was an error editing the monster";
+    }
   }
 }

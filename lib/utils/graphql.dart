@@ -11,11 +11,6 @@ Future<Map<String, dynamic>> graphql({
   Map<String, dynamic> variables = const {},
   Map<String, String> headers = const {},
 }) async {
-  log('GraphQL request: $query');
-  log('GraphQL variables: $variables');
-  log('GraphQL headers: $headers');
-  log('GraphQL url: $url');
-
   final finalHeaders = {'Content-Type': 'application/json', ...headers};
   final response = await http.post(
     Uri.parse(url),

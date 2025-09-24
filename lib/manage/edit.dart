@@ -4,9 +4,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/monster.dart';
 import '../providers/manage.dart';
 import '../shared/layout_scaffold.dart';
-import '../shared/monster_container.dart';
-import '../ui/inplace_text.dart';
-import '../utils/color.dart';
 import 'details.dart';
 import 'shop.dart';
 import 'skills.dart';
@@ -31,10 +28,13 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
   void initState() {
     super.initState();
     monster = widget.monster;
-    _pages.add(ManageView(monster: monster));
-    _pages.add(ManageDetailsView(monster: monster));
-    _pages.add(ManageSkillsView(monster: monster));
-    _pages.add(ManageShopView(monster: monster));
+    _pages.add(ManageView());
+    _pages.add(ManageDetailsView());
+    _pages.add(ManageSkillsView());
+    _pages.add(ManageShopView());
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      ref.read(manageEditProvider.notifier).set(monster);
+    });
   }
 
   @override
@@ -83,7 +83,7 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
                   label: 'View',
                 ),
                 BottomNavigationBarItem(
-                  icon: Icon(Icons.details_rounded),
+                  icon: Icon(Icons.account_box_rounded),
                   label: 'Details',
                 ),
                 BottomNavigationBarItem(

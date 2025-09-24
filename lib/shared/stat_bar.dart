@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../utils/color.dart';
@@ -26,6 +28,10 @@ class StatBar extends StatelessWidget {
     final barValue = currentValue;
     final barTotal = totalValue;
     final borderRadius = BorderRadius.circular(20);
+    final barValueWidth = barWidth * (barValue / barTotal);
+    log(
+      '[StatBar] barValueWidth: $barValueWidth, barWidth: $barWidth, barValue: $barValue, barTotal: $barTotal',
+    );
 
     return Stack(
       children: [
@@ -38,7 +44,7 @@ class StatBar extends StatelessWidget {
           ),
         ),
         Container(
-          width: barWidth * (barValue / barTotal),
+          width: barValueWidth,
           height: barHeight,
           decoration: BoxDecoration(
             borderRadius: borderRadius,

@@ -6,6 +6,7 @@ import '../shared/stat_change_bar.dart';
 
 class StatsView extends ConsumerStatefulWidget {
   final Monster monster;
+  final int availablePoints;
   final Function(Stat, int) onStatIncreased;
   final Function(Stat, int) onStatDecreased;
   final double width;
@@ -13,6 +14,7 @@ class StatsView extends ConsumerStatefulWidget {
   const StatsView({
     super.key,
     required this.monster,
+    this.availablePoints = 0,
     required this.onStatIncreased,
     required this.onStatDecreased,
     required this.width,
@@ -23,7 +25,7 @@ class StatsView extends ConsumerStatefulWidget {
 }
 
 class _StatsViewState extends ConsumerState<StatsView> {
-  int _health = 50;
+  int _health = 10;
   int _attack = 10;
   int _defense = 10;
   int _intelligence = 10;
@@ -52,6 +54,8 @@ class _StatsViewState extends ConsumerState<StatsView> {
   @override
   void initState() {
     super.initState();
+    _availablePoints = widget.availablePoints;
+
     _health = widget.monster.maxHealth ?? 10;
     _attack = widget.monster.maxAttack ?? 10;
     _defense = widget.monster.maxDefense ?? 10;
@@ -165,11 +169,13 @@ class _StatsViewState extends ConsumerState<StatsView> {
 
   @override
   Widget build(BuildContext context) {
-    final level = widget.monster.level;
-    final experience = widget.monster.experience;
+    final level = widget.monster.level ?? 0;
+    final experience = widget.monster.experience ?? 0;
     final color = widget.monster.toMonsterModel().color;
+    final largestStat = _maxStats.values.reduce((a, b) => a > b ? a : b);
 
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -179,7 +185,9 @@ class _StatsViewState extends ConsumerState<StatsView> {
         Text('Health'),
         StatChangeBar(
           currentValue: _health,
-          totalValue: _maxStats[Stat.health]!,
+          totalValue: _health == _maxStats[Stat.health]!
+              ? largestStat
+              : _maxStats[Stat.health]!,
           color: color,
           width: widget.width,
           onIncrease: (value) => _increaseStat(Stat.health, value),
@@ -189,7 +197,9 @@ class _StatsViewState extends ConsumerState<StatsView> {
         Text('Attack'),
         StatChangeBar(
           currentValue: _attack,
-          totalValue: _maxStats[Stat.attack]!,
+          totalValue: _attack == _maxStats[Stat.attack]!
+              ? largestStat
+              : _maxStats[Stat.attack]!,
           color: color,
           width: widget.width,
           onIncrease: (value) => _increaseStat(Stat.attack, value),
@@ -199,7 +209,9 @@ class _StatsViewState extends ConsumerState<StatsView> {
         Text('Defense'),
         StatChangeBar(
           currentValue: _defense,
-          totalValue: _maxStats[Stat.defense]!,
+          totalValue: _defense == _maxStats[Stat.defense]!
+              ? largestStat
+              : _maxStats[Stat.defense]!,
           color: color,
           width: widget.width,
           onIncrease: (value) => _increaseStat(Stat.defense, value),
@@ -209,7 +221,9 @@ class _StatsViewState extends ConsumerState<StatsView> {
         Text('Intelligence'),
         StatChangeBar(
           currentValue: _intelligence,
-          totalValue: _maxStats[Stat.intelligence]!,
+          totalValue: _intelligence == _maxStats[Stat.intelligence]!
+              ? largestStat
+              : _maxStats[Stat.intelligence]!,
           color: color,
           width: widget.width,
           onIncrease: (value) => _increaseStat(Stat.intelligence, value),
@@ -219,7 +233,9 @@ class _StatsViewState extends ConsumerState<StatsView> {
         Text('Speed'),
         StatChangeBar(
           currentValue: _speed,
-          totalValue: _maxStats[Stat.speed]!,
+          totalValue: _speed == _maxStats[Stat.speed]!
+              ? largestStat
+              : _maxStats[Stat.speed]!,
           color: color,
           width: widget.width,
           onIncrease: (value) => _increaseStat(Stat.speed, value),
@@ -229,7 +245,9 @@ class _StatsViewState extends ConsumerState<StatsView> {
         Text('Magic'),
         StatChangeBar(
           currentValue: _magic,
-          totalValue: _maxStats[Stat.magic]!,
+          totalValue: _magic == _maxStats[Stat.magic]!
+              ? largestStat
+              : _maxStats[Stat.magic]!,
           color: color,
           width: widget.width,
           onIncrease: (value) => _increaseStat(Stat.magic, value),

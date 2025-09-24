@@ -60,7 +60,7 @@ class _InplaceTextState extends State<InplaceText> {
                   iconColor: widget.foregroundColor,
                   suffixIconColor: widget.foregroundColor,
                   prefixIconColor: widget.foregroundColor,
-
+                  fillColor: widget.backgroundColor,
                   label: widget.label,
                   hintText: widget.hintText,
                   suffixIcon: IconButton(
@@ -103,7 +103,7 @@ class _InplaceTextState extends State<InplaceText> {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      widget.text ?? '',
+                      _controller.text,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: widget.foregroundColor,
                       ),

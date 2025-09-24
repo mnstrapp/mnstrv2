@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../manage/edit.dart';
-import 'new_monster.dart';
 import '../home/home.dart';
 import '../shared/sounds.dart';
 import '../shared/stars.dart';
@@ -29,7 +28,7 @@ class _CollectState extends ConsumerState<Collect> {
   Uint8List? _qrCode;
   final _collectSound = CollectSound();
   MonsterModel? _monster;
-  bool _isCollected = false;
+  bool _saved = false;
   bool _collectionSoundPlayed = false;
 
   Future<void> _playCollectSound() async {
@@ -72,9 +71,6 @@ class _CollectState extends ConsumerState<Collect> {
     }
 
     if (_monster?.id == null) {
-      setState(() {
-        _isCollected = true;
-      });
       if (context.mounted) {
         await _saveMonster();
       }
@@ -91,6 +87,11 @@ class _CollectState extends ConsumerState<Collect> {
       messenger.showSnackBar(SnackBar(content: Text(error)));
       return;
     }
+    final monster = ref.read(collectProvider);
+    setState(() {
+      _monster = monster?.toMonsterModel();
+      _saved = true;
+    });
     if (context.mounted) {
       messenger.showSnackBar(const SnackBar(content: Text('Monster saved')));
     }
@@ -141,16 +142,21 @@ class _CollectState extends ConsumerState<Collect> {
                       left: 0,
                       right: 0,
                       child: Center(
-                        child: InkWell(
-                          onTap: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (context) => ManageEditView(
-                                monster: _monster!.toMonster(),
-                              ),
-                            ),
-                          ),
-                          child: MonsterView(monster: _monster!, size: size),
-                        ),
+                        child: _saved
+                            ? InkWell(
+                                onTap: () => Navigator.of(context).push(
+                                  MaterialPageRoute(
+                                    builder: (context) => ManageEditView(
+                                      monster: _monster!.toMonster(),
+                                    ),
+                                  ),
+                                ),
+                                child: MonsterView(
+                                  monster: _monster!,
+                                  size: size,
+                                ),
+                              )
+                            : MonsterView(monster: _monster!, size: size),
                       ),
                     ),
                     Positioned(
