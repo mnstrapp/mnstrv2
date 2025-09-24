@@ -2,9 +2,16 @@ import 'dart:async';
 
 import 'package:flame_audio/flame_audio.dart';
 
+import '../providers/sounds.dart';
+
 class BackgroundMusic {
   static const String _backgroundMusic = 'mnstr-game-music.m4a';
   static bool _muted = false;
+  static bool _paused = false;
+
+  BackgroundMusic() {
+    backgroundSoundMuted ? mute() : unmute();
+  }
 
   Future<void> loop() async {
     Timer.periodic(const Duration(seconds: 1), (timer) async {
@@ -16,8 +23,10 @@ class BackgroundMusic {
   }
 
   Future<void> play() async {
-    if (_muted) {
-      resume();
+    if (_muted) return;
+    if (_paused) {
+      _paused = false;
+      FlameAudio.bgm.resume();
       return;
     }
     FlameAudio.bgm.initialize();
@@ -26,37 +35,86 @@ class BackgroundMusic {
   }
 
   Future<void> pause() async {
+    _paused = true;
     FlameAudio.bgm.pause();
   }
 
   Future<void> resume() async {
-    _muted = false;
+    _paused = false;
     FlameAudio.bgm.resume();
   }
 
   Future<void> mute() async {
     _muted = true;
+    backgroundSoundMuted = true;
+    await saveSoundPreferences();
     FlameAudio.bgm.pause();
+  }
+
+  Future<void> unmute() async {
+    _muted = false;
+    _paused = false;
+    backgroundSoundMuted = false;
+    await saveSoundPreferences();
+    play();
   }
 }
 
 class ButtonSound {
   static const String _buttonSound = 'accept-2.mp3';
+  static bool _muted = false;
+
+  ButtonSound() {
+    buttonSoundMuted ? mute() : unmute();
+  }
 
   Future<void> play() async {
+    if (_muted) return;
     FlameAudio.play(_buttonSound);
+  }
+
+  Future<void> mute() async {
+    _muted = true;
+    buttonSoundMuted = true;
+    await saveSoundPreferences();
+    FlameAudio.bgm.stop();
+  }
+
+  Future<void> unmute() async {
+    _muted = false;
+    buttonSoundMuted = false;
+    await saveSoundPreferences();
   }
 }
 
 class CollectSound {
   static const String _collectSound = 'collect-2.mp3';
   static AudioPlayer? _collectSoundPlayer;
+  static bool _muted = false;
+
+  CollectSound() {
+    collectSoundMuted ? mute() : unmute();
+  }
 
   Future<void> play() async {
+    if (_muted) return;
     _collectSoundPlayer = await FlameAudio.play(_collectSound, volume: 0.15);
   }
 
   Future<void> stop() async {
     await _collectSoundPlayer?.stop();
+  }
+
+  Future<void> mute() async {
+    _muted = true;
+    collectSoundMuted = true;
+    await saveSoundPreferences();
+    await _collectSoundPlayer?.stop();
+  }
+
+  Future<void> unmute() async {
+    _muted = false;
+    collectSoundMuted = false;
+    await saveSoundPreferences();
   }
 }

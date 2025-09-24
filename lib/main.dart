@@ -3,10 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app.dart';
 import 'providers/auth.dart';
 import 'providers/session_users.dart';
+import 'providers/sounds.dart';
 import 'shared/sounds.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await getSoundPreferences();
 
   final auth = await getAuth();
   final user = await getSessionUser();

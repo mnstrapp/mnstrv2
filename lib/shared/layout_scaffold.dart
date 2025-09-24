@@ -49,27 +49,6 @@ class LayoutScaffold extends ConsumerWidget {
               right: 0,
               child: SafeArea(child: MonsterXpBar(color: backgroundColor)),
             ),
-          Positioned(
-            bottom: 16,
-            right: 16,
-            child: IconButton.filled(
-              style: IconButton.styleFrom(
-                backgroundColor: darkenColor(
-                  backgroundColor ?? Colors.white,
-                  0.5,
-                ).withAlpha(128),
-              ),
-              onPressed: () {
-                ref.read(backgroundSoundProvider.notifier).toggleMute();
-                if (isMuted) {
-                  BackgroundMusic().play();
-                } else {
-                  BackgroundMusic().mute();
-                }
-              },
-              icon: Icon(isMuted ? Icons.volume_off : Icons.volume_up),
-            ),
-          ),
         ],
       ),
     );
