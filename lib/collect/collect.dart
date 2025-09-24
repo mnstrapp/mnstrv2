@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../manage/edit.dart';
 import 'new_monster.dart';
 import '../home/home.dart';
 import '../shared/sounds.dart';
@@ -60,17 +61,13 @@ class _CollectState extends ConsumerState<Collect> {
     );
   }
 
-  Future<void> _collectMonster(BuildContext context) async {
+  Future<void> _collectMonster() async {
     final messenger = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
-
-    await _collectSound.stop();
 
     if (_monster?.id != null) {
       messenger.showSnackBar(
         SnackBar(content: Text('Monster previously collected')),
       );
-      navigator.pop();
       return;
     }
 
@@ -79,15 +76,14 @@ class _CollectState extends ConsumerState<Collect> {
         _isCollected = true;
       });
       if (context.mounted) {
-        await _saveMonster(context);
+        await _saveMonster();
       }
       return;
     }
   }
 
-  Future<void> _saveMonster(BuildContext context) async {
+  Future<void> _saveMonster() async {
     final messenger = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
     final error = await ref
         .read(collectProvider.notifier)
         .createMonster(_monster!.toMonster());
@@ -97,9 +93,6 @@ class _CollectState extends ConsumerState<Collect> {
     }
     if (context.mounted) {
       messenger.showSnackBar(const SnackBar(content: Text('Monster saved')));
-      navigator.pushReplacement(
-        MaterialPageRoute(builder: (context) => HomeView()),
-      );
     }
   }
 
@@ -127,6 +120,7 @@ class _CollectState extends ConsumerState<Collect> {
                     setState(() {
                       _monster = monster;
                     });
+                    await _collectMonster();
                   }
                 },
               )
@@ -147,7 +141,16 @@ class _CollectState extends ConsumerState<Collect> {
                       left: 0,
                       right: 0,
                       child: Center(
-                        child: MonsterView(monster: _monster!, size: size),
+                        child: InkWell(
+                          onTap: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (context) => ManageEditView(
+                                monster: _monster!.toMonster(),
+                              ),
+                            ),
+                          ),
+                          child: MonsterView(monster: _monster!, size: size),
+                        ),
                       ),
                     ),
                     Positioned(
@@ -155,11 +158,14 @@ class _CollectState extends ConsumerState<Collect> {
                       left: size.width * 0.05,
                       right: size.width * 0.05,
                       child: UIButton(
-                        onPressedAsync: () => _collectMonster(context),
-                        text: _monster?.id != null
-                            ? 'Already Caught'
-                            : 'Catch Me!',
-                        // icon: Icons.add,
+                        onPressedAsync: () =>
+                            Navigator.of(context).pushReplacement(
+                              MaterialPageRoute(
+                                builder: (context) => HomeView(),
+                              ),
+                            ),
+                        text: 'Home',
+                        icon: Icons.home,
                         iconSize: 24,
                         fontSize: 24,
                         padding: 8,

@@ -7,16 +7,16 @@ import '../shared/layout_scaffold.dart';
 import '../shared/monster_container.dart';
 import '../ui/inplace_text.dart';
 import '../utils/color.dart';
+import 'details.dart';
+import 'shop.dart';
+import 'skills.dart';
+import 'view.dart';
 
 class ManageEditView extends ConsumerStatefulWidget {
   final Monster monster;
-  final VoidCallback onUpdate;
+  final Function(Monster)? onUpdate;
 
-  const ManageEditView({
-    super.key,
-    required this.monster,
-    required this.onUpdate,
-  });
+  const ManageEditView({super.key, required this.monster, this.onUpdate});
 
   @override
   ConsumerState<ManageEditView> createState() => _ManageEditViewState();
@@ -24,53 +24,22 @@ class ManageEditView extends ConsumerStatefulWidget {
 
 class _ManageEditViewState extends ConsumerState<ManageEditView> {
   late Monster monster;
+  int _currentIndex = 0;
+  final List<Widget> _pages = [];
 
   @override
   void initState() {
     super.initState();
     monster = widget.monster;
-  }
-
-  void _onNameChanged(BuildContext context, String name) async {
-    final messenger = ScaffoldMessenger.of(context);
-    final newMonster = monster.copyWith(name: name);
-    final response = await ref
-        .read(manageEditProvider.notifier)
-        .editMonster(newMonster);
-    if (response.error == null) {
-      setState(() {
-        monster = newMonster;
-      });
-      widget.onUpdate();
-    } else {
-      messenger.showSnackBar(
-        SnackBar(content: Text(response.error ?? 'Failed to edit monster')),
-      );
-    }
-  }
-
-  void _onDescriptionChanged(BuildContext context, String description) async {
-    final messenger = ScaffoldMessenger.of(context);
-    final newMonster = monster.copyWith(description: description);
-    final response = await ref
-        .read(manageEditProvider.notifier)
-        .editMonster(newMonster);
-    if (response.error == null) {
-      setState(() {
-        monster = newMonster;
-      });
-      widget.onUpdate();
-    } else {
-      messenger.showSnackBar(
-        SnackBar(content: Text(response.error ?? 'Failed to edit monster')),
-      );
-    }
+    _pages.add(ManageView(monster: monster));
+    _pages.add(ManageDetailsView(monster: monster));
+    _pages.add(ManageSkillsView(monster: monster));
+    _pages.add(ManageShopView(monster: monster));
   }
 
   @override
   Widget build(BuildContext context) {
     final mnstr = monster.toMonsterModel();
-    final size = MediaQuery.sizeOf(context);
 
     return LayoutScaffold(
       backgroundColor: Color.lerp(
@@ -78,43 +47,57 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
         Colors.white,
         0.5,
       ),
-      child: Padding(
-        padding: const EdgeInsets.only(top: 46, left: 16, right: 16),
-        child: Stack(
-          children: [
-            Positioned(
-              top: 0,
-              left: 0,
-              right: 0,
-              child: MonsterContainer(
-                monster: mnstr,
-                showName: false,
-                size: size,
+
+      child: Stack(
+        children: [
+          _pages[_currentIndex],
+          Positioned(
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: BottomNavigationBar(
+              backgroundColor: Color.lerp(
+                mnstr.color ?? Colors.white,
+                Colors.white,
+                0.5,
               ),
-            ),
-            ListView(
-              children: [
-                InplaceText(
-                  text: monster.name,
-                  onChanged: (name) => _onNameChanged(context, name),
-                  label: const Text('Name'),
-                  backgroundColor: lightenColor(mnstr.color ?? Colors.white),
-                  foregroundColor: darkenColor(mnstr.color ?? Colors.black),
+              selectedItemColor: Color.lerp(
+                mnstr.color ?? Colors.white,
+                Colors.black,
+                0.5,
+              ),
+              unselectedItemColor: Color.lerp(
+                mnstr.color ?? Colors.white,
+                Colors.white,
+                0.5,
+              ),
+              currentIndex: _currentIndex,
+              onTap: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+              },
+              items: [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.view_carousel_rounded),
+                  label: 'View',
                 ),
-                InplaceText(
-                  text: monster.description,
-                  label: const Text('Description'),
-                  onChanged: (description) =>
-                      _onDescriptionChanged(context, description),
-                  minLines: 3,
-                  maxLines: 10,
-                  backgroundColor: lightenColor(mnstr.color ?? Colors.black12),
-                  foregroundColor: darkenColor(mnstr.color ?? Colors.black),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.details_rounded),
+                  label: 'Details',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.bolt_rounded),
+                  label: 'Skills',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.shopping_bag_rounded),
+                  label: 'Shop',
                 ),
               ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

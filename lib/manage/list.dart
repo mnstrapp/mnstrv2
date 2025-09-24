@@ -208,12 +208,7 @@ Widget _buildMnstrView({
       Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (context) => ManageEditView(
-            monster: monster,
-            onUpdate: () {
-              onUpdate();
-            },
-          ),
+          builder: (context) => ManageEditView(monster: monster),
         ),
       );
     },
