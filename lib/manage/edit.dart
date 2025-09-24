@@ -69,7 +69,7 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
               unselectedItemColor: Color.lerp(
                 mnstr.color ?? Colors.white,
                 Colors.white,
-                0.5,
+                0.10,
               ),
               currentIndex: _currentIndex,
               onTap: (index) {
