@@ -61,9 +61,11 @@ class _StarsViewState extends State<StarsView> with TickerProviderStateMixin {
       if (status == AnimationStatus.completed) {
         Future.delayed(
           Duration(milliseconds: 3000 + Random().nextInt(1000)),
-          () {
+          () async {
             if (!mounted) return;
-            _controllers[index].reverse();
+            final controller = _controllers[index];
+            await controller.reverse();
+            controller.removeStatusListener(_checkStatus(index));
           },
         );
       }
@@ -96,10 +98,14 @@ class _StarsViewState extends State<StarsView> with TickerProviderStateMixin {
 
   @override
   void dispose() {
-    for (var i = 0; i < _starsCount; i++) {
-      _controllers[i].removeStatusListener(_checkStatus(i));
-      _controllers[i].dispose();
+    for (var i = 0; i < _controllers.length; i++) {
+      final controller = _controllers[i];
+      controller.dispose();
     }
+    _controllers.clear();
+    _animations.clear();
+    _targetPositions.clear();
+    _stars.clear();
     super.dispose();
   }
 
