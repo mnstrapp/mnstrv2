@@ -66,15 +66,15 @@ class _CollectState extends ConsumerState<Collect> {
 
     await _collectSound.stop();
 
-    if (_monster?.name != null) {
-      navigator.pop();
+    if (_monster?.id != null) {
       messenger.showSnackBar(
-        SnackBar(content: Text('Monster already collected')),
+        SnackBar(content: Text('Monster previously collected')),
       );
+      navigator.pop();
       return;
     }
 
-    if (_monster?.name == null) {
+    if (_monster?.id == null) {
       setState(() {
         _isCollected = true;
       });
@@ -88,22 +88,18 @@ class _CollectState extends ConsumerState<Collect> {
   Future<void> _saveMonster(BuildContext context) async {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
-    final result = await Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (context) => NewMonsterView(monster: _monster!.toMonster()),
-      ),
-    );
-    if (result == null) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Monster not saved')),
-      );
+    final error = await ref
+        .read(collectProvider.notifier)
+        .createMonster(_monster!.toMonster());
+    if (error != null) {
+      messenger.showSnackBar(SnackBar(content: Text(error)));
       return;
     }
     if (context.mounted) {
+      messenger.showSnackBar(const SnackBar(content: Text('Monster saved')));
       navigator.pushReplacement(
         MaterialPageRoute(builder: (context) => HomeView()),
       );
-      messenger.showSnackBar(const SnackBar(content: Text('Monster saved')));
     }
   }
 
@@ -160,7 +156,9 @@ class _CollectState extends ConsumerState<Collect> {
                       right: size.width * 0.05,
                       child: UIButton(
                         onPressedAsync: () => _collectMonster(context),
-                        text: _monster?.name != null ? 'Continue' : 'Catch Me!',
+                        text: _monster?.id != null
+                            ? 'Already Caught'
+                            : 'Catch Me!',
                         // icon: Icons.add,
                         iconSize: 24,
                         fontSize: 24,
