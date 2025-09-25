@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../models/monster.dart';
 import '../providers/manage.dart';
 import '../shared/layout_scaffold.dart';
+import '../ui/navigation_bar.dart';
+import '../utils/color.dart';
 import 'details.dart';
 import 'shop.dart';
 import 'skills.dart';
@@ -22,16 +24,29 @@ class ManageEditView extends ConsumerStatefulWidget {
 class _ManageEditViewState extends ConsumerState<ManageEditView> {
   late Monster monster;
   int _currentIndex = 0;
-  final List<Widget> _pages = [];
+  final _pages = <_NavigationPage>[
+    _NavigationPage(
+      label: 'view',
+      icon: Icons.view_carousel_rounded,
+      page: ManageView(),
+    ),
+    _NavigationPage(
+      label: 'details',
+      icon: Icons.abc_rounded,
+      page: ManageDetailsView(),
+    ),
+    _NavigationPage(
+      label: 'skills',
+      icon: Icons.school,
+      page: ManageSkillsView(),
+    ),
+    _NavigationPage(label: 'shop', icon: Icons.shop, page: ManageShopView()),
+  ];
 
   @override
   void initState() {
     super.initState();
     monster = widget.monster;
-    _pages.add(ManageView());
-    _pages.add(ManageDetailsView());
-    _pages.add(ManageSkillsView());
-    _pages.add(ManageShopView());
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       ref.read(manageEditProvider.notifier).set(monster);
     });
@@ -40,65 +55,59 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
   @override
   Widget build(BuildContext context) {
     final mnstr = monster.toMonsterModel();
+    final backgroundColor = Color.lerp(
+      mnstr.color ?? Colors.white,
+      Colors.white,
+      0.5,
+    );
+
+    final selectedBackgroundColor = darkenColor(
+      backgroundColor ?? Theme.of(context).primaryColor,
+      0.2,
+    );
 
     return LayoutScaffold(
-      backgroundColor: Color.lerp(
-        mnstr.color ?? Colors.white,
-        Colors.white,
-        0.5,
-      ),
+      backgroundColor: backgroundColor,
 
       child: Stack(
         children: [
-          _pages[_currentIndex],
+          _pages[_currentIndex].page,
           Positioned(
-            bottom: 0,
-            left: 0,
-            right: 0,
-            child: BottomNavigationBar(
-              backgroundColor: Color.lerp(
-                mnstr.color ?? Colors.white,
-                Colors.white,
-                0.5,
-              ),
-              selectedItemColor: Color.lerp(
-                mnstr.color ?? Colors.white,
-                Colors.black,
-                0.5,
-              ),
-              unselectedItemColor: Color.lerp(
-                mnstr.color ?? Colors.white,
-                Colors.white,
-                0.10,
-              ),
-              currentIndex: _currentIndex,
-              onTap: (index) {
+            bottom: 16,
+            left: 16,
+            right: 16,
+            child: UINavigationBar(
+              buttons: _pages
+                  .map(
+                    (page) => UINavigationBarButton(
+                      label: page.label,
+                      icon: page.icon,
+                    ),
+                  )
+                  .toList(),
+              onSelected: (index) {
                 setState(() {
                   _currentIndex = index;
                 });
               },
-              items: [
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.view_carousel_rounded),
-                  label: 'View',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.account_box_rounded),
-                  label: 'Details',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.bolt_rounded),
-                  label: 'Skills',
-                ),
-                BottomNavigationBarItem(
-                  icon: Icon(Icons.shopping_bag_rounded),
-                  label: 'Shop',
-                ),
-              ],
+              margin: 16,
+              selectedBackgroundColor: selectedBackgroundColor,
             ),
           ),
         ],
       ),
     );
   }
+}
+
+class _NavigationPage {
+  final String label;
+  final IconData icon;
+  final Widget page;
+
+  _NavigationPage({
+    required this.label,
+    required this.icon,
+    required this.page,
+  });
 }
