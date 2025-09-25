@@ -28,6 +28,8 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
   final ScreenshotController _screenshotController = ScreenshotController();
   List<mnstr.Monster> _monsters = [];
   Color? _backgroundColor;
+  int _currentIndex = 0;
+  double _currentPixels = 0;
 
   @override
   void initState() {
@@ -67,23 +69,30 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
     if (_monsters.isEmpty) {
       return;
     }
-    int index = 0;
+    int index = _currentIndex;
     final size = MediaQuery.sizeOf(context);
     final isTablet = size.width > mobileBreakpoint;
+    double pixels = _currentPixels;
+    final calculatedHeight = isTablet ? height / 2 : height;
 
     try {
-      if (_scrollController.position.pixels > 0) {
-        index =
-            _scrollController.position.pixels ~/
-            (isTablet ? height / 2 : height);
-      }
+      pixels = _scrollController.position.pixels;
     } catch (e) {
-      index = 0;
+      debugPrint('Error getting scroll position: $e');
     }
+
+    if (pixels > 0) {
+      index = pixels > _currentPixels
+          ? (pixels / calculatedHeight).ceil()
+          : (pixels / calculatedHeight).round();
+    }
+
     final monster = _monsters[index];
     final m = model.MonsterModel.fromQRCode(monster.qrCode ?? '');
     setState(() {
       _backgroundColor = Color.lerp(m.color, Colors.white, 0.25);
+      _currentIndex = index;
+      _currentPixels = pixels;
     });
   }
 
