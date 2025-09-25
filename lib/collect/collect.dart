@@ -67,6 +67,9 @@ class _CollectState extends ConsumerState<Collect> {
       messenger.showSnackBar(
         SnackBar(content: Text('Monster previously collected')),
       );
+      setState(() {
+        _saved = true;
+      });
       return;
     }
 
@@ -161,9 +164,10 @@ class _CollectState extends ConsumerState<Collect> {
                     ),
                     if (!_saved)
                       Positioned(
-                        bottom: size.height * 0.05,
-                        left: size.width * 0.05,
-                        right: size.width * 0.05,
+                        top: size.height * 0.5,
+                        bottom: size.height * 0.5,
+                        left: size.width * 0.5,
+                        right: size.width * 0.5,
                         child: CircularProgressIndicator(),
                       ),
                     if (_saved)
