@@ -5,8 +5,9 @@ import '../providers/session_users.dart';
 import '../utils/color.dart';
 
 class MonsterXpBar extends ConsumerStatefulWidget {
-  const MonsterXpBar({super.key, this.color});
+  const MonsterXpBar({super.key, this.color, this.disableBackButton = false});
   final Color? color;
+  final bool disableBackButton;
 
   @override
   ConsumerState<MonsterXpBar> createState() => _MonsterXpBarState();
@@ -58,56 +59,80 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
           ),
           height: height,
           margin: margin,
-          child: SizedBox(
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                const Text('LV: '),
-                Text(
-                  user.value?.experienceLevel.toString() ?? '0',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    fontWeight: FontWeight.bold,
+          child: Stack(
+            children: [
+              Positioned(
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: SizedBox(
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      const Text('LV: '),
+                      Text(
+                        user.value?.experienceLevel.toString() ?? '0',
+                        style: theme.textTheme.bodyLarge?.copyWith(
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      Stack(
+                        children: [
+                          Container(
+                            width: barWidth,
+                            height: barHeight,
+                            margin: EdgeInsets.only(left: 8, right: 8),
+                            decoration: BoxDecoration(
+                              borderRadius: borderRadius,
+                              color: barBackgroundColor,
+                            ),
+                          ),
+                          Container(
+                            width: barExperienceWidth,
+                            height: barHeight,
+                            margin: EdgeInsets.only(left: 8, right: 8),
+                            decoration: BoxDecoration(
+                              borderRadius: borderRadius,
+                              color: barForegroundColor,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 8),
+                      Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Image.asset(
+                            'assets/items/coin.png',
+                            width: 20,
+                            height: 20,
+                          ),
+                          Text(
+                            user.value?.coins.toString() ?? '0',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(width: 8),
+                    ],
                   ),
                 ),
-                Stack(
-                  children: [
-                    Container(
-                      width: barWidth,
-                      height: barHeight,
-                      margin: EdgeInsets.only(left: 8, right: 8),
-                      decoration: BoxDecoration(
-                        borderRadius: borderRadius,
-                        color: barBackgroundColor,
-                      ),
-                    ),
-                    Container(
-                      width: barExperienceWidth,
-                      height: barHeight,
-                      margin: EdgeInsets.only(left: 8, right: 8),
-                      decoration: BoxDecoration(
-                        borderRadius: borderRadius,
-                        color: barForegroundColor,
-                      ),
-                    ),
-                  ],
+              ),
+              if (Navigator.of(context).canPop() && !widget.disableBackButton)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  bottom: 0,
+                  child: IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.arrow_back),
+                  ),
                 ),
-                const SizedBox(width: 8),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Image.asset('assets/items/coin.png', width: 20, height: 20),
-                    Text(
-                      user.value?.coins.toString() ?? '0',
-                      style: theme.textTheme.bodyLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(width: 8),
-              ],
-            ),
+            ],
           ),
         ),
       ),

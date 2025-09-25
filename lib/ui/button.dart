@@ -57,11 +57,12 @@ class _UIButtonState extends State<UIButton> {
       setState(() {
         _isLoading = true;
       });
-      log('onPressedAsync');
       await widget.onPressedAsync!();
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     } else {
       widget.onPressed?.call();
     }

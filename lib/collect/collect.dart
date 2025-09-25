@@ -159,25 +159,35 @@ class _CollectState extends ConsumerState<Collect> {
                             : MonsterView(monster: _monster!, size: size),
                       ),
                     ),
-                    Positioned(
-                      bottom: size.height * 0.05,
-                      left: size.width * 0.05,
-                      right: size.width * 0.05,
-                      child: UIButton(
-                        onPressedAsync: () =>
-                            Navigator.of(context).pushReplacement(
-                              MaterialPageRoute(
-                                builder: (context) => HomeView(),
-                              ),
-                            ),
-                        text: 'Home',
-                        icon: Icons.home,
-                        iconSize: 24,
-                        fontSize: 24,
-                        padding: 8,
-                        backgroundColor: Color.lerp(color, Colors.black, 0.5),
+                    if (!_saved)
+                      Positioned(
+                        bottom: size.height * 0.05,
+                        left: size.width * 0.05,
+                        right: size.width * 0.05,
+                        child: CircularProgressIndicator(),
                       ),
-                    ),
+                    if (_saved)
+                      Positioned(
+                        bottom: size.height * 0.05,
+                        left: size.width * 0.05,
+                        right: size.width * 0.05,
+                        child: UIButton(
+                          onPressedAsync: () =>
+                              Navigator.of(context).pushReplacement(
+                                MaterialPageRoute(
+                                  builder: (context) => ManageEditView(
+                                    monster: _monster!.toMonster(),
+                                  ),
+                                ),
+                              ),
+                          text: 'View MNSTR',
+                          icon: Icons.view_carousel_rounded,
+                          iconSize: 24,
+                          fontSize: 24,
+                          padding: 8,
+                          backgroundColor: Color.lerp(color, Colors.black, 0.5),
+                        ),
+                      ),
                   ],
                 ),
               ),

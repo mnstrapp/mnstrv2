@@ -33,7 +33,7 @@ class HomeView extends ConsumerWidget {
       },
       {
         'icon': Icons.view_carousel_rounded,
-        'text': 'View',
+        'text': 'MNSTRs',
         'onPressed': () {
           Navigator.push(
             context,
@@ -76,6 +76,7 @@ class HomeView extends ConsumerWidget {
 
     return LayoutScaffold(
       useSizedBox: true,
+      disableBackButton: true,
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,

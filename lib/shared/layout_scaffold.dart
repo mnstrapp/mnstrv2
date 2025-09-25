@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../utils/color.dart';
 
-import '../providers/sounds.dart';
-import 'sounds.dart';
 import 'monster_xp_bar.dart';
 
 class LayoutScaffold extends ConsumerWidget {
@@ -12,6 +9,7 @@ class LayoutScaffold extends ConsumerWidget {
   final bool showStatBar;
   final bool useSizedBox;
   final bool useSafeArea;
+  final bool disableBackButton;
 
   const LayoutScaffold({
     super.key,
@@ -20,12 +18,11 @@ class LayoutScaffold extends ConsumerWidget {
     this.showStatBar = true,
     this.useSizedBox = false,
     this.useSafeArea = false,
+    this.disableBackButton = false,
   });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final isMuted = ref.watch(backgroundSoundProvider);
-
     final size = MediaQuery.of(context).size;
 
     return Scaffold(
@@ -47,7 +44,12 @@ class LayoutScaffold extends ConsumerWidget {
               top: 0,
               left: 0,
               right: 0,
-              child: SafeArea(child: MonsterXpBar(color: backgroundColor)),
+              child: SafeArea(
+                child: MonsterXpBar(
+                  color: backgroundColor,
+                  disableBackButton: disableBackButton,
+                ),
+              ),
             ),
         ],
       ),
