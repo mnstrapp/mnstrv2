@@ -70,13 +70,18 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
+                    spacing: 8,
                     children: [
-                      const Text('LV: '),
-                      Text(
-                        user.value?.experienceLevel.toString() ?? '0',
-                        style: theme.textTheme.bodyLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
+                      Row(
+                        children: [
+                          const Text('LV: '),
+                          Text(
+                            user.value?.experienceLevel.toString() ?? '0',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
                       ),
                       Stack(
                         children: [
@@ -100,9 +105,8 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
                           ),
                         ],
                       ),
-                      const SizedBox(width: 8),
                       Row(
-                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.end,
                         children: [
                           Image.asset(
                             'assets/items/coin.png',
@@ -117,7 +121,6 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
                           ),
                         ],
                       ),
-                      const SizedBox(width: 8),
                     ],
                   ),
                 ),
