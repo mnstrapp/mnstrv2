@@ -1,6 +1,9 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../battle/battle.dart';
 import '../collect/collect.dart';
 import '../settings/settings.dart';
 import '../ui/button.dart';
@@ -21,16 +24,17 @@ class HomeView extends ConsumerWidget {
     final displayPortrait = (size.width > size.height);
 
     final buttons = [
-      {
-        'icon': Icons.library_add_rounded,
-        'text': 'Catch',
-        'onPressed': () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => Collect()),
-          );
+      if (!Platform.isLinux)
+        {
+          'icon': Icons.library_add_rounded,
+          'text': 'Catch',
+          'onPressed': () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Collect()),
+            );
+          },
         },
-      },
       {
         'icon': Icons.view_carousel_rounded,
         'text': 'MNSTRs',
@@ -38,6 +42,16 @@ class HomeView extends ConsumerWidget {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) => ManageListView()),
+          );
+        },
+      },
+      {
+        'icon': Icons.map_rounded,
+        'text': 'Battle',
+        'onPressed': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => BattleView()),
           );
         },
       },
