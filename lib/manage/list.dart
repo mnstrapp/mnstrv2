@@ -217,15 +217,31 @@ Widget _buildMnstrView({
         container,
         Positioned(
           bottom: 130,
+          left: 13,
+          child: UIButton(
+            onPressedAsync: () async {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ManageEditView(monster: monster),
+                ),
+              );
+            },
+            icon: Icons.edit,
+            backgroundColor: lightenColor(
+              Color.lerp(m.color, Colors.black, 0.5) ?? Colors.black,
+              0.1,
+            ),
+          ),
+        ),
+        Positioned(
+          bottom: 130,
           right: 13,
           child: UIButton(
             onPressedAsync: () async {
-              final backgroundColor = Color.lerp(m.color, Colors.white, 0.5);
-
               final image = await screenshotController.captureFromWidget(
                 container,
               );
-
               await SharePlus.instance.share(
                 ShareParams(
                   subject: 'Sharing my MNSTR!',
@@ -241,7 +257,6 @@ Widget _buildMnstrView({
                 ),
               );
             },
-            // height: 65,
             icon: Icons.share,
             backgroundColor: lightenColor(
               Color.lerp(m.color, Colors.black, 0.5) ?? Colors.black,
