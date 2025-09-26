@@ -129,7 +129,7 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
               if (Navigator.of(context).canPop() && !widget.disableBackButton)
                 Positioned(
                   top: 0,
-                  left: -4,
+                  left: 0,
                   bottom: 0,
                   child: IconButton(
                     style: IconButton.styleFrom(
