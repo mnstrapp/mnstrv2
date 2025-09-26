@@ -103,6 +103,10 @@ class _LoginViewState extends ConsumerState<LoginView> {
                               focusNode: _emailFocusNode,
                               onEditingComplete: () =>
                                   _passwordFocusNode.requestFocus(),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    fontFamily: 'Roboto',
+                                  ),
                             ),
                             TextField(
                               controller: _passwordController,
@@ -124,6 +128,10 @@ class _LoginViewState extends ConsumerState<LoginView> {
                               ),
                               focusNode: _passwordFocusNode,
                               onEditingComplete: () => _login(context),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    fontFamily: 'Roboto',
+                                  ),
                             ),
                             UIButton(
                               onPressedAsync: () async => _login(context),
