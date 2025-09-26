@@ -1,7 +1,7 @@
 name: mnstrv2
 description: "A new adventure awaits!"
 publish_to: "none"
-version: 2.5.0+8
+version: 2.5.2+10
 
 environment:
   sdk: ^3.8.0
@@ -45,6 +45,20 @@ flutter:
       fonts:
         - asset: assets/fonts/Silkscreen-Regular.ttf
         - asset: assets/fonts/Silkscreen-Bold.ttf
+    - family: Roboto
+      fonts:
+        - asset: assets/fonts/Roboto-Regular.ttf
+        - asset: assets/fonts/Roboto-Bold.ttf
+        - asset: assets/fonts/Roboto-Medium.ttf
+        - asset: assets/fonts/Roboto-Light.ttf
+        - asset: assets/fonts/Roboto-Thin.ttf
+        - asset: assets/fonts/Roboto-Black.ttf
+        - asset: assets/fonts/Roboto-Italic.ttf
+        - asset: assets/fonts/Roboto-MediumItalic.ttf
+        - asset: assets/fonts/Roboto-BoldItalic.ttf
+        - asset: assets/fonts/Roboto-BlackItalic.ttf
+        - asset: assets/fonts/Roboto-ThinItalic.ttf
+        - asset: assets/fonts/Roboto-LightItalic.ttf
 
 flutter_launcher_icons:
   android: true

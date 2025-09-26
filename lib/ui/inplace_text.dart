@@ -83,6 +83,9 @@ class _InplaceTextState extends State<InplaceText> {
                   });
                 },
                 onChanged: widget.onChanged,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  fontFamily: 'Roboto',
+                ),
               ),
             )
           : InkWell(

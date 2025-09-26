@@ -173,6 +173,12 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                                       onEditingComplete: () =>
                                           _emailFocusNode.requestFocus(),
                                       focusNode: _displayNameFocusNode,
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontFamily: 'Roboto',
+                                          ),
                                     ),
                                     TextFormField(
                                       validator: (value) {
@@ -188,6 +194,12 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                                       focusNode: _emailFocusNode,
                                       onEditingComplete: () =>
                                           _passwordFocusNode.requestFocus(),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontFamily: 'Roboto',
+                                          ),
                                     ),
                                     TextFormField(
                                       validator: (value) {
@@ -218,6 +230,12 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                                       onEditingComplete: () =>
                                           _confirmPasswordFocusNode
                                               .requestFocus(),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontFamily: 'Roboto',
+                                          ),
                                     ),
                                     TextFormField(
                                       validator: (value) {
@@ -250,6 +268,12 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
                                       focusNode: _confirmPasswordFocusNode,
                                       onEditingComplete: () =>
                                           _register(context),
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(
+                                            fontFamily: 'Roboto',
+                                          ),
                                     ),
                                     UIButton(
                                       onPressedAsync: () async =>

@@ -122,49 +122,60 @@ class _StatsViewState extends ConsumerState<StatsView> {
     switch (stat) {
       case Stat.health:
         total = _health - value;
-        if (total < _baseStats[stat]!) {
+        if (total >= _baseStats[stat]!) {
+          setState(() => _health = total);
+          widget.onStatDecreased(stat, total);
+        } else {
           return;
         }
-        setState(() => _health = total);
         break;
       case Stat.attack:
         total = _attack - value;
-        if (total < _baseStats[stat]!) {
+        if (total >= _baseStats[stat]!) {
+          setState(() => _attack = total);
+          widget.onStatDecreased(stat, total);
+        } else {
           return;
         }
-        setState(() => _attack = total);
         break;
       case Stat.defense:
         total = _defense - value;
-        if (total < _baseStats[stat]!) {
+        if (total >= _baseStats[stat]!) {
+          setState(() => _defense = total);
+          widget.onStatDecreased(stat, total);
+        } else {
           return;
         }
-        setState(() => _defense = total);
         break;
       case Stat.intelligence:
         total = _intelligence - value;
-        if (total < _baseStats[stat]!) {
+        if (total >= _baseStats[stat]!) {
+          setState(() => _intelligence = total);
+          widget.onStatDecreased(stat, total);
+        } else {
           return;
         }
-        setState(() => _intelligence = total);
         break;
       case Stat.speed:
         total = _speed - value;
-        if (total < _baseStats[stat]!) {
+        if (total >= _baseStats[stat]!) {
+          setState(() => _speed = total);
+          widget.onStatDecreased(stat, total);
+        } else {
           return;
         }
-        setState(() => _speed = total);
         break;
       case Stat.magic:
         total = _magic - value;
-        if (total < _baseStats[stat]!) {
+        if (total >= _baseStats[stat]!) {
+          setState(() => _magic = total);
+          widget.onStatDecreased(stat, total);
+        } else {
           return;
         }
-        setState(() => _magic = total);
         break;
     }
     setState(() => _availablePoints += value);
-    widget.onStatDecreased(stat, total);
   }
 
   @override
