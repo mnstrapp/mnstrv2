@@ -1,13 +1,12 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../collect/name.dart';
 import '../collect/stats.dart';
 import '../models/monster.dart';
 import '../providers/manage.dart';
-import '../ui/button.dart';
 
 class ManageSkillsView extends ConsumerStatefulWidget {
   const ManageSkillsView({super.key});
@@ -19,8 +18,25 @@ class ManageSkillsView extends ConsumerStatefulWidget {
 class _ManageSkillsViewState extends ConsumerState<ManageSkillsView> {
   int _availablePoints = 0;
   bool _loading = true;
+  final duration = const Duration(milliseconds: 500);
 
-  void _calculateAvailablePoints() async {
+  int _health = 0;
+  int _attack = 0;
+  int _defense = 0;
+  int _intelligence = 0;
+  int _speed = 0;
+  int _magic = 0;
+
+  final Map<Stat, Timer?> _timers = {
+    Stat.health: null,
+    Stat.attack: null,
+    Stat.defense: null,
+    Stat.intelligence: null,
+    Stat.speed: null,
+    Stat.magic: null,
+  };
+
+  Future<void> _calculateAvailablePoints() async {
     var monster = ref.watch(manageEditProvider);
     if (monster == null) {
       return;
@@ -102,168 +118,380 @@ class _ManageSkillsViewState extends ConsumerState<ManageSkillsView> {
     });
   }
 
-  void _increaseStat(Stat stat, int total) {
-    final monster = ref.watch(manageEditProvider);
+  Future<void> _updateMonster() async {
+    var monster = ref.watch(manageEditProvider);
+    if (monster == null) {
+      return;
+    }
+    await ref
+        .read(manageEditProvider.notifier)
+        .editMonster(
+          _copyMonster(monster),
+        );
+  }
+
+  Monster _copyMonster(Monster monster) {
+    return monster.copyWith(
+      currentHealth: _health,
+      currentAttack: _attack,
+      currentDefense: _defense,
+      currentIntelligence: _intelligence,
+      currentSpeed: _speed,
+      currentMagic: _magic,
+      maxHealth: _health,
+      maxAttack: _attack,
+      maxDefense: _defense,
+      maxIntelligence: _intelligence,
+      maxSpeed: _speed,
+      maxMagic: _magic,
+    );
+  }
+
+  Future<void> _increaseStat(Stat stat, int total) async {
+    var monster = ref.watch(manageEditProvider);
     if (monster == null) {
       return;
     }
 
-    switch (stat) {
-      case Stat.health:
-        final maxHealth = total;
-        ref
-            .read(manageEditProvider.notifier)
-            .editMonster(
-              monster.copyWith(
-                maxHealth: maxHealth,
-                currentHealth: maxHealth,
-              ),
-            );
-        break;
-      case Stat.attack:
-        final maxAttack = total;
-        ref
-            .read(manageEditProvider.notifier)
-            .editMonster(
-              monster.copyWith(
-                maxAttack: maxAttack,
-                currentAttack: maxAttack,
-              ),
-            );
-        break;
-      case Stat.defense:
-        final maxDefense = total;
-        ref
-            .read(manageEditProvider.notifier)
-            .editMonster(
-              monster.copyWith(
-                maxDefense: maxDefense,
-                currentDefense: maxDefense,
-              ),
-            );
-        break;
-      case Stat.intelligence:
-        final maxIntelligence = total;
-        ref
-            .read(manageEditProvider.notifier)
-            .editMonster(
-              monster.copyWith(
-                maxIntelligence: maxIntelligence,
-                currentIntelligence: maxIntelligence,
-              ),
-            );
-        break;
-      case Stat.speed:
-        final maxSpeed = total;
-        ref
-            .read(manageEditProvider.notifier)
-            .editMonster(
-              monster.copyWith(
-                maxSpeed: maxSpeed,
-                currentSpeed: maxSpeed,
-              ),
-            );
-        break;
-      case Stat.magic:
-        final maxMagic = total;
-        ref
-            .read(manageEditProvider.notifier)
-            .editMonster(
-              monster.copyWith(
-                maxMagic: maxMagic,
-                currentMagic: maxMagic,
-              ),
-            );
-        break;
+    if (_availablePoints < 1) {
+      return;
     }
+
     setState(() {
       _availablePoints -= 1;
     });
-  }
-
-  void _decreaseStat(Stat stat, int total) {
-    final monster = ref.watch(manageEditProvider);
-    if (monster == null) {
-      return;
-    }
 
     switch (stat) {
       case Stat.health:
-        final maxHealth = total;
-        ref
-            .read(manageEditProvider.notifier)
-            .editMonster(
-              monster.copyWith(
-                maxHealth: maxHealth,
-                currentHealth: maxHealth,
-              ),
-            );
+        if (mounted) {
+          setState(() {
+            _health += 1;
+          });
+        }
+
+        if (_timers[stat] == null) {
+          _timers[stat] = Timer.periodic(duration, (
+            timer,
+          ) async {
+            if (mounted) {
+              int maxHealth = (monster!.maxHealth ?? 0);
+              if (maxHealth == _health) {
+                timer.cancel();
+                await _updateMonster();
+                _timers[stat] = null;
+                return;
+              }
+              monster = _copyMonster(monster!);
+            }
+          });
+        }
         break;
       case Stat.attack:
-        final maxAttack = total;
-        ref
-            .read(manageEditProvider.notifier)
-            .editMonster(
-              monster.copyWith(
-                maxAttack: maxAttack,
-                currentAttack: maxAttack,
-              ),
-            );
+        if (mounted) {
+          setState(() {
+            _attack += 1;
+          });
+        }
+
+        if (_timers[stat] == null) {
+          _timers[stat] = Timer.periodic(duration, (
+            timer,
+          ) async {
+            if (mounted) {
+              int maxAttack = (monster!.maxAttack ?? 0);
+              if (maxAttack == _attack) {
+                timer.cancel();
+                await _updateMonster();
+                _timers[stat] = null;
+                return;
+              }
+              monster = _copyMonster(monster!);
+            }
+          });
+        }
         break;
       case Stat.defense:
-        final maxDefense = total;
-        ref
-            .read(manageEditProvider.notifier)
-            .editMonster(
-              monster.copyWith(
-                maxDefense: maxDefense,
-                currentDefense: maxDefense,
-              ),
-            );
+        if (mounted) {
+          setState(() {
+            _defense += 1;
+          });
+        }
+
+        if (_timers[stat] == null) {
+          _timers[stat] = Timer.periodic(duration, (
+            timer,
+          ) async {
+            if (mounted) {
+              int maxDefense = (monster!.maxDefense ?? 0);
+              if (maxDefense == _defense) {
+                timer.cancel();
+                await _updateMonster();
+                _timers[stat] = null;
+                return;
+              }
+              monster = _copyMonster(monster!);
+            }
+          });
+        }
         break;
       case Stat.intelligence:
-        final maxIntelligence = total;
-        ref
-            .read(manageEditProvider.notifier)
-            .editMonster(
-              monster.copyWith(
-                maxIntelligence: maxIntelligence,
-                currentIntelligence: maxIntelligence,
-              ),
-            );
+        if (mounted) {
+          setState(() {
+            _intelligence += 1;
+          });
+        }
+
+        if (_timers[stat] == null) {
+          _timers[stat] = Timer.periodic(duration, (
+            timer,
+          ) async {
+            if (mounted) {
+              int maxIntelligence = (monster!.maxIntelligence ?? 0);
+              if (maxIntelligence == _intelligence) {
+                timer.cancel();
+                await _updateMonster();
+                _timers[stat] = null;
+                return;
+              }
+              monster = _copyMonster(monster!);
+            }
+          });
+        }
         break;
       case Stat.speed:
-        final maxSpeed = total;
-        ref
-            .read(manageEditProvider.notifier)
-            .editMonster(
-              monster.copyWith(
-                maxSpeed: maxSpeed,
-                currentSpeed: maxSpeed,
-              ),
-            );
+        if (mounted) {
+          setState(() {
+            _speed += 1;
+          });
+        }
+
+        if (_timers[stat] == null) {
+          _timers[stat] = Timer.periodic(duration, (
+            timer,
+          ) async {
+            if (mounted) {
+              int maxSpeed = (monster!.maxSpeed ?? 0);
+              if (maxSpeed == _speed) {
+                timer.cancel();
+                await _updateMonster();
+                _timers[stat] = null;
+                return;
+              }
+              monster = _copyMonster(monster!);
+            }
+          });
+        }
         break;
       case Stat.magic:
-        final maxMagic = total;
-        ref
-            .read(manageEditProvider.notifier)
-            .editMonster(
-              monster.copyWith(
-                maxMagic: maxMagic,
-                currentMagic: maxMagic,
-              ),
-            );
+        if (mounted) {
+          setState(() {
+            _magic += 1;
+          });
+        }
+
+        if (_timers[stat] == null) {
+          _timers[stat] = Timer.periodic(duration, (
+            timer,
+          ) async {
+            if (mounted) {
+              int maxMagic = (monster!.maxMagic ?? 0);
+              if (maxMagic == _magic) {
+                timer.cancel();
+                await _updateMonster();
+                _timers[stat] = null;
+                return;
+              }
+              monster = _copyMonster(monster!);
+            }
+          });
+        }
         break;
     }
+  }
+
+  Future<void> _decreaseStat(Stat stat, int total) async {
+    var monster = ref.watch(manageEditProvider);
+    if (monster == null) {
+      return;
+    }
     setState(() => _availablePoints += 1);
+
+    switch (stat) {
+      case Stat.health:
+        if (mounted) {
+          setState(() {
+            _health -= 1;
+          });
+        }
+
+        if (_timers[stat] == null) {
+          _timers[stat] = Timer.periodic(duration, (
+            timer,
+          ) async {
+            if (mounted) {
+              int maxHealth = (monster!.maxHealth ?? 0);
+              if (maxHealth == _health) {
+                timer.cancel();
+                await _updateMonster();
+                _timers[stat] = null;
+                return;
+              }
+              monster = _copyMonster(monster!);
+            }
+          });
+        }
+        break;
+      case Stat.attack:
+        if (mounted) {
+          setState(() {
+            _attack -= 1;
+          });
+        }
+
+        if (_timers[stat] == null) {
+          _timers[stat] = Timer.periodic(duration, (
+            timer,
+          ) async {
+            if (mounted) {
+              int maxAttack = (monster!.maxAttack ?? 0);
+              if (maxAttack == _attack) {
+                timer.cancel();
+                await _updateMonster();
+                _timers[stat] = null;
+                return;
+              }
+              monster = _copyMonster(monster!);
+            }
+          });
+        }
+        break;
+      case Stat.defense:
+        if (mounted) {
+          setState(() {
+            _defense -= 1;
+          });
+        }
+
+        if (_timers[stat] == null) {
+          _timers[stat] = Timer.periodic(duration, (
+            timer,
+          ) async {
+            if (mounted) {
+              int maxDefense = (monster!.maxDefense ?? 0);
+              if (maxDefense == _defense) {
+                timer.cancel();
+                await _updateMonster();
+                _timers[stat] = null;
+                return;
+              }
+              monster = _copyMonster(monster!);
+            }
+          });
+        }
+        break;
+      case Stat.intelligence:
+        if (mounted) {
+          setState(() {
+            _intelligence -= 1;
+          });
+        }
+
+        if (_timers[stat] == null) {
+          _timers[stat] = Timer.periodic(duration, (
+            timer,
+          ) async {
+            if (mounted) {
+              int maxIntelligence = (monster!.maxIntelligence ?? 0);
+              if (maxIntelligence == _intelligence) {
+                timer.cancel();
+                await _updateMonster();
+                _timers[stat] = null;
+                return;
+              }
+              monster = _copyMonster(monster!);
+            }
+          });
+        }
+        break;
+      case Stat.speed:
+        if (mounted) {
+          setState(() {
+            _speed -= 1;
+          });
+        }
+
+        if (_timers[stat] == null) {
+          _timers[stat] = Timer.periodic(duration, (
+            timer,
+          ) async {
+            if (mounted) {
+              int maxSpeed = (monster!.maxSpeed ?? 0);
+              if (maxSpeed == _speed) {
+                timer.cancel();
+                await _updateMonster();
+                _timers[stat] = null;
+                return;
+              }
+              monster = _copyMonster(monster!);
+            }
+          });
+        }
+        break;
+      case Stat.magic:
+        if (mounted) {
+          setState(() {
+            _magic -= 1;
+          });
+        }
+
+        if (_timers[stat] == null) {
+          _timers[stat] = Timer.periodic(duration, (
+            timer,
+          ) async {
+            if (mounted) {
+              int maxMagic = (monster!.maxMagic ?? 0);
+              if (maxMagic == _magic) {
+                timer.cancel();
+                await _updateMonster();
+                _timers[stat] = null;
+                return;
+              }
+              monster = _copyMonster(monster!);
+            }
+          });
+        }
+        break;
+    }
   }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      _calculateAvailablePoints();
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
+      await _calculateAvailablePoints();
+      final monster = ref.watch(manageEditProvider);
+      if (monster != null) {
+        setState(() {
+          _health = (monster.maxHealth ?? 0);
+          _attack = (monster.maxAttack ?? 0);
+          _defense = (monster.maxDefense ?? 0);
+          _intelligence = (monster.maxIntelligence ?? 0);
+          _speed = (monster.maxSpeed ?? 0);
+          _magic = (monster.maxMagic ?? 0);
+        });
+        log(
+          'initState: $_health, $_attack, $_defense, $_intelligence, $_speed, $_magic',
+        );
+      }
     });
+  }
+
+  @override
+  void dispose() {
+    for (var timer in _timers.values) {
+      timer?.cancel();
+    }
+    super.dispose();
   }
 
   @override
