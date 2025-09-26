@@ -6,7 +6,10 @@ import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 
 import '../config/endpoints.dart' as endpoints;
+import '../config/endpoints.dart';
 import '../models/user.dart';
+import '../utils/graphql.dart';
+import 'auth.dart';
 
 part 'users.g.dart';
 
@@ -33,20 +36,39 @@ class UserNotifier extends AsyncNotifier<User?> {
     return null;
   }
 
-  Future<void> getUser(String id) async {
-    // TODO: Implement getUser
-    // final response = await http.get(Uri.parse('${endpoints.users}/$id'));
+  Future<String?> deleteAccount() async {
+    final auth = ref.read(authProvider);
 
-    // final body = jsonDecode(response.body);
-    // final userResponse = UserResponse.fromJson(body);
+    if (auth.value == null) {
+      return "There was an error deleting the account";
+    }
 
-    // if (response.statusCode == HttpStatus.ok) {
-    //   state = AsyncData(userResponse.user);
-    // } else {
-    //   state = AsyncError(
-    //     Exception('Failed to get user: ${userResponse.error}'),
-    //     StackTrace.current,
-    //   );
-    // }
+    final document = r'''
+        mutation unregister {
+          users {
+            unregister
+          }
+        }
+      ''';
+
+    final headers = {
+      'Authorization': 'Bearer ${auth.value?.token}',
+    };
+
+    try {
+      final response = await graphql(
+        url: baseUrl,
+        query: document,
+        headers: headers,
+      );
+
+      if (response['data']['users']['unregister']) {
+        return null;
+      } else {
+        return "Failed to delete account";
+      }
+    } catch (e) {
+      return "Failed to delete account";
+    }
   }
 }
