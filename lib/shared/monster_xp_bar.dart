@@ -36,11 +36,11 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
     final height = 40.0;
     final barBackgroundColor = darkenColor(
       widget.color ?? theme.primaryColor,
-      0.1,
+      0.015,
     );
     final barForegroundColor = darkenColor(
       widget.color ?? theme.primaryColor,
-      0.2,
+      0.5,
     );
     final barWidth = size.width * 0.33;
     final barHeight = 20.0;
