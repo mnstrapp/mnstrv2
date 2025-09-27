@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -42,7 +44,7 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
       widget.color ?? theme.primaryColor,
       0.5,
     );
-    final barWidth = size.width * 0.33;
+    final barWidth = size.width * 0.25;
     final barHeight = 20.0;
     final barExperience = user.value?.experiencePoints ?? 1;
     final barExperienceToNextLevel = user.value?.experienceToNextLevel ?? 1;
@@ -64,7 +66,7 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
               Positioned(
                 top: 0,
                 bottom: 0,
-                left: 0,
+                left: size.width * 0.07,
                 right: 0,
                 child: SizedBox(
                   child: Padding(
@@ -129,7 +131,7 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
               if (Navigator.of(context).canPop() && !widget.disableBackButton)
                 Positioned(
                   top: 0,
-                  left: 0,
+                  left: (Platform.isIOS ? -4 : 0),
                   bottom: 0,
                   child: IconButton(
                     style: IconButton.styleFrom(

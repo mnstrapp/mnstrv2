@@ -34,7 +34,6 @@ class MonsterContainer extends StatelessWidget {
       0.1,
     );
     final theme = Theme.of(context);
-    final screen = MediaQuery.sizeOf(context);
     final monsterName = monster.toMonster().name?.isNotEmpty ?? false
         ? monster.toMonster().name!
         : 'unnamed';

@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 
 import 'monster_model.dart';
@@ -22,7 +20,6 @@ class MonsterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    log(size.width.toString());
     final isLargePhone = size.width > 410;
     final middle = Size(
       (size.width - (size.width - (size.width / (monsterScale ?? scale)))) /
