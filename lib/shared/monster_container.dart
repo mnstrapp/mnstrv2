@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 
 import '../utils/color.dart';
@@ -34,6 +35,7 @@ class MonsterContainer extends StatelessWidget {
       0.1,
     );
     final theme = Theme.of(context);
+    final screen = MediaQuery.sizeOf(context);
     final monsterName = monster.toMonster().name?.isNotEmpty ?? false
         ? monster.toMonster().name!
         : 'unnamed';
@@ -79,6 +81,7 @@ class MonsterContainer extends StatelessWidget {
                     style: theme.textTheme.titleLarge?.copyWith(
                       color: theme.colorScheme.surface,
                       fontFamily: 'Silkscreen',
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ),

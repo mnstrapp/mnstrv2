@@ -33,6 +33,24 @@
                 "--dart-define=API_HOST=http://localhost:8080",
                 "--dart-define=WS_HOST=ws://localhost:8080"
             ]
+        },
+        {
+            "name": "prod",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "debug"
+        },
+        {
+            "name": "prod (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "prod (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
         }
     ]
 }
