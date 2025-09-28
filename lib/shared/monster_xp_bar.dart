@@ -38,6 +38,9 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
     final user = ref.watch(sessionUserProvider);
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
+
+    final isMobile = Platform.isIOS || Platform.isAndroid;
+
     final backgroundColor = lightenColor(widget.color ?? theme.primaryColor);
     final margin = EdgeInsets.only(left: 32, right: 32);
     final height = 40.0;
@@ -71,7 +74,7 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
               Positioned(
                 top: 0,
                 bottom: 0,
-                left: size.width * 0.07,
+                left: 0,
                 right: 0,
                 child: SizedBox(
                   child: Padding(
