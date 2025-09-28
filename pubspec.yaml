@@ -1,7 +1,7 @@
 name: mnstrv2
 description: "A new adventure awaits!"
 publish_to: "none"
-version: 2.6.3+12
+version: 2.6.4+13
 
 environment:
   sdk: ^3.8.0
@@ -25,6 +25,7 @@ dependencies:
   just_audio: ^0.10.4
   audioplayers: ^6.5.0
   flame_audio: ^2.11.8
+  change_case: ^2.2.0
 
 dev_dependencies:
   flutter_test:

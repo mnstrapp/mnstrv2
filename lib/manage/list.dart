@@ -51,9 +51,11 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
       _isLoading = true;
     });
     await ref.read(manageProvider.notifier).getMonsters();
-    setState(() {
-      _isLoading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   void _setMonsters() {

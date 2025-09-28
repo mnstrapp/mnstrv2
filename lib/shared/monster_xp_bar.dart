@@ -7,9 +7,14 @@ import '../providers/session_users.dart';
 import '../utils/color.dart';
 
 class MonsterXpBar extends ConsumerStatefulWidget {
-  const MonsterXpBar({super.key, this.color, this.disableBackButton = false});
   final Color? color;
   final bool disableBackButton;
+
+  const MonsterXpBar({
+    super.key,
+    this.color,
+    this.disableBackButton = false,
+  });
 
   @override
   ConsumerState<MonsterXpBar> createState() => _MonsterXpBarState();
@@ -131,14 +136,16 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
               if (Navigator.of(context).canPop() && !widget.disableBackButton)
                 Positioned(
                   top: 0,
-                  left: (Platform.isIOS ? -4 : 0),
+                  left: (Platform.isIOS || Platform.isAndroid ? -4 : 0),
                   bottom: 0,
                   child: IconButton(
                     style: IconButton.styleFrom(
                       backgroundColor: barForegroundColor,
                       foregroundColor: Colors.white,
                     ),
-                    onPressed: () => Navigator.of(context).pop(),
+                    onPressed: () async {
+                      Navigator.of(context).pop();
+                    },
                     icon: const Icon(Icons.arrow_back),
                   ),
                 ),

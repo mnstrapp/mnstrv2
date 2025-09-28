@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../theme.dart';
 import 'monster_model.dart';
 
 class MonsterView extends StatelessWidget {
@@ -20,10 +21,32 @@ class MonsterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLargePhone = size.width > 410;
+    final isSmallPhone =
+        (size.width > smallMobileMinimumBreakpoint) &&
+        (size.width < smallMobileMaximumBreakpoint);
+    final isLargePhone =
+        (size.width > largeMobileMinimumBreakpoint) &&
+        (size.width < largeMobileMaximumBreakpoint);
+    final isFoldable =
+        (size.width > foldableMinimumBreakpoint) &&
+        (size.width < foldableMaximumBreakpoint);
+    final isTablet =
+        (size.width > tabletMinimumBreakpoint) &&
+        (size.width < tabletMaximumBreakpoint);
+    final isWidescreen = size.width > widescreenMinimumBreakpoint;
     final middle = Size(
       (size.width - (size.width - (size.width / (monsterScale ?? scale)))) /
-          (isLargePhone ? 4 : 6),
+          (isSmallPhone
+              ? 6
+              : isLargePhone
+              ? 4
+              : isFoldable
+              ? 10.5
+              : isTablet
+              ? 6
+              : isWidescreen
+              ? 3
+              : 4),
       (size.height - (size.height - (size.height / (monsterScale ?? scale)))) /
           (isLargePhone ? 2.3 : 2.5),
     );
