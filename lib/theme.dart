@@ -24,4 +24,4 @@ const foldableMinimumBreakpoint = 850;
 const foldableMaximumBreakpoint = 900;
 const tabletMinimumBreakpoint = 900;
 const tabletMaximumBreakpoint = 1024;
-const widescreenMinimumBreakpoint = 1024;
+const widescreenMinimumBreakpoint = 2560;

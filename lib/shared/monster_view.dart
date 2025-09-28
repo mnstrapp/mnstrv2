@@ -33,7 +33,9 @@ class MonsterView extends StatelessWidget {
     final isTablet =
         (size.width > tabletMinimumBreakpoint) &&
         (size.width < tabletMaximumBreakpoint);
-    final isWidescreen = size.width > widescreenMinimumBreakpoint;
+    final isDesktop =
+        (size.width > tabletMinimumBreakpoint) &&
+        (size.width < widescreenMinimumBreakpoint);
     final middle = Size(
       (size.width - (size.width - (size.width / (monsterScale ?? scale)))) /
           (isSmallPhone
@@ -44,9 +46,9 @@ class MonsterView extends StatelessWidget {
               ? 10.5
               : isTablet
               ? 6
-              : isWidescreen
-              ? 3
-              : 4),
+              : isDesktop
+              ? 4
+              : 3),
       (size.height - (size.height - (size.height / (monsterScale ?? scale)))) /
           (isLargePhone ? 2.3 : 2.5),
     );
