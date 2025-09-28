@@ -1,5 +1,6 @@
 import 'package:change_case/change_case.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:uuid/uuid.dart' as uuid;
 
 part 'data.g.dart';
 
@@ -24,7 +25,7 @@ enum BattleQueueAction {
 
 @JsonSerializable()
 class BattleQueue {
-  String? id;
+  String id;
   String? userId;
   BattleQueueChannel? channel;
   BattleQueueAction? action;
@@ -34,7 +35,7 @@ class BattleQueue {
   DateTime? archivedAt;
 
   BattleQueue({
-    this.id,
+    String? id,
     this.userId,
     this.channel,
     this.action,
@@ -42,10 +43,10 @@ class BattleQueue {
     this.createdAt,
     this.updatedAt,
     this.archivedAt,
-  });
+  }) : id = id ?? uuid.Uuid().v4();
 
   factory BattleQueue.fromJson(Map<String, dynamic> json) => BattleQueue(
-    id: json['id'] as String?,
+    id: json['id'] as String,
     userId: json['userId'] as String?,
     channel: $enumDecodeNullable(
       _$BattleQueueChannelEnumMap,
