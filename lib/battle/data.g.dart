@@ -11,6 +11,9 @@ BattleQueue _$BattleQueueFromJson(Map<String, dynamic> json) => BattleQueue(
   userId: json['userId'] as String?,
   channel: $enumDecodeNullable(_$BattleQueueChannelEnumMap, json['channel']),
   action: $enumDecodeNullable(_$BattleQueueActionEnumMap, json['action']),
+  data: json['data'] == null
+      ? null
+      : BattleQueueData.fromJson(json['data'] as Map<String, dynamic>),
   createdAt: json['createdAt'] == null
       ? null
       : DateTime.parse(json['createdAt'] as String),
@@ -28,6 +31,7 @@ Map<String, dynamic> _$BattleQueueToJson(BattleQueue instance) =>
       'userId': instance.userId,
       'channel': _$BattleQueueChannelEnumMap[instance.channel],
       'action': _$BattleQueueActionEnumMap[instance.action],
+      'data': instance.data,
       'createdAt': instance.createdAt?.toIso8601String(),
       'updatedAt': instance.updatedAt?.toIso8601String(),
       'archivedAt': instance.archivedAt?.toIso8601String(),
@@ -57,7 +61,9 @@ BattleQueueData _$BattleQueueDataFromJson(Map<String, dynamic> json) =>
         json['action'],
       ),
       userId: json['userId'] as String?,
+      userName: json['userName'] as String?,
       opponentId: json['opponentId'] as String?,
+      opponentName: json['opponentName'] as String?,
       mnstrId: json['mnstrId'] as String?,
       error: json['error'] as String?,
       message: json['message'] as String?,
@@ -67,7 +73,9 @@ Map<String, dynamic> _$BattleQueueDataToJson(BattleQueueData instance) =>
     <String, dynamic>{
       'action': _$BattleQueueDataActionEnumMap[instance.action],
       'userId': instance.userId,
+      'userName': instance.userName,
       'opponentId': instance.opponentId,
+      'opponentName': instance.opponentName,
       'mnstrId': instance.mnstrId,
       'error': instance.error,
       'message': instance.message,

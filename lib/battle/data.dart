@@ -96,7 +96,9 @@ enum BattleQueueDataAction {
 class BattleQueueData {
   BattleQueueDataAction? action;
   String? userId;
+  String? userName;
   String? opponentId;
+  String? opponentName;
   String? mnstrId;
   String? error;
   String? message;
@@ -104,7 +106,9 @@ class BattleQueueData {
   BattleQueueData({
     this.action,
     this.userId,
+    this.userName,
     this.opponentId,
+    this.opponentName,
     this.mnstrId,
     this.error,
     this.message,
@@ -117,7 +121,9 @@ class BattleQueueData {
           (json['action'] as String?)?.toLowerCase(),
         ),
         userId: json['userId'] as String?,
+        userName: json['userName'] as String?,
         opponentId: json['opponentId'] as String?,
+        opponentName: json['opponentName'] as String?,
         mnstrId: json['mnstrId'] as String?,
         error: json['error'] as String?,
         message: json['message'] as String?,
@@ -126,7 +132,9 @@ class BattleQueueData {
   Map<String, dynamic> toJson() => {
     'action': action?.name.toTitleCase(),
     'userId': userId,
+    'userName': userName,
     'opponentId': opponentId,
+    'opponentName': opponentName,
     'mnstrId': mnstrId,
     'error': error,
     'message': message,
