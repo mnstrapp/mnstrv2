@@ -1,16 +1,11 @@
 import 'package:change_case/change_case.dart';
-import 'package:json_annotation/json_annotation.dart';
 import 'package:uuid/uuid.dart' as uuid;
 
-part 'data.g.dart';
-
-@JsonEnum()
 enum BattleQueueChannel {
   lobby,
   battle,
 }
 
-@JsonEnum()
 enum BattleQueueAction {
   error,
   joined,
@@ -19,12 +14,14 @@ enum BattleQueueAction {
   requested,
   accepted,
   rejected,
-  cancelled,
   watching,
   list,
+  challenge,
+  cancel,
+  accept,
+  reject,
 }
 
-@JsonSerializable()
 class BattleQueue {
   String id;
   String? userId;
@@ -46,30 +43,47 @@ class BattleQueue {
     this.archivedAt,
   }) : id = id ?? uuid.Uuid().v4();
 
-  factory BattleQueue.fromJson(Map<String, dynamic> json) => BattleQueue(
-    id: json['id'] as String,
-    userId: json['userId'] as String?,
-    channel: $enumDecodeNullable(
-      _$BattleQueueChannelEnumMap,
-      (json['channel'] as String?)?.toLowerCase(),
-    ),
-    action: $enumDecodeNullable(
-      _$BattleQueueActionEnumMap,
-      (json['action'] as String?)?.toLowerCase(),
-    ),
-    data: json['data'] == null
-        ? null
-        : BattleQueueData.fromJson(json['data'] as Map<String, dynamic>),
-    createdAt: json['createdAt'] == null
-        ? null
-        : DateTime.parse(json['createdAt'] as String),
-    updatedAt: json['updatedAt'] == null
-        ? null
-        : DateTime.parse(json['updatedAt'] as String),
-    archivedAt: json['archivedAt'] == null
-        ? null
-        : DateTime.parse(json['archivedAt'] as String),
-  );
+  factory BattleQueue.fromJson(Map<String, dynamic> json) {
+    final channel = switch (json['channel'].toLowerCase()) {
+      'lobby' => BattleQueueChannel.lobby,
+      'battle' => BattleQueueChannel.battle,
+      _ => BattleQueueChannel.lobby,
+    };
+    final action = switch (json['action'].toLowerCase()) {
+      'error' => BattleQueueAction.error,
+      'joined' => BattleQueueAction.joined,
+      'left' => BattleQueueAction.left,
+      'ready' => BattleQueueAction.ready,
+      'requested' => BattleQueueAction.requested,
+      'accepted' => BattleQueueAction.accepted,
+      'rejected' => BattleQueueAction.rejected,
+      'watching' => BattleQueueAction.watching,
+      'list' => BattleQueueAction.list,
+      'challenge' => BattleQueueAction.challenge,
+      'cancel' => BattleQueueAction.cancel,
+      'accept' => BattleQueueAction.accept,
+      'reject' => BattleQueueAction.reject,
+      _ => BattleQueueAction.error,
+    };
+    return BattleQueue(
+      id: json['id'] as String,
+      userId: json['userId'] as String?,
+      channel: channel,
+      action: action,
+      data: json['data'] == null
+          ? null
+          : BattleQueueData.fromJson(json['data'] as Map<String, dynamic>),
+      createdAt: json['createdAt'] == null
+          ? null
+          : DateTime.parse(json['createdAt'] as String),
+      updatedAt: json['updatedAt'] == null
+          ? null
+          : DateTime.parse(json['updatedAt'] as String),
+      archivedAt: json['archivedAt'] == null
+          ? null
+          : DateTime.parse(json['archivedAt'] as String),
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -83,7 +97,6 @@ class BattleQueue {
   };
 }
 
-@JsonEnum()
 enum BattleQueueDataAction {
   connect,
   cancel,
@@ -94,9 +107,11 @@ enum BattleQueueDataAction {
   left,
   list,
   error,
+  challenge,
+  accept,
+  reject,
 }
 
-@JsonSerializable()
 class BattleQueueData {
   BattleQueueDataAction? action;
   String? userId;
@@ -120,21 +135,34 @@ class BattleQueueData {
     this.message,
   });
 
-  factory BattleQueueData.fromJson(Map<String, dynamic> json) =>
-      BattleQueueData(
-        action: $enumDecodeNullable(
-          _$BattleQueueDataActionEnumMap,
-          (json['action'] as String?)?.toLowerCase(),
-        ),
-        userId: json['userId'] as String?,
-        userName: json['userName'] as String?,
-        opponentId: json['opponentId'] as String?,
-        opponentName: json['opponentName'] as String?,
-        mnstrId: json['mnstrId'] as String?,
-        data: json['data'] as String?,
-        error: json['error'] as String?,
-        message: json['message'] as String?,
-      );
+  factory BattleQueueData.fromJson(Map<String, dynamic> json) {
+    final action = switch (json['action'].toLowerCase()) {
+      'connect' => BattleQueueDataAction.connect,
+      'cancel' => BattleQueueDataAction.cancel,
+      'ready' => BattleQueueDataAction.ready,
+      'unready' => BattleQueueDataAction.unready,
+      'Start' => BattleQueueDataAction.start,
+      'watch' => BattleQueueDataAction.watch,
+      'left' => BattleQueueDataAction.left,
+      'list' => BattleQueueDataAction.list,
+      'error' => BattleQueueDataAction.error,
+      'challenge' => BattleQueueDataAction.challenge,
+      'accept' => BattleQueueDataAction.accept,
+      'reject' => BattleQueueDataAction.reject,
+      _ => BattleQueueDataAction.error,
+    };
+    return BattleQueueData(
+      action: action,
+      userId: json['userId'] as String?,
+      userName: json['userName'] as String?,
+      opponentId: json['opponentId'] as String?,
+      opponentName: json['opponentName'] as String?,
+      mnstrId: json['mnstrId'] as String?,
+      data: json['data'] as String?,
+      error: json['error'] as String?,
+      message: json['message'] as String?,
+    );
+  }
 
   Map<String, dynamic> toJson() => {
     'action': action?.name.toTitleCase(),

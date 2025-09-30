@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/session_users.dart';
+import '../ui/button.dart';
+import '../utils/color.dart';
 import 'data.dart';
 import 'battle_status.dart';
 
@@ -28,6 +30,62 @@ class BattleQueueView extends ConsumerStatefulWidget {
 
 class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
   List<BattleStatus> _battleStatuses = [];
+  List<BattleQueue> _challenges = [];
+  bool _showChallenges = false;
+
+  void _acceptChallenge(int index) {
+    final user = ref.read(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
+
+    final data = BattleQueueData(
+      action: BattleQueueDataAction.accept,
+      userId: user.value?.id,
+      userName: user.value?.displayName,
+      opponentId: _challenges[index].data?.opponentId,
+      opponentName: _challenges[index].data?.opponentName,
+      message: 'accept challenge',
+    );
+    final battleQueue = BattleQueue(
+      action: BattleQueueAction.accept,
+      userId: user.value?.id,
+      data: data,
+      channel: BattleQueueChannel.lobby,
+    );
+    widget.onSend(battleQueue);
+
+    setState(() {
+      _challenges.removeAt(index);
+    });
+  }
+
+  void _rejectChallenge(int index) {
+    final user = ref.read(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
+
+    final data = BattleQueueData(
+      action: BattleQueueDataAction.reject,
+      userId: user.value?.id,
+      userName: user.value?.displayName,
+      opponentId: _challenges[index].data?.opponentId,
+      opponentName: _challenges[index].data?.opponentName,
+      message: 'reject challenge',
+    );
+    final battleQueue = BattleQueue(
+      action: BattleQueueAction.reject,
+      userId: user.value?.id,
+      data: data,
+      channel: BattleQueueChannel.lobby,
+    );
+    widget.onSend(battleQueue);
+
+    setState(() {
+      _challenges.removeAt(index);
+    });
+  }
 
   void _getBattleStatuses() {
     final user = ref.read(sessionUserProvider);
@@ -59,9 +117,8 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
       return;
     }
 
-    log('message: $message');
-
     final battleQueue = BattleQueue.fromJson(jsonDecode(message));
+    log('battleQueue: ${battleQueue.toJson()}');
 
     switch (battleQueue.action) {
       case BattleQueueAction.joined:
@@ -91,6 +148,14 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
           _battleStatuses = battleStatuses;
         });
         break;
+      case BattleQueueAction.challenge:
+        if (battleQueue.data?.opponentId == user.value?.id) {
+          setState(() {
+            _showChallenges = true;
+            _challenges = [..._challenges, battleQueue];
+          });
+        }
+        break;
       default:
         break;
     }
@@ -101,6 +166,7 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
     super.initState();
     widget.onListen(_handleMessage);
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      log('get battle statuses');
       _getBattleStatuses();
     });
   }
@@ -114,7 +180,208 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
   @override
   Widget build(BuildContext context) {
     return Column(
-      children: [],
+      spacing: 8,
+      children: [
+        if (_showChallenges)
+          ..._challenges.asMap().entries.map(
+            (entry) => _ChallengeWidget(
+              challenge: entry.value,
+              onAccept: () => _acceptChallenge(entry.key),
+              onReject: () => _rejectChallenge(entry.key),
+            ),
+          ),
+        ..._battleStatuses.map(
+          (battleStatus) => _BattleStatusWidget(
+            battleStatus: battleStatus,
+            onSend: widget.onSend,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BattleStatusWidget extends ConsumerStatefulWidget {
+  final BattleStatus battleStatus;
+  final Function(BattleQueue) onSend;
+
+  const _BattleStatusWidget({required this.battleStatus, required this.onSend});
+
+  @override
+  ConsumerState<_BattleStatusWidget> createState() =>
+      _BattleStatusWidgetState();
+}
+
+class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
+  bool _waiting = false;
+
+  void _challenge() {
+    final user = ref.read(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
+
+    setState(() {
+      _waiting = true;
+    });
+
+    final data = BattleQueueData(
+      action: BattleQueueDataAction.challenge,
+      userId: user.value?.id,
+      userName: user.value?.displayName,
+      opponentId: widget.battleStatus.userId,
+      opponentName: widget.battleStatus.displayName,
+      message: 'challenge ${widget.battleStatus.displayName}',
+    );
+    final battleQueue = BattleQueue(
+      action: BattleQueueAction.challenge,
+      userId: user.value?.id,
+      data: data,
+      channel: BattleQueueChannel.lobby,
+    );
+    widget.onSend(battleQueue);
+  }
+
+  void _cancel() {
+    setState(() {
+      _waiting = false;
+    });
+    final data = BattleQueueData(
+      action: BattleQueueDataAction.cancel,
+      userId: widget.battleStatus.userId,
+      userName: widget.battleStatus.displayName,
+      message: 'cancel challenge ${widget.battleStatus.displayName}',
+    );
+    final battleQueue = BattleQueue(
+      action: BattleQueueAction.cancel,
+      userId: widget.battleStatus.userId,
+      data: data,
+      channel: BattleQueueChannel.lobby,
+    );
+    widget.onSend(battleQueue);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final size = MediaQuery.sizeOf(context);
+    final statusColor = switch (widget.battleStatus.status) {
+      BattleStatusState.inQueue => Colors.green,
+      BattleStatusState.inBattle => Colors.yellow,
+      BattleStatusState.watching => Colors.grey,
+      null => Colors.red,
+    };
+    final canBattle = widget.battleStatus.status == BattleStatusState.inQueue;
+
+    return Container(
+      height: 40,
+      width: size.width - 32,
+      padding: const EdgeInsets.all(8),
+      decoration: BoxDecoration(
+        color: darkenColor(theme.primaryColor, 0.3),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        spacing: 8,
+        children: [
+          Icon(
+            Icons.circle,
+            color: statusColor,
+          ),
+          Text(
+            widget.battleStatus.displayName ?? 'unknown',
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.surface,
+            ),
+          ),
+          Spacer(),
+          if (canBattle && !_waiting)
+            UIButton(
+              onPressed: _challenge,
+              text: 'Battle',
+              icon: Icons.play_arrow_rounded,
+              backgroundColor: darkenColor(theme.colorScheme.primary, 0.1),
+            ),
+          if (canBattle && _waiting)
+            UIButton(
+              onPressed: _cancel,
+              text: 'Cancel',
+              icon: Icons.hourglass_empty_rounded,
+              backgroundColor: darkenColor(theme.colorScheme.primary, 0.1),
+            ),
+          if (!canBattle)
+            UIButton(
+              onPressed: () {},
+              text: 'Watch',
+              icon: Icons.remove_red_eye_rounded,
+              backgroundColor: darkenColor(theme.colorScheme.primary, 0.1),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ChallengeWidget extends ConsumerWidget {
+  final BattleQueue challenge;
+  final Function() onAccept;
+  final Function() onReject;
+
+  const _ChallengeWidget({
+    required this.challenge,
+    required this.onAccept,
+    required this.onReject,
+  });
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+
+    return Container(
+      padding: const EdgeInsets.all(8),
+      margin: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: lightenColor(theme.colorScheme.primary, 0.2),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          width: 3,
+          color: theme.colorScheme.primary,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Column(
+        spacing: 16,
+        children: [
+          Text(
+            '${challenge.data?.userName} has challenged you to a battle',
+            style: theme.textTheme.labelLarge?.copyWith(
+              color: theme.colorScheme.onPrimary,
+            ),
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              UIButton(
+                onPressed: onReject,
+                text: 'Reject',
+                icon: Icons.cancel_rounded,
+                backgroundColor: Colors.transparent,
+              ),
+              UIButton(
+                onPressed: onAccept,
+                text: 'Accept',
+                icon: Icons.play_arrow_rounded,
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

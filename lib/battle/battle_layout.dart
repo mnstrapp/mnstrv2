@@ -116,8 +116,6 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
   }
 
   void _sendMessage(BattleQueue battleQueue) {
-    // _log(battleQueue);
-
     _socket?.add(jsonEncode(battleQueue.toJson()));
   }
 
@@ -275,12 +273,9 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
 
 class _BattleMessages extends StatefulWidget {
   final List<BattleMessage> messages;
-  final bool expanded;
 
   const _BattleMessages({
-    super.key,
     required this.messages,
-    this.expanded = false,
   });
 
   @override
@@ -293,7 +288,6 @@ class _BattleMessagesState extends State<_BattleMessages> {
   @override
   void initState() {
     super.initState();
-    _expanded = widget.expanded;
   }
 
   @override
@@ -325,7 +319,7 @@ class _BattleMessagesState extends State<_BattleMessages> {
                 width: size.width - 32,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: darkenColor(theme.primaryColor, 0.3),
+                  color: darkenColor(theme.primaryColor, 0.1),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: InkWell(
@@ -344,14 +338,15 @@ class _BattleMessagesState extends State<_BattleMessages> {
                             ? theme.colorScheme.error
                             : Colors.green,
                       ),
-                      Text(
-                        currentMessage.message,
-                        style: theme.textTheme.labelLarge?.copyWith(
-                          color: theme.colorScheme.surface,
-                          overflow: TextOverflow.ellipsis,
+                      Expanded(
+                        child: Text(
+                          currentMessage.message,
+                          style: theme.textTheme.labelLarge?.copyWith(
+                            color: theme.colorScheme.surface,
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ),
-                      Spacer(),
                       Container(
                         height: 40,
                         width: 40,
