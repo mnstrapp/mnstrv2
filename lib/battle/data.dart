@@ -20,6 +20,7 @@ enum BattleQueueAction {
   cancel,
   accept,
   reject,
+  ping,
 }
 
 class BattleQueue {
@@ -63,6 +64,7 @@ class BattleQueue {
       'cancel' => BattleQueueAction.cancel,
       'accept' => BattleQueueAction.accept,
       'reject' => BattleQueueAction.reject,
+      'ping' => BattleQueueAction.ping,
       _ => BattleQueueAction.error,
     };
     return BattleQueue(
@@ -110,10 +112,12 @@ enum BattleQueueDataAction {
   challenge,
   accept,
   reject,
+  ping,
 }
 
 class BattleQueueData {
   BattleQueueDataAction? action;
+  String? id;
   String? userId;
   String? userName;
   String? opponentId;
@@ -125,6 +129,7 @@ class BattleQueueData {
 
   BattleQueueData({
     this.action,
+    this.id,
     this.userId,
     this.userName,
     this.opponentId,
@@ -149,10 +154,12 @@ class BattleQueueData {
       'challenge' => BattleQueueDataAction.challenge,
       'accept' => BattleQueueDataAction.accept,
       'reject' => BattleQueueDataAction.reject,
+      'ping' => BattleQueueDataAction.ping,
       _ => BattleQueueDataAction.error,
     };
     return BattleQueueData(
       action: action,
+      id: json['id'] as String?,
       userId: json['userId'] as String?,
       userName: json['userName'] as String?,
       opponentId: json['opponentId'] as String?,
@@ -166,6 +173,7 @@ class BattleQueueData {
 
   Map<String, dynamic> toJson() => {
     'action': action?.name.toTitleCase(),
+    'id': id,
     'userId': userId,
     'userName': userName,
     'opponentId': opponentId,

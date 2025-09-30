@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:uuid/uuid.dart';
 
 import '../providers/session_users.dart';
 import '../ui/button.dart';
@@ -118,7 +119,6 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
     }
 
     final battleQueue = BattleQueue.fromJson(jsonDecode(message));
-    log('battleQueue: ${battleQueue.toJson()}');
 
     switch (battleQueue.action) {
       case BattleQueueAction.joined:
@@ -153,6 +153,18 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
           setState(() {
             _showChallenges = true;
             _challenges = [..._challenges, battleQueue];
+          });
+        }
+        break;
+      case BattleQueueAction.cancel:
+        if (battleQueue.data?.opponentId == user.value?.id) {
+          setState(() {
+            _challenges.removeWhere(
+              (challenge) => challenge.data?.id == battleQueue.data?.id,
+            );
+            if (_challenges.isEmpty) {
+              _showChallenges = false;
+            }
           });
         }
         break;
@@ -227,6 +239,7 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
 
     final data = BattleQueueData(
       action: BattleQueueDataAction.challenge,
+      id: Uuid().v4(),
       userId: user.value?.id,
       userName: user.value?.displayName,
       opponentId: widget.battleStatus.userId,
@@ -243,18 +256,26 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
   }
 
   void _cancel() {
+    final user = ref.read(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
+
     setState(() {
       _waiting = false;
     });
     final data = BattleQueueData(
       action: BattleQueueDataAction.cancel,
-      userId: widget.battleStatus.userId,
-      userName: widget.battleStatus.displayName,
+      id: Uuid().v4(),
+      userId: user.value?.id,
+      userName: user.value?.displayName,
+      opponentId: widget.battleStatus.userId,
+      opponentName: widget.battleStatus.displayName,
       message: 'cancel challenge ${widget.battleStatus.displayName}',
     );
     final battleQueue = BattleQueue(
       action: BattleQueueAction.cancel,
-      userId: widget.battleStatus.userId,
+      userId: user.value?.id,
       data: data,
       channel: BattleQueueChannel.lobby,
     );

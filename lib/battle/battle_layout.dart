@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io' show WebSocket;
 import 'dart:convert';
 import 'dart:developer';
@@ -40,6 +41,42 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
   List<BattleMessage> _messages = [];
   List<Function(String)> _listeners = [];
 
+  void _keepConnection() {
+    Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+      if (_socket == null) {
+        timer.cancel();
+        _connect();
+        return;
+      }
+
+      final user = ref.read(sessionUserProvider);
+      if (user.value == null) {
+        return;
+      }
+      final data = BattleQueueData(
+        userId: user.value?.id,
+        userName: user.value?.displayName,
+        message: 'ping',
+        action: BattleQueueDataAction.ping,
+      );
+      final battleQueue = BattleQueue(
+        action: BattleQueueAction.ping,
+        userId: user.value?.id,
+        data: data,
+        channel: BattleQueueChannel.lobby,
+      );
+      try {
+        _socket?.add(jsonEncode(battleQueue.toJson()));
+      } catch (e) {
+        _connect();
+      }
+    });
+  }
+
   void _log(BattleQueue battleQueue) {
     final user = ref.read(sessionUserProvider);
     if (user.value == null) {
@@ -73,15 +110,17 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
   }
 
   Future<void> _handleMessage(String message) async {
-    _broadcast(message);
-
     final user = ref.read(sessionUserProvider);
     if (user.value == null) {
       return;
     }
 
     final battleQueue = BattleQueue.fromJson(jsonDecode(message));
+    if (battleQueue.action == BattleQueueAction.ping) {
+      return;
+    }
     _log(battleQueue);
+    _broadcast(message);
 
     switch (battleQueue.action) {
       case BattleQueueAction.joined:
@@ -173,6 +212,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
               _isJoined = false;
               _reconnect = true;
             });
+            _keepConnection();
           }
         },
         onError: (error) {
