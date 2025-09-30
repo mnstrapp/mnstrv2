@@ -52,6 +52,7 @@ const _$BattleQueueActionEnumMap = {
   BattleQueueAction.rejected: 'rejected',
   BattleQueueAction.cancelled: 'cancelled',
   BattleQueueAction.watching: 'watching',
+  BattleQueueAction.list: 'list',
 };
 
 BattleQueueData _$BattleQueueDataFromJson(Map<String, dynamic> json) =>
@@ -65,6 +66,7 @@ BattleQueueData _$BattleQueueDataFromJson(Map<String, dynamic> json) =>
       opponentId: json['opponentId'] as String?,
       opponentName: json['opponentName'] as String?,
       mnstrId: json['mnstrId'] as String?,
+      data: json['data'] as String?,
       error: json['error'] as String?,
       message: json['message'] as String?,
     );
@@ -77,6 +79,7 @@ Map<String, dynamic> _$BattleQueueDataToJson(BattleQueueData instance) =>
       'opponentId': instance.opponentId,
       'opponentName': instance.opponentName,
       'mnstrId': instance.mnstrId,
+      'data': instance.data,
       'error': instance.error,
       'message': instance.message,
     };
@@ -88,4 +91,7 @@ const _$BattleQueueDataActionEnumMap = {
   BattleQueueDataAction.unready: 'unready',
   BattleQueueDataAction.start: 'start',
   BattleQueueDataAction.watch: 'watch',
+  BattleQueueDataAction.left: 'left',
+  BattleQueueDataAction.list: 'list',
+  BattleQueueDataAction.error: 'error',
 };

@@ -12,6 +12,7 @@ import '../shared/layout_scaffold.dart';
 import '../ui/button.dart';
 import '../utils/color.dart';
 import 'data.dart';
+import 'queue.dart';
 
 enum BattleMessageType {
   message,
@@ -25,27 +26,29 @@ class BattleMessage {
   BattleMessage({this.type = BattleMessageType.message, this.message = ''});
 }
 
-class BattleView extends ConsumerStatefulWidget {
-  const BattleView({super.key});
+class BattleLayoutView extends ConsumerStatefulWidget {
+  const BattleLayoutView({super.key});
 
   @override
-  ConsumerState<BattleView> createState() => _BattleViewState();
+  ConsumerState<BattleLayoutView> createState() => _BattleLayoutViewState();
 }
 
-class _BattleViewState extends ConsumerState<BattleView> {
+class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
   WebSocket? _socket;
   bool _isJoined = false;
   bool _reconnect = false;
   List<BattleMessage> _messages = [];
+  List<Function(String)> _listeners = [];
 
-  Future<void> _handleMessage(String message) async {
+  void _log(BattleQueue battleQueue) {
     final user = ref.read(sessionUserProvider);
     if (user.value == null) {
       return;
     }
+    battleQueue.data?.userName ??= user.value?.displayName;
+    battleQueue.data?.userId ??= user.value?.id;
+    battleQueue.userId ??= user.value?.id;
 
-    final battleQueue = BattleQueue.fromJson(jsonDecode(message));
-    log('[handleMessage] battleQueue: ${battleQueue.toJson()}');
     final newMessage = BattleMessage();
 
     if (battleQueue.data?.message != null) {
@@ -61,6 +64,24 @@ class _BattleViewState extends ConsumerState<BattleView> {
     setState(() {
       _messages = [..._messages, newMessage];
     });
+  }
+
+  void _broadcast(String message) {
+    for (var listener in _listeners) {
+      listener(message);
+    }
+  }
+
+  Future<void> _handleMessage(String message) async {
+    _broadcast(message);
+
+    final user = ref.read(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
+
+    final battleQueue = BattleQueue.fromJson(jsonDecode(message));
+    _log(battleQueue);
 
     switch (battleQueue.action) {
       case BattleQueueAction.joined:
@@ -71,24 +92,33 @@ class _BattleViewState extends ConsumerState<BattleView> {
         }
         break;
       case BattleQueueAction.left:
-        break;
-      case BattleQueueAction.ready:
-        break;
-      case BattleQueueAction.requested:
-        break;
-      case BattleQueueAction.accepted:
-        break;
-      case BattleQueueAction.rejected:
-        break;
-      case BattleQueueAction.cancelled:
-        break;
-      case BattleQueueAction.watching:
-        break;
-      case BattleQueueAction.error:
+        if (battleQueue.data?.userId == user.value?.id) {
+          setState(() {
+            _isJoined = false;
+            _reconnect = true;
+          });
+        }
         break;
       default:
         break;
     }
+  }
+
+  void _addListener(Function(String) listener) {
+    if (_listeners.contains(listener)) {
+      return;
+    }
+    _listeners.add(listener);
+  }
+
+  void _removeListener(Function(String) listener) {
+    _listeners.remove(listener);
+  }
+
+  void _sendMessage(BattleQueue battleQueue) {
+    // _log(battleQueue);
+
+    _socket?.add(jsonEncode(battleQueue.toJson()));
   }
 
   Future<void> _connect() async {
@@ -157,6 +187,8 @@ class _BattleViewState extends ConsumerState<BattleView> {
                   message: 'Socket error: $error',
                 ),
               ];
+              _isJoined = false;
+              _reconnect = true;
             });
           }
         },
@@ -170,51 +202,9 @@ class _BattleViewState extends ConsumerState<BattleView> {
             message: 'Socket error: $e',
           ),
         ];
+        _isJoined = false;
+        _reconnect = true;
       });
-    }
-  }
-
-  Future<void> _sendTestMessage() async {
-    final user = ref.read(sessionUserProvider);
-    if (user.value == null) {
-      if (mounted) {
-        setState(() {
-          _messages = [
-            ..._messages,
-            BattleMessage(
-              type: BattleMessageType.error,
-              message: 'User is null',
-            ),
-          ];
-        });
-      }
-      return;
-    }
-    final data = BattleQueueData(
-      action: BattleQueueDataAction.ready,
-      userId: user.value?.id,
-      userName: user.value?.displayName,
-      message: 'test',
-    );
-    final queue = BattleQueue(
-      action: BattleQueueAction.ready,
-      channel: BattleQueueChannel.lobby,
-      userId: user.value?.id,
-      data: data,
-    );
-    if (mounted) {
-      setState(() {
-        _messages = [
-          ..._messages,
-          BattleMessage(
-            type: BattleMessageType.message,
-            message: 'Sending test message',
-          ),
-        ];
-      });
-    }
-    if (_socket?.readyState == WebSocket.open) {
-      _socket?.add(jsonEncode(queue.toJson()));
     }
   }
 
@@ -269,10 +259,11 @@ class _BattleViewState extends ConsumerState<BattleView> {
                   icon: Icons.refresh,
                 ),
               if (_isJoined)
-                UIButton(
-                  onPressedAsync: _sendTestMessage,
-                  text: 'Send Test Message',
-                  icon: Icons.send,
+                BattleQueueView(
+                  onListen: _addListener,
+                  onSend: _sendMessage,
+                  onLog: _log,
+                  onDispose: _removeListener,
                 ),
             ],
           ),
@@ -357,6 +348,7 @@ class _BattleMessagesState extends State<_BattleMessages> {
                         currentMessage.message,
                         style: theme.textTheme.labelLarge?.copyWith(
                           color: theme.colorScheme.surface,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                       Spacer(),

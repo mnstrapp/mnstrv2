@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../battle/battle.dart';
+import '../battle/battle_layout.dart';
 import '../collect/collect.dart';
 import '../settings/settings.dart';
 import '../ui/button.dart';
@@ -51,7 +51,7 @@ class HomeView extends ConsumerWidget {
         'onPressed': () {
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (context) => BattleView()),
+            MaterialPageRoute(builder: (context) => BattleLayoutView()),
           );
         },
       },

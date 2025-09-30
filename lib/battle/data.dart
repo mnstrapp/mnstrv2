@@ -21,6 +21,7 @@ enum BattleQueueAction {
   rejected,
   cancelled,
   watching,
+  list,
 }
 
 @JsonSerializable()
@@ -90,6 +91,9 @@ enum BattleQueueDataAction {
   unready,
   start,
   watch,
+  left,
+  list,
+  error,
 }
 
 @JsonSerializable()
@@ -100,6 +104,7 @@ class BattleQueueData {
   String? opponentId;
   String? opponentName;
   String? mnstrId;
+  String? data;
   String? error;
   String? message;
 
@@ -110,6 +115,7 @@ class BattleQueueData {
     this.opponentId,
     this.opponentName,
     this.mnstrId,
+    this.data,
     this.error,
     this.message,
   });
@@ -125,6 +131,7 @@ class BattleQueueData {
         opponentId: json['opponentId'] as String?,
         opponentName: json['opponentName'] as String?,
         mnstrId: json['mnstrId'] as String?,
+        data: json['data'] as String?,
         error: json['error'] as String?,
         message: json['message'] as String?,
       );
@@ -136,6 +143,7 @@ class BattleQueueData {
     'opponentId': opponentId,
     'opponentName': opponentName,
     'mnstrId': mnstrId,
+    'data': data,
     'error': error,
     'message': message,
   };
