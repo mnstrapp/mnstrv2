@@ -35,6 +35,16 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
   final Map<String, (BattleQueue, VoidCallback)> _sentChallenges = {};
   bool _showChallenges = false;
 
+  void _onChallenge(BattleQueue battleQueue, VoidCallback callback) {
+    setState(() {
+      _sentChallenges[battleQueue.data!.id!] = (
+        battleQueue,
+        callback,
+      );
+    });
+    widget.onSend(battleQueue);
+  }
+
   void _acceptChallenge(int index) {
     final user = ref.read(sessionUserProvider);
     if (user.value == null) {
@@ -152,13 +162,26 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
         break;
       case BattleQueueAction.challenge:
         if (battleQueue.data?.opponentId == user.value?.id) {
+          log('[challenge handler] adding challenge');
+          log('[challenge handler] id: ${battleQueue.data?.id}');
           setState(() {
             _showChallenges = true;
             _challenges = [..._challenges, battleQueue];
           });
+          final challenge = _challenges.firstWhere(
+            (challenge) => challenge.data?.id == battleQueue.data?.id,
+          );
+          log('[challenge handler] challenges: ${challenge.data?.id}');
         }
         break;
       case BattleQueueAction.cancel:
+        log('[cancel handler] id: ${battleQueue.data?.id}');
+        log(
+          '[cancel handler] userName: ${battleQueue.data?.userName} displayName: ${user.value?.displayName}',
+        );
+        log(
+          '[cancel handler] opponentName: ${battleQueue.data?.opponentName} userName: ${user.value?.displayName}',
+        );
         if (battleQueue.data?.opponentId == user.value?.id) {
           setState(() {
             _challenges.removeWhere(
@@ -182,7 +205,6 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
         }
         break;
       case BattleQueueAction.accept:
-        log('accept ${battleQueue.data?.userName} ${user.value?.displayName}');
         if (battleQueue.data?.userId == user.value?.id) {
           final callback = _sentChallenges[battleQueue.data?.id];
           if (callback != null) {
@@ -191,8 +213,8 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
           setState(() {
             _sentChallenges.remove(battleQueue.data?.id);
           });
-          _getBattleStatuses();
         }
+        _getBattleStatuses();
         break;
       default:
         break;
@@ -232,15 +254,7 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
           (battleStatus) => _BattleStatusWidget(
             battleStatus: battleStatus,
             onSend: widget.onSend,
-            onChallenge: (battleQueue, callback) {
-              setState(() {
-                _sentChallenges[battleQueue.data!.id!] = (
-                  battleQueue,
-                  callback,
-                );
-              });
-              widget.onSend(battleQueue);
-            },
+            onChallenge: _onChallenge,
           ),
         ),
       ],
@@ -266,6 +280,7 @@ class _BattleStatusWidget extends ConsumerStatefulWidget {
 
 class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
   bool _waiting = false;
+  BattleQueue? _challengeMade;
 
   void _challenge() {
     final user = ref.read(sessionUserProvider);
@@ -292,6 +307,7 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
       data: data,
       channel: BattleQueueChannel.lobby,
     );
+    _challengeMade = battleQueue;
     widget.onChallenge(battleQueue, () {
       setState(() {
         _waiting = false;
@@ -305,12 +321,11 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
       return;
     }
 
-    setState(() {
-      _waiting = false;
-    });
+    log('[battle status cancel handler] id: ${_challengeMade?.data?.id}');
+
     final data = BattleQueueData(
       action: BattleQueueDataAction.cancel,
-      id: Uuid().v4(),
+      id: _challengeMade?.data?.id,
       userId: user.value?.id,
       userName: user.value?.displayName,
       opponentId: widget.battleStatus.userId,
@@ -324,6 +339,10 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
       channel: BattleQueueChannel.lobby,
     );
     widget.onSend(battleQueue);
+    setState(() {
+      _waiting = false;
+      _challengeMade = null;
+    });
   }
 
   @override
