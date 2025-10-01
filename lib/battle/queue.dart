@@ -34,6 +34,7 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
   List<BattleQueue> _challenges = [];
   final Map<String, (BattleQueue, VoidCallback)> _sentChallenges = {};
   bool _showChallenges = false;
+  String? _opponentId;
 
   void _onChallenge(BattleQueue battleQueue, VoidCallback callback) {
     setState(() {
@@ -69,6 +70,7 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
 
     setState(() {
       _challenges.removeAt(index);
+      _opponentId = data.userId;
     });
   }
 
@@ -162,26 +164,13 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
         break;
       case BattleQueueAction.challenge:
         if (battleQueue.data?.opponentId == user.value?.id) {
-          log('[challenge handler] adding challenge');
-          log('[challenge handler] id: ${battleQueue.data?.id}');
           setState(() {
             _showChallenges = true;
             _challenges = [..._challenges, battleQueue];
           });
-          final challenge = _challenges.firstWhere(
-            (challenge) => challenge.data?.id == battleQueue.data?.id,
-          );
-          log('[challenge handler] challenges: ${challenge.data?.id}');
         }
         break;
       case BattleQueueAction.cancel:
-        log('[cancel handler] id: ${battleQueue.data?.id}');
-        log(
-          '[cancel handler] userName: ${battleQueue.data?.userName} displayName: ${user.value?.displayName}',
-        );
-        log(
-          '[cancel handler] opponentName: ${battleQueue.data?.opponentName} userName: ${user.value?.displayName}',
-        );
         if (battleQueue.data?.opponentId == user.value?.id) {
           setState(() {
             _challenges.removeWhere(
@@ -212,6 +201,7 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
           }
           setState(() {
             _sentChallenges.remove(battleQueue.data?.id);
+            _opponentId = battleQueue.data?.opponentId;
           });
         }
         _getBattleStatuses();
@@ -255,6 +245,7 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
             battleStatus: battleStatus,
             onSend: widget.onSend,
             onChallenge: _onChallenge,
+            opponentId: _opponentId,
           ),
         ),
       ],
@@ -266,11 +257,13 @@ class _BattleStatusWidget extends ConsumerStatefulWidget {
   final BattleStatus battleStatus;
   final Function(BattleQueue) onSend;
   final Function(BattleQueue, VoidCallback) onChallenge;
+  final String? opponentId;
 
   const _BattleStatusWidget({
     required this.battleStatus,
     required this.onSend,
     required this.onChallenge,
+    this.opponentId,
   });
 
   @override
@@ -356,6 +349,8 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
       null => Colors.red,
     };
     final canBattle = widget.battleStatus.status == BattleStatusState.inQueue;
+    final battling = widget.opponentId == widget.battleStatus.userId;
+    final inBattle = widget.opponentId != null;
 
     return Container(
       height: 40,
@@ -379,12 +374,17 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
             ),
           ),
           Spacer(),
-          if (canBattle && !_waiting)
+          if (canBattle && !_waiting && !battling)
             UIButton(
-              onPressed: _challenge,
+              onPressed: inBattle ? () {} : _challenge,
               text: 'Battle',
               icon: Icons.play_arrow_rounded,
-              backgroundColor: darkenColor(theme.colorScheme.primary, 0.1),
+              backgroundColor: inBattle
+                  ? Colors.grey
+                  : darkenColor(theme.colorScheme.primary, 0.1),
+              foregroundColor: inBattle
+                  ? lightenColor(theme.colorScheme.onSurface, 0.3)
+                  : theme.colorScheme.onPrimary,
             ),
           if (canBattle && _waiting)
             UIButton(
@@ -393,12 +393,24 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
               icon: Icons.hourglass_empty_rounded,
               backgroundColor: darkenColor(theme.colorScheme.primary, 0.1),
             ),
-          if (!canBattle)
+          if (!canBattle && !battling)
             UIButton(
-              onPressed: () {},
+              onPressed: inBattle ? () {} : () {},
               text: 'Watch',
               icon: Icons.remove_red_eye_rounded,
-              backgroundColor: darkenColor(theme.colorScheme.primary, 0.1),
+              backgroundColor: inBattle
+                  ? Colors.grey
+                  : darkenColor(theme.colorScheme.primary, 0.1),
+              foregroundColor: inBattle
+                  ? lightenColor(theme.colorScheme.onSurface, 0.3)
+                  : theme.colorScheme.onPrimary,
+            ),
+          if (battling)
+            Text(
+              'Battling...',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.surface,
+              ),
             ),
         ],
       ),

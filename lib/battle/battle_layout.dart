@@ -326,14 +326,10 @@ class _BattleMessagesState extends State<_BattleMessages> {
   bool _expanded = false;
 
   @override
-  void initState() {
-    super.initState();
-  }
-
-  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final size = MediaQuery.sizeOf(context);
+    final height = size.height * 0.15;
 
     if (widget.messages.isEmpty) {
       return const SizedBox.shrink();
@@ -409,7 +405,7 @@ class _BattleMessagesState extends State<_BattleMessages> {
           ),
           if (_expanded)
             Container(
-              height: size.height * 0.33,
+              height: height,
               padding: const EdgeInsets.all(8),
               child: ClipRRect(
                 borderRadius: BorderRadius.circular(20),
