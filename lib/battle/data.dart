@@ -21,6 +21,8 @@ enum BattleQueueAction {
   accept,
   reject,
   ping,
+  gameStarted,
+  gameEnded,
 }
 
 class BattleQueue {
@@ -65,6 +67,8 @@ class BattleQueue {
       'accept' => BattleQueueAction.accept,
       'reject' => BattleQueueAction.reject,
       'ping' => BattleQueueAction.ping,
+      'gameStarted' => BattleQueueAction.gameStarted,
+      'gameEnded' => BattleQueueAction.gameEnded,
       _ => BattleQueueAction.error,
     };
     return BattleQueue(
@@ -113,6 +117,8 @@ enum BattleQueueDataAction {
   accept,
   reject,
   ping,
+  gameStarted,
+  gameEnded,
 }
 
 class BattleQueueData {
@@ -120,9 +126,10 @@ class BattleQueueData {
   String? id;
   String? userId;
   String? userName;
+  String? userMnstrId;
   String? opponentId;
   String? opponentName;
-  String? mnstrId;
+  String? opponentMnstrId;
   String? data;
   String? error;
   String? message;
@@ -132,9 +139,10 @@ class BattleQueueData {
     this.id,
     this.userId,
     this.userName,
+    this.userMnstrId,
     this.opponentId,
     this.opponentName,
-    this.mnstrId,
+    this.opponentMnstrId,
     this.data,
     this.error,
     this.message,
@@ -155,6 +163,8 @@ class BattleQueueData {
       'accept' => BattleQueueDataAction.accept,
       'reject' => BattleQueueDataAction.reject,
       'ping' => BattleQueueDataAction.ping,
+      'gameStarted' => BattleQueueDataAction.gameStarted,
+      'gameEnded' => BattleQueueDataAction.gameEnded,
       _ => BattleQueueDataAction.error,
     };
     return BattleQueueData(
@@ -162,9 +172,10 @@ class BattleQueueData {
       id: json['id'] as String?,
       userId: json['userId'] as String?,
       userName: json['userName'] as String?,
+      userMnstrId: json['userMnstrId'] as String?,
       opponentId: json['opponentId'] as String?,
       opponentName: json['opponentName'] as String?,
-      mnstrId: json['mnstrId'] as String?,
+      opponentMnstrId: json['opponentMnstrId'] as String?,
       data: json['data'] as String?,
       error: json['error'] as String?,
       message: json['message'] as String?,
@@ -178,7 +189,8 @@ class BattleQueueData {
     'userName': userName,
     'opponentId': opponentId,
     'opponentName': opponentName,
-    'mnstrId': mnstrId,
+    'userMnstrId': userMnstrId,
+    'opponentMnstrId': opponentMnstrId,
     'data': data,
     'error': error,
     'message': message,
