@@ -12,30 +12,37 @@ Future<Map<String, dynamic>> graphql({
   Map<String, String> headers = const {},
 }) async {
   final finalHeaders = {'Content-Type': 'application/json', ...headers};
-  final response = await http.post(
-    Uri.parse(url),
-    headers: finalHeaders,
-    body: jsonEncode({
-      'query': query,
-      'variables': variables,
-    }),
-  );
+  try {
+    final response = await http.post(
+      Uri.parse(url),
+      headers: finalHeaders,
+      body: jsonEncode({
+        'query': query,
+        'variables': variables,
+      }),
+    );
 
-  if (response.statusCode == HttpStatus.ok) {
-    try {
-      return jsonDecode(response.body);
-    } catch (e) {
-      log(
-        'Failed to parse response: ${response.statusCode}, ${response.body}, $e',
-      );
+    if (response.statusCode == HttpStatus.ok) {
+      try {
+        return jsonDecode(response.body);
+      } catch (e) {
+        log(
+          'Failed to parse response: ${response.statusCode}, ${response.body}, $e',
+        );
+        throw Exception(
+          'Failed to parse response: ${response.statusCode}, ${response.body}, $e',
+        );
+      }
+    } else {
+      log('Failed to load data: ${response.statusCode}, ${response.body}');
       throw Exception(
-        'Failed to parse response: ${response.statusCode}, ${response.body}, $e',
+        'Failed to load data: ${response.statusCode}, ${response.body}',
       );
     }
-  } else {
-    log('Failed to load data: ${response.statusCode}, ${response.body}');
+  } catch (e, stackTrace) {
+    log('Failed to load data: $e $stackTrace');
     throw Exception(
-      'Failed to load data: ${response.statusCode}, ${response.body}',
+      'Failed to load data: $e $stackTrace',
     );
   }
 }
