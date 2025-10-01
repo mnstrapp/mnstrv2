@@ -431,8 +431,13 @@ class _BattleMessagesState extends State<_BattleMessages> {
                                       ? theme.colorScheme.error
                                       : Colors.green,
                                 ),
-                                Text(
-                                  message.message,
+                                Expanded(
+                                  child: Text(
+                                    message.message,
+                                    style: theme.textTheme.labelLarge?.copyWith(
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),

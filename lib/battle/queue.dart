@@ -32,6 +32,7 @@ class BattleQueueView extends ConsumerStatefulWidget {
 class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
   List<BattleStatus> _battleStatuses = [];
   List<BattleQueue> _challenges = [];
+  final Map<String, (BattleQueue, VoidCallback)> _sentChallenges = {};
   bool _showChallenges = false;
 
   void _acceptChallenge(int index) {
@@ -42,10 +43,10 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
 
     final data = BattleQueueData(
       action: BattleQueueDataAction.accept,
-      userId: user.value?.id,
-      userName: user.value?.displayName,
-      opponentId: _challenges[index].data?.opponentId,
-      opponentName: _challenges[index].data?.opponentName,
+      userId: _challenges[index].data?.userId,
+      userName: _challenges[index].data?.userName,
+      opponentId: user.value?.id,
+      opponentName: user.value?.displayName,
       message: 'accept challenge',
     );
     final battleQueue = BattleQueue(
@@ -69,10 +70,11 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
 
     final data = BattleQueueData(
       action: BattleQueueDataAction.reject,
-      userId: user.value?.id,
-      userName: user.value?.displayName,
-      opponentId: _challenges[index].data?.opponentId,
-      opponentName: _challenges[index].data?.opponentName,
+      id: _challenges[index].data?.id,
+      userId: _challenges[index].data?.userId,
+      userName: _challenges[index].data?.userName,
+      opponentId: user.value?.id,
+      opponentName: user.value?.displayName,
       message: 'reject challenge',
     );
     final battleQueue = BattleQueue(
@@ -168,6 +170,30 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
           });
         }
         break;
+      case BattleQueueAction.reject:
+        if (battleQueue.data?.userId == user.value?.id) {
+          final callback = _sentChallenges[battleQueue.data?.id];
+          if (callback != null) {
+            callback.$2();
+          }
+          setState(() {
+            _sentChallenges.remove(battleQueue.data?.id);
+          });
+        }
+        break;
+      case BattleQueueAction.accept:
+        log('accept ${battleQueue.data?.userName} ${user.value?.displayName}');
+        if (battleQueue.data?.userId == user.value?.id) {
+          final callback = _sentChallenges[battleQueue.data?.id];
+          if (callback != null) {
+            callback.$2();
+          }
+          setState(() {
+            _sentChallenges.remove(battleQueue.data?.id);
+          });
+          _getBattleStatuses();
+        }
+        break;
       default:
         break;
     }
@@ -206,6 +232,15 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
           (battleStatus) => _BattleStatusWidget(
             battleStatus: battleStatus,
             onSend: widget.onSend,
+            onChallenge: (battleQueue, callback) {
+              setState(() {
+                _sentChallenges[battleQueue.data!.id!] = (
+                  battleQueue,
+                  callback,
+                );
+              });
+              widget.onSend(battleQueue);
+            },
           ),
         ),
       ],
@@ -216,8 +251,13 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
 class _BattleStatusWidget extends ConsumerStatefulWidget {
   final BattleStatus battleStatus;
   final Function(BattleQueue) onSend;
+  final Function(BattleQueue, VoidCallback) onChallenge;
 
-  const _BattleStatusWidget({required this.battleStatus, required this.onSend});
+  const _BattleStatusWidget({
+    required this.battleStatus,
+    required this.onSend,
+    required this.onChallenge,
+  });
 
   @override
   ConsumerState<_BattleStatusWidget> createState() =>
@@ -252,7 +292,11 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
       data: data,
       channel: BattleQueueChannel.lobby,
     );
-    widget.onSend(battleQueue);
+    widget.onChallenge(battleQueue, () {
+      setState(() {
+        _waiting = false;
+      });
+    });
   }
 
   void _cancel() {

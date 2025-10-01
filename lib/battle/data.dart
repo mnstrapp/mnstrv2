@@ -45,12 +45,12 @@ class BattleQueue {
   }) : id = id ?? uuid.Uuid().v4();
 
   factory BattleQueue.fromJson(Map<String, dynamic> json) {
-    final channel = switch (json['channel'].toLowerCase()) {
+    final channel = switch (json['channel']) {
       'lobby' => BattleQueueChannel.lobby,
       'battle' => BattleQueueChannel.battle,
       _ => BattleQueueChannel.lobby,
     };
-    final action = switch (json['action'].toLowerCase()) {
+    final action = switch (json['action']) {
       'error' => BattleQueueAction.error,
       'joined' => BattleQueueAction.joined,
       'left' => BattleQueueAction.left,
@@ -90,8 +90,8 @@ class BattleQueue {
   Map<String, dynamic> toJson() => {
     'id': id,
     'userId': userId,
-    'channel': channel?.name.toTitleCase(),
-    'action': action?.name.toTitleCase(),
+    'channel': channel?.name,
+    'action': action?.name,
     'data': data?.toJson(),
     'createdAt': createdAt?.toIso8601String(),
     'updatedAt': updatedAt?.toIso8601String(),
@@ -141,7 +141,7 @@ class BattleQueueData {
   });
 
   factory BattleQueueData.fromJson(Map<String, dynamic> json) {
-    final action = switch (json['action'].toLowerCase()) {
+    final action = switch (json['action']) {
       'connect' => BattleQueueDataAction.connect,
       'cancel' => BattleQueueDataAction.cancel,
       'ready' => BattleQueueDataAction.ready,
@@ -172,7 +172,7 @@ class BattleQueueData {
   }
 
   Map<String, dynamic> toJson() => {
-    'action': action?.name.toTitleCase(),
+    'action': action?.name,
     'id': id,
     'userId': userId,
     'userName': userName,
