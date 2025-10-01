@@ -39,8 +39,6 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
     final theme = Theme.of(context);
     final size = MediaQuery.of(context).size;
 
-    final isMobile = Platform.isIOS || Platform.isAndroid;
-
     final backgroundColor = lightenColor(widget.color ?? theme.primaryColor);
     final margin = EdgeInsets.only(left: 32, right: 32);
     final height = 40.0;
