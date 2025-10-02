@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../battle/battle_layout.dart';
+import '../battle/layout.dart';
 import '../collect/collect.dart';
 import '../settings/settings.dart';
 import '../ui/button.dart';
@@ -26,7 +26,7 @@ class HomeView extends ConsumerWidget {
     final buttons = [
       if (!Platform.isLinux)
         {
-          'icon': Icons.library_add_rounded,
+          'icon': Icons.qr_code_rounded,
           'text': 'Catch',
           'onPressed': () {
             Navigator.push(

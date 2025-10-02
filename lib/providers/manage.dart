@@ -7,13 +7,13 @@ import '../providers/auth.dart';
 import '../models/monster.dart';
 import '../utils/graphql.dart';
 
-final manageProvider = AsyncNotifierProvider<ManageNotifier, List<Monster>>(
+final manageProvider = NotifierProvider<ManageNotifier, List<Monster>>(
   () => ManageNotifier(),
 );
 
-class ManageNotifier extends AsyncNotifier<List<Monster>> {
+class ManageNotifier extends Notifier<List<Monster>> {
   @override
-  Future<List<Monster>> build() async {
+  List<Monster> build() {
     return [];
   }
 
@@ -71,7 +71,7 @@ class ManageNotifier extends AsyncNotifier<List<Monster>> {
       for (var e in response['data']['mnstrs']['list']) {
         monsters.add(Monster.fromJson(e as Map<String, dynamic>));
       }
-      state = AsyncData(monsters);
+      state = monsters;
       return null;
     } catch (e, stackTrace) {
       log('[getMonsters] catch error: $e');
