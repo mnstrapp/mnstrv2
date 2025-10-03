@@ -7,6 +7,7 @@ import '../models/user.dart';
 import '../providers/session_users.dart';
 import '../shared/mnstr_list.dart';
 import '../ui/button.dart';
+import '../utils/color.dart';
 import 'data.dart';
 import '../models/monster.dart';
 import 'game_data.dart';
@@ -155,27 +156,37 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
 
     return chooseMnstr && mnstrs.isNotEmpty
         ? SizedBox(
-            height: size.height - 96,
-            width: size.width - 32,
+            height: size.height,
+            width: size.width,
             child: MnstrList(
               showName: false,
               monsters: mnstrs,
               onTap: _chooseMnstr,
               overlayBuilder: (mnstr) {
-                return UIButton(
-                  height: 40,
-                  onPressed: () {
-                    _chooseMnstr(mnstr);
-                  },
-                  icon: Icons.play_arrow_rounded,
-                  backgroundColor: Colors.green,
+                final m = mnstr.toMonsterModel();
+                final color = darkenColor(
+                  Color.lerp(m.color, Colors.black, 0.1) ?? Colors.black,
+                  0.3,
+                );
+                return Stack(
+                  children: [
+                    Positioned(
+                      bottom: 16,
+                      left: 16,
+                      right: 16,
+                      child: UIButton(
+                        height: 48,
+                        onPressed: () {
+                          _chooseMnstr(mnstr);
+                        },
+                        icon: Icons.play_arrow_rounded,
+                        backgroundColor: color,
+                        text: 'Choose ${mnstr.mnstrName}',
+                      ),
+                    ),
+                  ],
                 );
               },
-              overlayPositioning: const EdgeInsets.only(
-                bottom: 16,
-                left: 16,
-                right: 16,
-              ),
             ),
           )
         : waiting

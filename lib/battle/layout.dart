@@ -298,61 +298,61 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
     }
 
     return LayoutScaffold(
-      child: SafeArea(
-        child: _isLoading
-            ? const Center(child: CircularProgressIndicator())
-            : Container(
-                margin: const EdgeInsets.only(
-                  top: 48,
-                  left: 16,
-                  right: 16,
-                  bottom: 0,
-                ),
-                width: size.width,
-                child: Column(
-                  spacing: 8,
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (_messages.isNotEmpty)
-                      _BattleMessages(messages: _messages),
-                    if (_reconnect)
-                      UIButton(
-                        onPressedAsync: () async {
-                          setState(() {
-                            _reconnect = false;
-                            _messages = [
-                              ..._messages,
-                              BattleMessage(
-                                type: BattleMessageType.message,
-                                message: 'Reconnecting to battle queue',
-                              ),
-                            ];
-                          });
-                          await _connect();
-                        },
-                        text: 'Reconnect',
-                        icon: Icons.refresh,
+      child: _isInBattle
+          ? BattleVsView(
+              onListen: _addListener,
+              onSend: _sendMessage,
+              onLog: _log,
+              onDispose: _removeListener,
+              battleQueue: _battleQueue,
+            )
+          : SafeArea(
+              child: _isLoading
+                  ? const Center(child: CircularProgressIndicator())
+                  : Container(
+                      margin: const EdgeInsets.only(
+                        top: 48,
+                        left: 16,
+                        right: 16,
+                        bottom: 0,
                       ),
-                    if (_isJoined && !_isInBattle)
-                      BattleQueueView(
-                        onListen: _addListener,
-                        onSend: _sendMessage,
-                        onLog: _log,
-                        onDispose: _removeListener,
+                      width: size.width,
+                      child: Column(
+                        spacing: 8,
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          if (_messages.isNotEmpty)
+                            _BattleMessages(messages: _messages),
+                          if (_reconnect)
+                            UIButton(
+                              onPressedAsync: () async {
+                                setState(() {
+                                  _reconnect = false;
+                                  _messages = [
+                                    ..._messages,
+                                    BattleMessage(
+                                      type: BattleMessageType.message,
+                                      message: 'Reconnecting to battle queue',
+                                    ),
+                                  ];
+                                });
+                                await _connect();
+                              },
+                              text: 'Reconnect',
+                              icon: Icons.refresh,
+                            ),
+                          if (_isJoined && !_isInBattle)
+                            BattleQueueView(
+                              onListen: _addListener,
+                              onSend: _sendMessage,
+                              onLog: _log,
+                              onDispose: _removeListener,
+                            ),
+                        ],
                       ),
-                    if (_isInBattle)
-                      BattleVsView(
-                        onListen: _addListener,
-                        onSend: _sendMessage,
-                        onLog: _log,
-                        onDispose: _removeListener,
-                        battleQueue: _battleQueue,
-                      ),
-                  ],
-                ),
-              ),
-      ),
+                    ),
+            ),
     );
   }
 }
@@ -376,6 +376,7 @@ class _BattleMessagesState extends State<_BattleMessages> {
     final theme = Theme.of(context);
     final size = MediaQuery.sizeOf(context);
     final height = size.height * 0.15;
+    final backgroundColor = LayoutScaffold.getBackgroundColor(context);
 
     if (widget.messages.isEmpty) {
       return const SizedBox.shrink();
@@ -387,7 +388,7 @@ class _BattleMessagesState extends State<_BattleMessages> {
     return Container(
       width: size.width,
       decoration: BoxDecoration(
-        color: lightenColor(theme.primaryColor, 0.3),
+        color: lightenColor(backgroundColor ?? theme.primaryColor, 0.3),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -401,7 +402,10 @@ class _BattleMessagesState extends State<_BattleMessages> {
                 width: size.width - 32,
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  color: darkenColor(theme.primaryColor, 0.1),
+                  color: darkenColor(
+                    backgroundColor ?? theme.primaryColor,
+                    0.1,
+                  ),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: InkWell(

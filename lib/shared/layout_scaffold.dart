@@ -41,6 +41,10 @@ class LayoutScaffold extends ConsumerStatefulWidget {
     of(context).setBackgroundColor(color);
   }
 
+  static Color? getBackgroundColor(BuildContext context) {
+    return of(context).getBackgroundColor();
+  }
+
   static void setUseSizedBox(BuildContext context, bool useSizedBox) {
     of(context).setUseSizedBox(useSizedBox);
   }
@@ -82,6 +86,10 @@ class LayoutScaffoldState extends ConsumerState<LayoutScaffold> {
     setState(() {
       _backgroundColor = color;
     });
+  }
+
+  Color? getBackgroundColor() {
+    return _backgroundColor;
   }
 
   void setUseSizedBox(bool useSizedBox) {

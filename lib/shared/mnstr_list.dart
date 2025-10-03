@@ -54,6 +54,10 @@ class _MnstrListState extends State<MnstrList> {
           : (pixels / calculatedHeight).round();
     }
 
+    if (index >= (widget.monsters.length - 1)) {
+      index = widget.monsters.length - 1;
+    }
+
     final monster = widget.monsters[index];
     final m = monster.toMonsterModel();
     final color = Color.lerp(m.color, Colors.white, 0.25);
@@ -123,6 +127,7 @@ class _MnstrListState extends State<MnstrList> {
               widget.overlayBuilder?.call(widget.monsters.first) ??
               widget.overlay,
           overlayPositioning: widget.overlayPositioning,
+          showName: widget.showName,
         ),
       );
     } else if (isTablet) {
@@ -145,6 +150,7 @@ class _MnstrListState extends State<MnstrList> {
                           overlay:
                               widget.overlayBuilder?.call(m) ?? widget.overlay,
                           overlayPositioning: widget.overlayPositioning,
+                          showName: widget.showName,
                         ),
                       ),
                     )
@@ -164,6 +170,7 @@ class _MnstrListState extends State<MnstrList> {
             onTap: widget.onTap,
             overlay: widget.overlayBuilder?.call(m) ?? widget.overlay,
             overlayPositioning: widget.overlayPositioning,
+            showName: widget.showName,
           ),
         ),
       );
