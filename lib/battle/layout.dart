@@ -1,11 +1,10 @@
-import 'dart:async';
-import 'dart:io' show WebSocket;
 import 'dart:convert';
 import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mnstrv2/providers/auth.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../config/endpoints.dart';
 import '../providers/manage.dart';
@@ -38,7 +37,7 @@ class BattleLayoutView extends ConsumerStatefulWidget {
 }
 
 class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
-  WebSocket? _socket;
+  WebSocketChannel? _socket;
   bool _isLoading = false;
   bool _isJoined = false;
   bool _reconnect = false;
@@ -48,38 +47,37 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
   BattleQueue? _battleQueue;
 
   void _keepConnection() {
-    Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (!mounted) {
-        timer.cancel();
-        return;
-      }
-      if (_socket == null) {
-        timer.cancel();
-        _connect();
-        return;
-      }
+    if (!mounted) {
+      return;
+    }
+    if (_socket == null) {
+      _connect();
+      return;
+    }
 
-      final user = ref.read(sessionUserProvider);
-      if (user.value == null) {
-        return;
-      }
-      final data = BattleQueueData(
-        userId: user.value?.id,
-        userName: user.value?.displayName,
-        message: 'ping',
-        action: BattleQueueDataAction.ping,
-      );
-      final battleQueue = BattleQueue(
-        action: BattleQueueAction.ping,
-        userId: user.value?.id,
-        data: data,
-        channel: BattleQueueChannel.lobby,
-      );
-      try {
-        _socket?.add(jsonEncode(battleQueue.toJson()));
-      } catch (e) {
-        _connect();
-      }
+    final user = ref.read(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
+    final data = BattleQueueData(
+      userId: user.value?.id,
+      userName: user.value?.displayName,
+      message: 'ping',
+      action: BattleQueueDataAction.ping,
+    );
+    final battleQueue = BattleQueue(
+      action: BattleQueueAction.ping,
+      userId: user.value?.id,
+      data: data,
+      channel: BattleQueueChannel.lobby,
+    );
+    try {
+      _socket?.sink.add(jsonEncode(battleQueue.toJson()));
+    } catch (e) {
+      _connect();
+    }
+    Future.delayed(const Duration(seconds: 1), () {
+      _keepConnection();
     });
   }
 
@@ -171,7 +169,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
   }
 
   void _sendMessage(BattleQueue battleQueue) {
-    _socket?.add(jsonEncode(battleQueue.toJson()));
+    _socket?.sink.add(jsonEncode(battleQueue.toJson()));
   }
 
   Future<void> _connect() async {
@@ -180,7 +178,6 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
       log('session is null');
       return;
     }
-    final headers = {'Authorization': 'Bearer ${session.token}'};
 
     try {
       if (mounted) {
@@ -193,9 +190,8 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
             ),
           ];
         });
-        _socket = await WebSocket.connect(
-          '$wsUrl/battle_queue',
-          headers: headers,
+        _socket = await WebSocketChannel.connect(
+          Uri.parse('$wsUrl/battle_queue/${session.token}'),
         );
       }
       if (mounted) {
@@ -209,7 +205,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
           ];
         });
       }
-      _socket?.listen(
+      _socket?.stream.listen(
         (message) {
           if (mounted) {
             _handleMessage(message);
@@ -267,7 +263,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
 
   @override
   void dispose() {
-    _socket?.close();
+    _socket?.sink.close();
     super.dispose();
   }
 

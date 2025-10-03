@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flame_audio/flame_audio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../providers/sounds.dart';
 
@@ -23,6 +24,7 @@ class BackgroundMusic {
   }
 
   Future<void> play() async {
+    if (kIsWeb || kIsWasm) return;
     if (_muted) return;
     if (_paused) {
       _paused = false;
@@ -69,6 +71,7 @@ class ButtonSound {
   }
 
   Future<void> play() async {
+    if (kIsWeb || kIsWasm) return;
     if (_muted) return;
     FlameAudio.play(_buttonSound);
   }
@@ -97,6 +100,7 @@ class CollectSound {
   }
 
   Future<void> play() async {
+    if (kIsWeb || kIsWasm) return;
     if (_muted) return;
     _collectSoundPlayer = await FlameAudio.play(_collectSound, volume: 0.15);
   }

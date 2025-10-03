@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -24,17 +22,16 @@ class HomeView extends ConsumerWidget {
     final displayPortrait = (size.width > size.height);
 
     final buttons = [
-      if (!Platform.isLinux)
-        {
-          'icon': Icons.qr_code_rounded,
-          'text': 'Catch',
-          'onPressed': () {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => Collect()),
-            );
-          },
+      {
+        'icon': Icons.qr_code_rounded,
+        'text': 'Catch',
+        'onPressed': () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => Collect()),
+          );
         },
+      },
       {
         'icon': Icons.view_carousel_rounded,
         'text': 'MNSTRs',

@@ -27,6 +27,9 @@ dependencies:
   flame_audio: ^2.11.8
   change_case: ^2.2.0
   motor: ^1.0.1
+  web_socket_channel: ^3.0.3
+  platform: ^3.1.6
+  universal_platform: ^1.1.0
 
 dev_dependencies:
   flutter_test:

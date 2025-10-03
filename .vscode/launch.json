@@ -11,7 +11,8 @@
             "flutterMode": "debug",
             "args": [
                 "--dart-define=API_HOST=http://localhost:8080",
-                "--dart-define=WS_HOST=ws://localhost:8080"
+                "--dart-define=WS_HOST=ws://localhost:8080",
+                "--web-port=9000"
             ]
         },
         {
@@ -21,7 +22,8 @@
             "flutterMode": "profile",
             "args": [
                 "--dart-define=API_HOST=http://localhost:8080",
-                "--dart-define=WS_HOST=ws://localhost:8080"
+                "--dart-define=WS_HOST=ws://localhost:8080",
+                "--web-port=9000"
             ]
         },
         {
@@ -31,26 +33,36 @@
             "flutterMode": "release",
             "args": [
                 "--dart-define=API_HOST=http://localhost:8080",
-                "--dart-define=WS_HOST=ws://localhost:8080"
+                "--dart-define=WS_HOST=ws://localhost:8080",
+                "--web-port=9000"
             ]
         },
         {
             "name": "prod",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "debug"
+            "flutterMode": "debug",
+            "args": [
+                "--web-port=9000"
+            ]
         },
         {
             "name": "prod (profile mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "profile"
+            "flutterMode": "profile",
+            "args": [
+                "--web-port=9000"
+            ]
         },
         {
             "name": "prod (release mode)",
             "request": "launch",
             "type": "dart",
-            "flutterMode": "release"
+            "flutterMode": "release",
+            "args": [
+                "--web-port=9000"
+            ]
         }
     ]
 }

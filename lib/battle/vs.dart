@@ -4,7 +4,6 @@ import 'dart:developer' show log;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../models/user.dart';
 import '../providers/session_users.dart';
 import '../shared/mnstr_list.dart';
 import '../ui/button.dart';
@@ -38,61 +37,71 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
   Monster? _opponentMnstr;
   List<Monster>? _challengerMnstrs;
   List<Monster>? _opponentMnstrs;
+  String? _userId;
+  String? _userName;
   String? _battleId;
   String? _challengerId;
   String? _opponentId;
-  User? _user;
   GameData? _gameData;
   BattleQueue? _battleQueue;
+  bool _choosingMnstr = true;
+  bool _inBattle = false;
+  bool _isChallenger = false;
 
   Future<void> _initUser() async {
-    final user = await getSessionUser();
+    final user = ref.read(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
     setState(() {
-      _user = user;
+      _userId = user.value?.id;
+      _userName = user.value?.displayName;
+      _isChallenger = _battleQueue?.data?.userId == user.value?.id;
     });
   }
 
-  bool _isChallenger() {
-    return _battleQueue?.data?.userId == _user?.id;
-  }
+  Future<void> _chooseMnstr(Monster mnstr) async {
+    final isChallenger = _isChallenger;
 
-  void _chooseMnstr(Monster mnstr) {
     setState(() {
-      if (_isChallenger()) {
+      if (isChallenger) {
         _challengerMnstr = mnstr;
       } else {
         _opponentMnstr = mnstr;
       }
+      _choosingMnstr = false;
     });
-    final battleQueue = _buildBattleQueue();
+    final battleQueue = await _buildBattleQueue();
     widget.onSend(battleQueue);
   }
 
-  BattleQueue _buildBattleQueue() {
-    log('[build battle queue] _user: ${_user?.toJson()}');
+  Future<BattleQueue> _buildBattleQueue() async {
+    log('[build battle queue] _isChallenger: $_isChallenger');
+    log('[build battle queue] _userId: $_userId');
+    log('[build battle queue] _userName: $_userName');
+    log('[build battle queue] _battleQueue: ${_battleQueue?.data?.toJson()}');
+
     final data = BattleQueueData(
       action: BattleQueueDataAction.mnstrChosen,
-      userId: _isChallenger() ? _user?.id : _battleQueue!.data!.opponentId,
-      userName: _isChallenger()
-          ? _user?.displayName
+      userId: _isChallenger ? _userId : _battleQueue!.data!.opponentId,
+      userName: _isChallenger ? _userName : _battleQueue!.data!.opponentName,
+      opponentId: !_isChallenger ? _userId : _battleQueue!.data?.opponentId,
+      opponentName: !_isChallenger
+          ? _userName
           : _battleQueue!.data!.opponentName,
-      opponentId: !_isChallenger() ? _battleQueue!.data?.opponentId : _user?.id,
-      opponentName: !_isChallenger()
-          ? _battleQueue!.data!.opponentName
-          : _user?.displayName,
-      userMnstrId: _isChallenger()
+      userMnstrId: _isChallenger
           ? _challengerMnstr?.id
           : _battleQueue!.data!.userMnstrId,
-      opponentMnstrId: !_isChallenger()
+      opponentMnstrId: !_isChallenger
           ? _opponentMnstr?.id
           : _battleQueue!.data!.opponentMnstrId,
       message: 'Mnstr chosen',
       data: jsonEncode(
         GameData(
-          challengerMnstr: _isChallenger()
+          challengerMnstr: _isChallenger
               ? _challengerMnstr
               : _gameData?.challengerMnstr,
-          opponentMnstr: !_isChallenger()
+          opponentMnstr: !_isChallenger
               ? _opponentMnstr
               : _gameData?.opponentMnstr,
           battleId: _gameData?.battleId,
@@ -101,33 +110,30 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
     );
     return BattleQueue(
       action: BattleQueueAction.mnstrChosen,
-      userId: _user?.id,
+      userId: _userId,
       data: data,
       channel: BattleQueueChannel.battle,
     );
   }
 
   Future<void> _handleMessage(String message) async {
-    final user = ref.read(sessionUserProvider);
-    if (user.value == null) {
-      return;
-    }
-
     final battleQueue = BattleQueue.fromJson(jsonDecode(message));
     if (battleQueue.action == BattleQueueAction.ping) {
       return;
     }
+
+    if (battleQueue.data!.userId != _userId &&
+        battleQueue.data!.opponentId != _userId) {
+      log('[handle message] not user or opponent:');
+      log('\tchallenger: ${battleQueue.data?.userId != _userId}');
+      log('\topponent: ${battleQueue.data?.opponentId != _userId}');
+      log('battle queue: $message');
+      return;
+    }
+
     setState(() {
       _battleQueue = battleQueue;
     });
-
-    log('[mnstr chosen] battle queue: $message');
-
-    if (battleQueue.data!.userId != user.value?.id ||
-        battleQueue.data!.opponentId != user.value?.id) {
-      log('[mnstr chosen] not user or opponent');
-      return;
-    }
 
     switch (battleQueue.action) {
       case BattleQueueAction.mnstrChosen:
@@ -144,6 +150,10 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
           }
           if (gameData.opponentMnstr != null) {
             _opponentMnstr = gameData.opponentMnstr;
+          }
+          _gameData = gameData;
+          if (_challengerMnstr != null && _opponentMnstr != null) {
+            _inBattle = true;
           }
         });
         log(
@@ -162,14 +172,14 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
     _battleQueue = widget.battleQueue;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _initUser();
-      final data = jsonDecode(_battleQueue!.data!.data!);
-      if (_isChallenger()) {
-        _challengerId = _user?.id;
+      if (_isChallenger) {
+        _challengerId = _userId;
         _opponentId = _battleQueue!.data!.opponentId;
       } else {
         _challengerId = _battleQueue!.data!.userId;
-        _opponentId = _user?.id;
+        _opponentId = _userId;
       }
+      final data = jsonDecode(_battleQueue!.data!.data!);
       _gameData = GameData.fromJson(data);
       _challengerMnstr = _gameData?.challengerMnstr;
       _opponentMnstr = _gameData?.opponentMnstr;
@@ -180,9 +190,15 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
   }
 
   @override
+  void dispose() {
+    widget.onDispose(_handleMessage);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     List<Monster> mnstrs = [];
-    if (_isChallenger()) {
+    if (_isChallenger) {
       mnstrs = _challengerMnstrs ?? [];
     } else {
       mnstrs = _opponentMnstrs ?? [];
@@ -192,20 +208,13 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
       return const Center(child: CircularProgressIndicator());
     }
 
-    bool chooseMnstr = false;
-    if (_isChallenger() && _challengerMnstr == null) {
-      chooseMnstr = true;
-    } else if (!_isChallenger() && _opponentMnstr == null) {
-      chooseMnstr = true;
-    }
+    bool choosingMnstr = _choosingMnstr;
 
-    final waiting = (_challengerMnstr == null || _opponentMnstr == null)
-        ? true
-        : false;
+    final inBattle = _inBattle;
 
     final size = MediaQuery.sizeOf(context);
 
-    return chooseMnstr && mnstrs.isNotEmpty
+    return choosingMnstr && mnstrs.isNotEmpty
         ? SizedBox(
             height: size.height,
             width: size.width,
@@ -232,7 +241,7 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
                         },
                         icon: Icons.play_arrow_rounded,
                         backgroundColor: color,
-                        text: 'Choose ${mnstr.mnstrName}',
+                        text: 'Choose',
                       ),
                     ),
                   ],
@@ -240,8 +249,60 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
               },
             ),
           )
-        : waiting
-        ? const Center(child: Text('Waiting for opponent...'))
-        : const Center(child: Text('Game time!'));
+        : inBattle
+        ? BattleVsInGameView(
+            gameData: _gameData!,
+            onListen: widget.onListen,
+            onSend: widget.onSend,
+            onLog: widget.onLog,
+            onDispose: widget.onDispose,
+          )
+        : const Center(child: Text('Waiting for opponent...'));
+  }
+}
+
+class BattleVsInGameView extends ConsumerStatefulWidget {
+  final GameData gameData;
+  final Function(Function(String)) onListen;
+  final Function(BattleQueue) onSend;
+  final Function(BattleQueue) onLog;
+  final Function(Function(String)) onDispose;
+
+  const BattleVsInGameView({
+    super.key,
+    required this.gameData,
+    required this.onListen,
+    required this.onSend,
+    required this.onLog,
+    required this.onDispose,
+  });
+
+  @override
+  ConsumerState<BattleVsInGameView> createState() => _BattleVsInGameViewState();
+}
+
+class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
+  GameData? _gameData;
+
+  void _handleMessage(String message) {}
+
+  @override
+  void initState() {
+    super.initState();
+    _gameData = widget.gameData;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      widget.onListen(_handleMessage);
+    });
+  }
+
+  @override
+  void dispose() {
+    widget.onDispose(_handleMessage);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: Text('Game time!'));
   }
 }

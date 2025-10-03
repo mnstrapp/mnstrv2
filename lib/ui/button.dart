@@ -78,7 +78,6 @@ class _UIButtonState extends State<UIButton> {
     final textStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
       color: widget.foregroundColor ?? Theme.of(context).colorScheme.onPrimary,
       fontSize: fontSize,
-      overflow: TextOverflow.ellipsis,
     );
 
     return Padding(
@@ -95,40 +94,36 @@ class _UIButtonState extends State<UIButton> {
           ),
           child: Padding(
             padding: EdgeInsets.all(padding),
-            child: SizedBox(
-              width: widget.width,
-              height: widget.height,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: widget.center
-                    ? MainAxisAlignment.center
-                    : widget.icon != null
-                    ? MainAxisAlignment.start
-                    : MainAxisAlignment.center,
-                children: _isLoading
-                    ? [CircularProgressIndicator(color: widget.foregroundColor)]
-                    : [
-                        if (widget.icon != null && !widget.center) ...[
-                          SizedBox(width: padding),
-                          Icon(
-                            widget.icon!,
-                            size: iconSize,
-                            color: widget.foregroundColor,
-                          ),
-                          SizedBox(width: padding),
-                        ],
-                        if (widget.icon != null && widget.center) ...[
-                          Icon(
-                            widget.icon!,
-                            size: iconSize,
-                            color: widget.foregroundColor,
-                          ),
-                          SizedBox(width: padding),
-                        ],
-                        if (widget.text != null)
-                          Text(widget.text!, style: textStyle),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: widget.center
+                  ? MainAxisAlignment.center
+                  : widget.icon != null
+                  ? MainAxisAlignment.start
+                  : MainAxisAlignment.center,
+              children: _isLoading
+                  ? [CircularProgressIndicator(color: widget.foregroundColor)]
+                  : [
+                      if (widget.icon != null && !widget.center) ...[
+                        SizedBox(width: padding),
+                        Icon(
+                          widget.icon!,
+                          size: iconSize,
+                          color: widget.foregroundColor,
+                        ),
+                        SizedBox(width: padding),
                       ],
-              ),
+                      if (widget.icon != null && widget.center) ...[
+                        Icon(
+                          widget.icon!,
+                          size: iconSize,
+                          color: widget.foregroundColor,
+                        ),
+                        SizedBox(width: padding),
+                      ],
+                      if (widget.text != null)
+                        Text(widget.text!, style: textStyle),
+                    ],
             ),
           ),
         ),

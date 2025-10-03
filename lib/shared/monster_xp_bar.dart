@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:universal_platform/universal_platform.dart';
 
 import '../providers/session_users.dart';
 import '../utils/color.dart';
@@ -137,7 +136,9 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
               if (Navigator.of(context).canPop() && !widget.disableBackButton)
                 Positioned(
                   top: 0,
-                  left: (Platform.isIOS || Platform.isAndroid ? -4 : 0),
+                  left: UniversalPlatform.isIOS || UniversalPlatform.isAndroid
+                      ? -4
+                      : 0,
                   bottom: 0,
                   child: IconButton(
                     style: IconButton.styleFrom(
