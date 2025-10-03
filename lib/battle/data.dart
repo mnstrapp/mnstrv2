@@ -23,6 +23,7 @@ enum BattleQueueAction {
   ping,
   gameStarted,
   gameEnded,
+  mnstrChosen,
 }
 
 class BattleQueue {
@@ -69,6 +70,7 @@ class BattleQueue {
       'ping' => BattleQueueAction.ping,
       'gameStarted' => BattleQueueAction.gameStarted,
       'gameEnded' => BattleQueueAction.gameEnded,
+      'mnstrChosen' => BattleQueueAction.mnstrChosen,
       _ => BattleQueueAction.error,
     };
     return BattleQueue(
@@ -119,6 +121,7 @@ enum BattleQueueDataAction {
   ping,
   gameStarted,
   gameEnded,
+  mnstrChosen,
 }
 
 class BattleQueueData {
@@ -165,6 +168,7 @@ class BattleQueueData {
       'ping' => BattleQueueDataAction.ping,
       'gameStarted' => BattleQueueDataAction.gameStarted,
       'gameEnded' => BattleQueueDataAction.gameEnded,
+      'mnstrChosen' => BattleQueueDataAction.mnstrChosen,
       _ => BattleQueueDataAction.error,
     };
     return BattleQueueData(

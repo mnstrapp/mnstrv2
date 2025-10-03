@@ -58,7 +58,7 @@ class MonsterContainer extends StatelessWidget {
           ),
           if (showName)
             Positioned(
-              bottom: size.height * 0.05,
+              bottom: 16,
               left: 0,
               right: 0,
               child: Center(

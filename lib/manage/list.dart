@@ -9,7 +9,7 @@ import '../shared/empty_message.dart';
 import '../shared/layout_scaffold.dart';
 import '../shared/monster_container.dart';
 import '../ui/button.dart';
-import '../ui/mnstr_list.dart';
+import '../shared/mnstr_list.dart';
 import '../utils/color.dart';
 import 'edit.dart';
 
@@ -51,89 +51,90 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
   Widget build(BuildContext context) {
     final monsters = ref.watch(manageProvider);
     final size = MediaQuery.sizeOf(context);
-    final theme = Theme.of(context);
 
     if (monsters.isEmpty && !_isLoading) {
       return const EmptyMessage();
     }
 
-    return _isLoading
-        ? LayoutScaffold(
-            child: const Center(child: CircularProgressIndicator()),
-          )
-        : MnstrList(
-            monsters: monsters,
-            onTap: (monster) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => ManageEditView(monster: monster),
-                ),
-              );
-            },
-            overlayBuilder: (monster) {
-              final m = monster.toMonsterModel();
-              final backgroundColor = lightenColor(
-                Color.lerp(
-                      m.color,
+    return LayoutScaffold(
+      child: _isLoading
+          ? const Center(
+              child: CircularProgressIndicator(),
+            )
+          : MnstrList(
+              monsters: monsters,
+              onTap: (monster) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => ManageEditView(monster: monster),
+                  ),
+                );
+              },
+              overlayBuilder: (monster) {
+                final m = monster.toMonsterModel();
+                final backgroundColor = lightenColor(
+                  Color.lerp(
+                        m.color,
+                        Colors.black,
+                        0.5,
+                      ) ??
                       Colors.black,
-                      0.5,
-                    ) ??
-                    Colors.black,
-                0.1,
-              );
-              final container = MonsterContainer(monster: m, size: size);
+                  0.1,
+                );
+                final container = MonsterContainer(monster: m, size: size);
 
-              return Stack(
-                children: [
-                  Positioned(
-                    bottom: 130,
-                    left: 13,
-                    child: UIButton(
-                      onPressedAsync: () async {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) =>
-                                ManageEditView(monster: monster),
-                          ),
-                        );
-                      },
-                      icon: Icons.edit,
-                      backgroundColor: backgroundColor,
+                return Stack(
+                  children: [
+                    Positioned(
+                      bottom: 116,
+                      left: 13,
+                      child: UIButton(
+                        onPressedAsync: () async {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  ManageEditView(monster: monster),
+                            ),
+                          );
+                        },
+                        icon: Icons.edit,
+                        backgroundColor: backgroundColor,
+                      ),
                     ),
-                  ),
-                  Positioned(
-                    bottom: 130,
-                    right: 13,
-                    child: UIButton(
-                      onPressedAsync: () async {
-                        final image = await _screenshotController
-                            .captureFromWidget(
-                              container,
-                            );
-                        await SharePlus.instance.share(
-                          ShareParams(
-                            subject: 'Sharing my MNSTR!',
-                            text: '👋 Check out my MNSTR, ${monster.name}!',
-                            downloadFallbackEnabled: true,
-                            files: [
-                              XFile.fromData(
-                                image,
-                                mimeType: 'image/png',
-                                name: '${monster.name}.png',
-                              ),
-                            ],
-                          ),
-                        );
-                      },
-                      icon: Icons.share,
-                      backgroundColor: backgroundColor,
+                    Positioned(
+                      bottom: 116,
+                      right: 13,
+                      child: UIButton(
+                        onPressedAsync: () async {
+                          final image = await _screenshotController
+                              .captureFromWidget(
+                                container,
+                              );
+                          await SharePlus.instance.share(
+                            ShareParams(
+                              subject: 'Sharing my MNSTR!',
+                              text: '👋 Check out my MNSTR, ${monster.name}!',
+                              downloadFallbackEnabled: true,
+                              files: [
+                                XFile.fromData(
+                                  image,
+                                  mimeType: 'image/png',
+                                  name: '${monster.name}.png',
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        icon: Icons.share,
+                        backgroundColor: backgroundColor,
+                      ),
                     ),
-                  ),
-                ],
-              );
-            },
-          );
+                  ],
+                );
+              },
+            ),
+    );
   }
 }

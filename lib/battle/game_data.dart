@@ -1,38 +1,48 @@
+import 'dart:developer';
+
 import '../models/monster.dart';
 
 class GameData {
-  final String battleId;
+  final String? battleId;
   final Monster? challengerMnstr;
   final List<Monster>? challengerMnstrs;
   final Monster? opponentMnstr;
   final List<Monster>? opponentMnstrs;
 
   GameData({
-    required this.battleId,
-    required this.challengerMnstr,
-    required this.challengerMnstrs,
-    required this.opponentMnstr,
-    required this.opponentMnstrs,
+    this.battleId,
+    this.challengerMnstr,
+    this.challengerMnstrs,
+    this.opponentMnstr,
+    this.opponentMnstrs,
   });
 
   factory GameData.fromJson(Map<String, dynamic> json) {
+    log('[game data from json] $json');
+    final challengerMnstrs = <Monster>[];
+
+    if (json['challengerMnstrs'] != null) {
+      for (var e in json['challengerMnstrs']) {
+        challengerMnstrs.add(Monster.fromJson(e));
+      }
+    }
+
+    final opponentMnstrs = <Monster>[];
+    if (json['opponentMnstrs'] != null) {
+      for (var e in json['opponentMnstrs']) {
+        opponentMnstrs.add(Monster.fromJson(e));
+      }
+    }
+
     return GameData(
-      battleId: json['battleId'],
+      battleId: json['battleId'] as String?,
       challengerMnstr: json['challengerMnstr'] != null
           ? Monster.fromJson(json['challengerMnstr'])
           : null,
-      challengerMnstrs: json['challengerMnstrs'] != null
-          ? (json['challengerMnstrs'] as List)
-                .map((e) => Monster.fromJson(e))
-                .toList()
-          : null,
+      challengerMnstrs: challengerMnstrs,
+      opponentMnstrs: opponentMnstrs,
       opponentMnstr: json['opponentMnstr'] != null
           ? Monster.fromJson(json['opponentMnstr'])
-          : null,
-      opponentMnstrs: json['opponentMnstrs'] != null
-          ? (json['opponentMnstrs'] as List)
-                .map((e) => Monster.fromJson(e))
-                .toList()
           : null,
     );
   }

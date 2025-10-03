@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
@@ -65,10 +66,18 @@ class MonsterModel {
   Monster toMonster() => Monster(id: id, name: name, qrCode: qrCode);
 
   static MonsterModel fromMonster(Monster monster) {
-    MonsterModel model = MonsterModel.fromQRCode(monster.qrCode!);
-    model.id = monster.id;
-    model.name = monster.name;
-    return model;
+    try {
+      if (monster.qrCode == null) {
+        return MonsterModel();
+      }
+      MonsterModel model = MonsterModel.fromQRCode(monster.qrCode!);
+      model.id = monster.id;
+      model.name = monster.name;
+      return model;
+    } catch (e) {
+      log('[fromMonster] error: $e');
+      return MonsterModel();
+    }
   }
 }
 

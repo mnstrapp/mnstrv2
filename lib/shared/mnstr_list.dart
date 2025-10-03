@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../models/monster.dart';
-import '../shared/layout_scaffold.dart';
-import '../shared/monster_container.dart';
+import 'layout_scaffold.dart';
+import 'monster_container.dart';
 import '../theme.dart';
 
 class MnstrList extends StatefulWidget {
@@ -10,6 +10,7 @@ class MnstrList extends StatefulWidget {
   final Function(Monster)? onTap;
   final Widget? overlay;
   final Widget Function(Monster)? overlayBuilder;
+  final bool showName;
 
   const MnstrList({
     super.key,
@@ -17,6 +18,7 @@ class MnstrList extends StatefulWidget {
     this.onTap,
     this.overlay,
     this.overlayBuilder,
+    this.showName = true,
   });
 
   @override
@@ -25,16 +27,14 @@ class MnstrList extends StatefulWidget {
 
 class _MnstrListState extends State<MnstrList> {
   final ScrollController _scrollController = ScrollController();
-  int _currentIndex = 0;
   double _currentPixels = 0;
-  Color? _backgroundColor;
 
   void _setBackgroundColor() {
     if (widget.monsters.isEmpty) {
       return;
     }
 
-    int index = _currentIndex;
+    int index = 0;
     final size = MediaQuery.sizeOf(context);
     final isTablet = size.width > mobileBreakpoint;
     double pixels = _currentPixels;
@@ -57,10 +57,15 @@ class _MnstrListState extends State<MnstrList> {
     final color = Color.lerp(m.color, Colors.white, 0.25);
 
     setState(() {
-      _backgroundColor = color;
-      _currentIndex = index;
       _currentPixels = pixels;
     });
+
+    try {
+      final layoutScaffold = LayoutScaffold.of(context);
+      layoutScaffold.setBackgroundColor(color!);
+    } catch (e) {
+      debugPrint('Error setting background color: $e');
+    }
   }
 
   void _scrollPage(DragEndDetails details) {
@@ -107,7 +112,17 @@ class _MnstrListState extends State<MnstrList> {
     final mnstrs = <Widget>[];
     final mnstrsTablet = <Widget>[];
 
-    if (isTablet) {
+    if (widget.monsters.length == 1) {
+      mnstrs.add(
+        MnstrView(
+          monster: widget.monsters.first,
+          onTap: widget.onTap,
+          overlay:
+              widget.overlayBuilder?.call(widget.monsters.first) ??
+              widget.overlay,
+        ),
+      );
+    } else if (isTablet) {
       final row = <Monster>[];
       for (var entry in widget.monsters.asMap().entries) {
         final index = entry.key;
@@ -116,13 +131,17 @@ class _MnstrListState extends State<MnstrList> {
           if (row.isNotEmpty) {
             mnstrsTablet.add(
               Row(
+                mainAxisSize: MainAxisSize.min,
                 children: row
                     .map(
-                      (m) => MnstrView(
-                        monster: m,
-                        onTap: widget.onTap,
-                        overlay:
-                            widget.overlayBuilder?.call(m) ?? widget.overlay,
+                      (m) => SizedBox(
+                        width: size.width / 2,
+                        child: MnstrView(
+                          monster: m,
+                          onTap: widget.onTap,
+                          overlay:
+                              widget.overlayBuilder?.call(m) ?? widget.overlay,
+                        ),
                       ),
                     )
                     .toList(),
@@ -145,16 +164,13 @@ class _MnstrListState extends State<MnstrList> {
       );
     }
 
-    return LayoutScaffold(
-      backgroundColor: _backgroundColor,
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        child: GestureDetector(
-          onVerticalDragEnd: _scrollPage,
-          child: isTablet
-              ? Column(children: mnstrsTablet)
-              : Column(children: mnstrs),
-        ),
+    return SingleChildScrollView(
+      controller: _scrollController,
+      child: GestureDetector(
+        onVerticalDragEnd: _scrollPage,
+        child: isTablet && widget.monsters.length > 1
+            ? Column(children: mnstrsTablet)
+            : Column(children: mnstrs),
       ),
     );
   }
@@ -164,12 +180,14 @@ class MnstrView extends StatelessWidget {
   final Monster monster;
   final Function(Monster)? onTap;
   final Widget? overlay;
+  final bool showName;
 
   const MnstrView({
     super.key,
     required this.monster,
     this.onTap,
     this.overlay,
+    this.showName = true,
   });
 
   @override
@@ -181,7 +199,7 @@ class MnstrView extends StatelessWidget {
       onTap: () => onTap?.call(monster),
       child: Stack(
         children: [
-          MonsterContainer(monster: m, size: size),
+          MonsterContainer(monster: m, size: size, showName: showName),
           if (overlay != null)
             Positioned(
               top: 0,
