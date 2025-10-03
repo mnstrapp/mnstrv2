@@ -4,6 +4,7 @@ enum Stat { health, attack, defense, speed, magic, intelligence }
 
 class Monster {
   String? id;
+  String? userId;
   String? mnstrName;
   String? mnstrDescription;
   String? mnstrQrCode;
@@ -22,9 +23,13 @@ class Monster {
   int? maxSpeed;
   int? currentMagic;
   int? maxMagic;
+  DateTime? createdAt;
+  DateTime? updatedAt;
+  DateTime? archivedAt;
 
   Monster({
     this.id,
+    this.userId,
     this.mnstrName,
     this.mnstrDescription,
     this.mnstrQrCode,
@@ -42,11 +47,15 @@ class Monster {
     this.maxSpeed,
     this.currentMagic,
     this.maxMagic,
+    this.createdAt,
+    this.updatedAt,
+    this.archivedAt,
   });
 
   factory Monster.fromJson(Map<String, dynamic> json) {
     return Monster(
       id: json['id'],
+      userId: json['userId'],
       mnstrName: json['mnstrName'],
       mnstrDescription: json['mnstrDescription'],
       mnstrQrCode: json['mnstrQrCode'],
@@ -64,11 +73,21 @@ class Monster {
       maxSpeed: json['maxSpeed'],
       currentMagic: json['currentMagic'],
       maxMagic: json['maxMagic'],
+      createdAt: json['createdAt'] == null
+          ? null
+          : DateTime.parse(json['createdAt']),
+      updatedAt: json['updatedAt'] == null
+          ? null
+          : DateTime.parse(json['updatedAt']),
+      archivedAt: json['archivedAt'] == null
+          ? null
+          : DateTime.parse(json['archivedAt']),
     );
   }
 
   Map<String, dynamic> toJson() => {
     'id': id,
+    'userId': userId,
     'mnstrName': mnstrName,
     'mnstrDescription': mnstrDescription,
     'mnstrQrCode': mnstrQrCode,
@@ -86,9 +105,13 @@ class Monster {
     'maxSpeed': maxSpeed,
     'currentMagic': currentMagic,
     'maxMagic': maxMagic,
+    'createdAt': createdAt?.toIso8601String(),
+    'updatedAt': updatedAt?.toIso8601String(),
+    'archivedAt': archivedAt?.toIso8601String(),
   };
 
   Monster copyWith({
+    String? userId,
     String? mnstrName,
     String? mnstrDescription,
     int? currentLevel,
@@ -105,8 +128,12 @@ class Monster {
     int? maxSpeed,
     int? currentMagic,
     int? maxMagic,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+    DateTime? archivedAt,
   }) => Monster(
     id: id,
+    userId: userId ?? this.userId,
     mnstrName: mnstrName ?? this.mnstrName,
     mnstrDescription: mnstrDescription ?? this.mnstrDescription,
     mnstrQrCode: mnstrQrCode,
@@ -124,10 +151,17 @@ class Monster {
     maxSpeed: maxSpeed ?? this.maxSpeed,
     currentMagic: currentMagic ?? this.currentMagic,
     maxMagic: maxMagic ?? this.maxMagic,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    archivedAt: archivedAt ?? this.archivedAt,
   );
 
   MonsterModel toMonsterModel() => MonsterModel.fromMonster(this);
 
-  static Monster fromMonsterModel(MonsterModel model) =>
-      Monster(id: model.id, mnstrName: model.name, mnstrQrCode: model.qrCode);
+  static Monster fromMonsterModel(MonsterModel model) => Monster(
+    id: model.id,
+    userId: model.userId,
+    mnstrName: model.name,
+    mnstrQrCode: model.qrCode,
+  );
 }

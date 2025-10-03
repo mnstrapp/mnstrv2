@@ -125,7 +125,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
     if (battleQueue.action == BattleQueueAction.ping) {
       return;
     }
-    _log(battleQueue);
+    // _log(battleQueue);
     _broadcast(message);
 
     switch (battleQueue.action) {
@@ -141,6 +141,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
           setState(() {
             _isJoined = false;
             _reconnect = true;
+            _isInBattle = false;
           });
         }
         break;
@@ -226,8 +227,8 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
               ];
               _isJoined = false;
               _reconnect = true;
+              _isInBattle = false;
             });
-            _keepConnection();
           }
         },
         onError: (error) {
@@ -242,6 +243,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
               ];
               _isJoined = false;
               _reconnect = true;
+              _isInBattle = false;
             });
           }
         },
@@ -257,8 +259,10 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
         ];
         _isJoined = false;
         _reconnect = true;
+        _isInBattle = false;
       });
     }
+    _keepConnection();
   }
 
   @override
@@ -279,12 +283,12 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
         setState(() {
           _isLoading = false;
         });
+        final mnstrs = ref.read(manageProvider);
+        if (mnstrs.isEmpty) {
+          return;
+        }
+        _connect();
       }
-      final mnstrs = ref.read(manageProvider);
-      if (mnstrs.isEmpty) {
-        return;
-      }
-      _connect();
     });
   }
 

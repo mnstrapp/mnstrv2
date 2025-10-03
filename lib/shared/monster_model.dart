@@ -8,6 +8,7 @@ import '../models/monster.dart';
 
 class MonsterModel {
   String? id;
+  String? userId;
   String? name;
   String? qrCode;
   Color? color;
@@ -19,6 +20,7 @@ class MonsterModel {
 
   MonsterModel({
     this.id,
+    this.userId,
     this.name,
     this.qrCode,
     this.color,
@@ -63,7 +65,8 @@ class MonsterModel {
   Map<MonsterPart, Widget?> get monsterParts =>
       MonsterParts(monster: this).monsterParts;
 
-  Monster toMonster() => Monster(id: id, mnstrName: name, mnstrQrCode: qrCode);
+  Monster toMonster() =>
+      Monster(id: id, userId: userId, mnstrName: name, mnstrQrCode: qrCode);
 
   static MonsterModel fromMonster(Monster monster) {
     try {
@@ -72,6 +75,7 @@ class MonsterModel {
       }
       MonsterModel model = MonsterModel.fromQRCode(monster.mnstrQrCode!);
       model.id = monster.id;
+      model.userId = monster.userId;
       model.name = monster.mnstrName;
       return model;
     } catch (e) {

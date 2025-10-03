@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer' show log;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -42,6 +43,7 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
   String? _opponentId;
   User? _user;
   GameData? _gameData;
+  BattleQueue? _battleQueue;
 
   Future<void> _initUser() async {
     final user = await getSessionUser();
@@ -51,7 +53,7 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
   }
 
   bool _isChallenger() {
-    return widget.battleQueue!.data?.userId == _user?.id;
+    return _battleQueue?.data?.userId == _user?.id;
   }
 
   void _chooseMnstr(Monster mnstr) {
@@ -62,30 +64,28 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
         _opponentMnstr = mnstr;
       }
     });
-    _buildBattleQueue();
+    final battleQueue = _buildBattleQueue();
+    widget.onSend(battleQueue);
   }
 
   BattleQueue _buildBattleQueue() {
+    log('[build battle queue] _user: ${_user?.toJson()}');
     final data = BattleQueueData(
       action: BattleQueueDataAction.mnstrChosen,
-      userId: _isChallenger()
-          ? _user?.id
-          : widget.battleQueue!.data?.opponentId,
+      userId: _isChallenger() ? _user?.id : _battleQueue!.data!.opponentId,
       userName: _isChallenger()
           ? _user?.displayName
-          : widget.battleQueue!.data?.opponentName,
-      opponentId: !_isChallenger()
-          ? widget.battleQueue!.data?.opponentId
-          : _user?.id,
+          : _battleQueue!.data!.opponentName,
+      opponentId: !_isChallenger() ? _battleQueue!.data?.opponentId : _user?.id,
       opponentName: !_isChallenger()
-          ? widget.battleQueue!.data?.opponentName
+          ? _battleQueue!.data!.opponentName
           : _user?.displayName,
       userMnstrId: _isChallenger()
           ? _challengerMnstr?.id
-          : widget.battleQueue!.data?.userMnstrId,
+          : _battleQueue!.data!.userMnstrId,
       opponentMnstrId: !_isChallenger()
           ? _opponentMnstr?.id
-          : widget.battleQueue!.data?.opponentMnstrId,
+          : _battleQueue!.data!.opponentMnstrId,
       message: 'Mnstr chosen',
       data: jsonEncode(
         GameData(
@@ -107,17 +107,67 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
     );
   }
 
+  Future<void> _handleMessage(String message) async {
+    final user = ref.read(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
+
+    final battleQueue = BattleQueue.fromJson(jsonDecode(message));
+    if (battleQueue.action == BattleQueueAction.ping) {
+      return;
+    }
+    setState(() {
+      _battleQueue = battleQueue;
+    });
+
+    log('[mnstr chosen] battle queue: $message');
+
+    if (battleQueue.data!.userId != user.value?.id ||
+        battleQueue.data!.opponentId != user.value?.id) {
+      log('[mnstr chosen] not user or opponent');
+      return;
+    }
+
+    switch (battleQueue.action) {
+      case BattleQueueAction.mnstrChosen:
+        if (battleQueue.data!.data == null) {
+          log('[mnstr chosen] data is null');
+          break;
+        }
+        final data = jsonDecode(battleQueue.data!.data!);
+        final gameData = GameData.fromJson(data);
+        log('[mnstr chosen] game data: ${gameData.toJson()}');
+        setState(() {
+          if (gameData.challengerMnstr != null) {
+            _challengerMnstr = gameData.challengerMnstr;
+          }
+          if (gameData.opponentMnstr != null) {
+            _opponentMnstr = gameData.opponentMnstr;
+          }
+        });
+        log(
+          '[mnstr chosen] challenger mnstr set: ${_challengerMnstr?.toJson()}',
+        );
+        log('[mnstr chosen] opponent mnstr set: ${_opponentMnstr?.toJson()}');
+        break;
+      default:
+        break;
+    }
+  }
+
   @override
   void initState() {
     super.initState();
+    _battleQueue = widget.battleQueue;
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       await _initUser();
-      final data = jsonDecode(widget.battleQueue!.data!.data!);
+      final data = jsonDecode(_battleQueue!.data!.data!);
       if (_isChallenger()) {
         _challengerId = _user?.id;
-        _opponentId = widget.battleQueue!.data?.opponentId;
+        _opponentId = _battleQueue!.data!.opponentId;
       } else {
-        _challengerId = widget.battleQueue!.data?.userId;
+        _challengerId = _battleQueue!.data!.userId;
         _opponentId = _user?.id;
       }
       _gameData = GameData.fromJson(data);
@@ -125,6 +175,7 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
       _opponentMnstr = _gameData?.opponentMnstr;
       _challengerMnstrs = _gameData?.challengerMnstrs;
       _opponentMnstrs = _gameData?.opponentMnstrs;
+      widget.onListen(_handleMessage);
     });
   }
 

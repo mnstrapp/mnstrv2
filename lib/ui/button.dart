@@ -95,36 +95,40 @@ class _UIButtonState extends State<UIButton> {
           ),
           child: Padding(
             padding: EdgeInsets.all(padding),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              mainAxisAlignment: widget.center
-                  ? MainAxisAlignment.center
-                  : widget.icon != null
-                  ? MainAxisAlignment.start
-                  : MainAxisAlignment.center,
-              children: _isLoading
-                  ? [CircularProgressIndicator(color: widget.foregroundColor)]
-                  : [
-                      if (widget.icon != null && !widget.center) ...[
-                        SizedBox(width: padding),
-                        Icon(
-                          widget.icon!,
-                          size: iconSize,
-                          color: widget.foregroundColor,
-                        ),
-                        SizedBox(width: padding),
+            child: SizedBox(
+              width: widget.width,
+              height: widget.height,
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: widget.center
+                    ? MainAxisAlignment.center
+                    : widget.icon != null
+                    ? MainAxisAlignment.start
+                    : MainAxisAlignment.center,
+                children: _isLoading
+                    ? [CircularProgressIndicator(color: widget.foregroundColor)]
+                    : [
+                        if (widget.icon != null && !widget.center) ...[
+                          SizedBox(width: padding),
+                          Icon(
+                            widget.icon!,
+                            size: iconSize,
+                            color: widget.foregroundColor,
+                          ),
+                          SizedBox(width: padding),
+                        ],
+                        if (widget.icon != null && widget.center) ...[
+                          Icon(
+                            widget.icon!,
+                            size: iconSize,
+                            color: widget.foregroundColor,
+                          ),
+                          SizedBox(width: padding),
+                        ],
+                        if (widget.text != null)
+                          Text(widget.text!, style: textStyle),
                       ],
-                      if (widget.icon != null && widget.center) ...[
-                        Icon(
-                          widget.icon!,
-                          size: iconSize,
-                          color: widget.foregroundColor,
-                        ),
-                        SizedBox(width: padding),
-                      ],
-                      if (widget.text != null)
-                        Text(widget.text!, style: textStyle),
-                    ],
+              ),
             ),
           ),
         ),
