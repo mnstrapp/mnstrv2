@@ -27,15 +27,16 @@ class CollectNotifier extends Notifier<Monster?> {
 
     final document = r'''
     mutation createMonster(
-      $qrCode: String!,
+      $mnstrQrCode: String!,
     ) {
       mnstrs {
         collect(
-          qrCode: $qrCode,
+          mnstrQrCode: $mnstrQrCode,
         ) {
           id
-          name
-          qrCode
+          mnstrName
+          mnstrDescription
+          mnstrQrCode
           currentLevel
           currentExperience
           currentHealth
@@ -55,7 +56,7 @@ class CollectNotifier extends Notifier<Monster?> {
     }
     ''';
 
-    final variables = {'qrCode': monster.qrCode ?? ''};
+    final variables = {'mnstrQrCode': monster.mnstrQrCode ?? ''};
     log('[createMonster] variables: ${jsonEncode(variables)}');
 
     final headers = {

@@ -29,9 +29,9 @@ class ManageNotifier extends Notifier<List<Monster>> {
       mnstrs {
         list {
           id
-          name
-          description
-          qrCode
+          mnstrName
+          mnstrDescription
+          mnstrQrCode
           currentLevel
           currentExperience
           currentHealth
@@ -100,13 +100,13 @@ class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
     }
 
     final document = r'''
-    query getMonsterByQRCode($qrCode: String!) {
+    query getMonsterByQRCode($mnstrQrCode: String!) {
       mnstrs {
-        qrCode(qrCode: $qrCode) {
+        qrCode(mnstrQrCode: $mnstrQrCode) {
           id
-          name
-          description
-          qrCode
+          mnstrName
+          mnstrDescription
+          mnstrQrCode
           currentLevel
           currentExperience
           currentHealth
@@ -126,7 +126,7 @@ class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
     }
     ''';
 
-    final variables = {'qrCode': qrCode};
+    final variables = {'mnstrQrCode': qrCode};
 
     final headers = {
       'Content-Type': 'application/json',
@@ -186,45 +186,45 @@ class ManageEditNotifier extends Notifier<Monster?> {
     final document = r'''
     mutation editMonster(
       $id: String!,
-      $name: String,
-      $description: String,
-      $qrCode: String,
-      $health: Int,
+      $mnstrName: String,
+      $mnstrDescription: String,
+      $mnstrQrCode: String,
+      $currentHealth: Int,
       $maxHealth: Int,
-      $attack: Int,
+      $currentAttack: Int,
       $maxAttack: Int,
-      $defense: Int,
+      $currentDefense: Int,
       $maxDefense: Int,
-      $intelligence: Int,
+      $currentIntelligence: Int,
       $maxIntelligence: Int,
-      $speed: Int,
+      $currentSpeed: Int,
       $maxSpeed: Int,
-      $magic: Int,
+      $currentMagic: Int,
       $maxMagic: Int,
     ) {
       mnstrs {
         update(
           id: $id,
-          name: $name,
-          description: $description,
-          qrCode: $qrCode,
-          health: $health,
+          mnstrName: $mnstrName,
+          mnstrDescription: $mnstrDescription,
+          mnstrQrCode: $mnstrQrCode,
+          currentHealth: $currentHealth,
           maxHealth: $maxHealth,
-          attack: $attack,
+          currentAttack: $currentAttack,
           maxAttack: $maxAttack,
-          defense: $defense,
+          currentDefense: $currentDefense,
           maxDefense: $maxDefense,
-          intelligence: $intelligence,
+          currentIntelligence: $currentIntelligence,
           maxIntelligence: $maxIntelligence,
-          speed: $speed,
+          currentSpeed: $currentSpeed,
           maxSpeed: $maxSpeed,
-          magic: $magic,
+          currentMagic: $currentMagic,
           maxMagic: $maxMagic,
         ) {
           id
-          name
-          description
-          qrCode
+          mnstrName
+          mnstrDescription
+          mnstrQrCode
           currentLevel
           currentExperience
           currentHealth
@@ -246,20 +246,20 @@ class ManageEditNotifier extends Notifier<Monster?> {
 
     final variables = {
       'id': monster.id,
-      'name': monster.name,
-      'description': monster.description,
-      'qrCode': monster.qrCode,
-      'health': monster.currentHealth,
+      'mnstrName': monster.mnstrName,
+      'mnstrDescription': monster.mnstrDescription,
+      'mnstrQrCode': monster.mnstrQrCode,
+      'currentHealth': monster.currentHealth,
       'maxHealth': monster.maxHealth,
-      'attack': monster.currentAttack,
+      'currentAttack': monster.currentAttack,
       'maxAttack': monster.maxAttack,
-      'defense': monster.currentDefense,
+      'currentDefense': monster.currentDefense,
       'maxDefense': monster.maxDefense,
-      'intelligence': monster.currentIntelligence,
+      'currentIntelligence': monster.currentIntelligence,
       'maxIntelligence': monster.maxIntelligence,
-      'speed': monster.currentSpeed,
+      'currentSpeed': monster.currentSpeed,
       'maxSpeed': monster.maxSpeed,
-      'magic': monster.currentMagic,
+      'currentMagic': monster.currentMagic,
       'maxMagic': monster.maxMagic,
     };
 

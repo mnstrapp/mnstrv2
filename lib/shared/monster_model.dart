@@ -63,16 +63,16 @@ class MonsterModel {
   Map<MonsterPart, Widget?> get monsterParts =>
       MonsterParts(monster: this).monsterParts;
 
-  Monster toMonster() => Monster(id: id, name: name, qrCode: qrCode);
+  Monster toMonster() => Monster(id: id, mnstrName: name, mnstrQrCode: qrCode);
 
   static MonsterModel fromMonster(Monster monster) {
     try {
-      if (monster.qrCode == null) {
+      if (monster.mnstrQrCode == null) {
         return MonsterModel();
       }
-      MonsterModel model = MonsterModel.fromQRCode(monster.qrCode!);
+      MonsterModel model = MonsterModel.fromQRCode(monster.mnstrQrCode!);
       model.id = monster.id;
-      model.name = monster.name;
+      model.name = monster.mnstrName;
       return model;
     } catch (e) {
       log('[fromMonster] error: $e');

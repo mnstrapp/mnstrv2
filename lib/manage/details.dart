@@ -49,11 +49,11 @@ class _ManageDetailsViewState extends ConsumerState<ManageDetailsView> {
                   onSubmitted: (value) {
                     ref
                         .read(manageEditProvider.notifier)
-                        .editMonster(monster.copyWith(name: value));
+                        .editMonster(monster.copyWith(mnstrName: value));
                   },
                 ),
                 InplaceText(
-                  text: monster.description,
+                  text: monster.mnstrDescription,
                   label: Text(
                     'Description',
                     style: theme.textTheme.bodyMedium?.copyWith(
@@ -67,7 +67,7 @@ class _ManageDetailsViewState extends ConsumerState<ManageDetailsView> {
                     ref
                         .read(manageEditProvider.notifier)
                         .editMonster(
-                          monster.copyWith(description: value),
+                          monster.copyWith(mnstrDescription: value),
                         );
                   },
                 ),

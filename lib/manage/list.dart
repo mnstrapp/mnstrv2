@@ -115,13 +115,14 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
                           await SharePlus.instance.share(
                             ShareParams(
                               subject: 'Sharing my MNSTR!',
-                              text: '👋 Check out my MNSTR, ${monster.name}!',
+                              text:
+                                  '👋 Check out my MNSTR, ${monster.mnstrName}!',
                               downloadFallbackEnabled: true,
                               files: [
                                 XFile.fromData(
                                   image,
                                   mimeType: 'image/png',
-                                  name: '${monster.name}.png',
+                                  name: '${monster.mnstrName}.png',
                                 ),
                               ],
                             ),

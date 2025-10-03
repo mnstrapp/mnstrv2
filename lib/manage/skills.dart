@@ -48,7 +48,7 @@ class _ManageSkillsViewState extends ConsumerState<ManageSkillsView> {
 
     bool changed = false;
 
-    final levelPoints = ((monster.level ?? 0) + 1) * 10;
+    final levelPoints = ((monster.currentLevel ?? 0) + 1) * 10;
     final assumedPoints = levelPoints * 6;
 
     if ((monster.maxHealth ?? 0) < levelPoints) {

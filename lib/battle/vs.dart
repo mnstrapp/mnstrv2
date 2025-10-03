@@ -154,39 +154,29 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
     final size = MediaQuery.sizeOf(context);
 
     return chooseMnstr && mnstrs.isNotEmpty
-        ? Stack(
-            children: [
-              Positioned(
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                child: SizedBox(
-                  height: size.height,
-                  width: size.width,
-                  child: MnstrList(
-                    showName: false,
-                    monsters: mnstrs,
-                    onTap: _chooseMnstr,
-                    overlayBuilder: (mnstr) {
-                      return Positioned(
-                        bottom: 16,
-                        left: 16,
-                        right: 16,
-                        child: UIButton(
-                          height: 40,
-                          onPressed: () {
-                            _chooseMnstr(mnstr);
-                          },
-                          icon: Icons.play_arrow_rounded,
-                          backgroundColor: Colors.green,
-                        ),
-                      );
-                    },
-                  ),
-                ),
+        ? SizedBox(
+            height: size.height - 96,
+            width: size.width - 32,
+            child: MnstrList(
+              showName: false,
+              monsters: mnstrs,
+              onTap: _chooseMnstr,
+              overlayBuilder: (mnstr) {
+                return UIButton(
+                  height: 40,
+                  onPressed: () {
+                    _chooseMnstr(mnstr);
+                  },
+                  icon: Icons.play_arrow_rounded,
+                  backgroundColor: Colors.green,
+                );
+              },
+              overlayPositioning: const EdgeInsets.only(
+                bottom: 16,
+                left: 16,
+                right: 16,
               ),
-            ],
+            ),
           )
         : waiting
         ? const Center(child: Text('Waiting for opponent...'))

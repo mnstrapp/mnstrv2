@@ -21,7 +21,7 @@ class _NameViewState extends ConsumerState<NameView> {
   @override
   void initState() {
     super.initState();
-    _nameController.text = widget.monster.name ?? '';
+    _nameController.text = widget.monster.mnstrName ?? '';
   }
 
   @override

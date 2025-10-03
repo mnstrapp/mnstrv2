@@ -9,6 +9,7 @@ class MnstrList extends StatefulWidget {
   final List<Monster> monsters;
   final Function(Monster)? onTap;
   final Widget? overlay;
+  final EdgeInsets? overlayPositioning;
   final Widget Function(Monster)? overlayBuilder;
   final bool showName;
 
@@ -18,6 +19,7 @@ class MnstrList extends StatefulWidget {
     this.onTap,
     this.overlay,
     this.overlayBuilder,
+    this.overlayPositioning,
     this.showName = true,
   });
 
@@ -120,6 +122,7 @@ class _MnstrListState extends State<MnstrList> {
           overlay:
               widget.overlayBuilder?.call(widget.monsters.first) ??
               widget.overlay,
+          overlayPositioning: widget.overlayPositioning,
         ),
       );
     } else if (isTablet) {
@@ -141,6 +144,7 @@ class _MnstrListState extends State<MnstrList> {
                           onTap: widget.onTap,
                           overlay:
                               widget.overlayBuilder?.call(m) ?? widget.overlay,
+                          overlayPositioning: widget.overlayPositioning,
                         ),
                       ),
                     )
@@ -159,6 +163,7 @@ class _MnstrListState extends State<MnstrList> {
             monster: m,
             onTap: widget.onTap,
             overlay: widget.overlayBuilder?.call(m) ?? widget.overlay,
+            overlayPositioning: widget.overlayPositioning,
           ),
         ),
       );
@@ -180,6 +185,7 @@ class MnstrView extends StatelessWidget {
   final Monster monster;
   final Function(Monster)? onTap;
   final Widget? overlay;
+  final EdgeInsets? overlayPositioning;
   final bool showName;
 
   const MnstrView({
@@ -187,6 +193,7 @@ class MnstrView extends StatelessWidget {
     required this.monster,
     this.onTap,
     this.overlay,
+    this.overlayPositioning,
     this.showName = true,
   });
 
@@ -202,10 +209,10 @@ class MnstrView extends StatelessWidget {
           MonsterContainer(monster: m, size: size, showName: showName),
           if (overlay != null)
             Positioned(
-              top: 0,
-              bottom: 0,
-              left: 0,
-              right: 0,
+              top: overlayPositioning?.top ?? 0,
+              bottom: overlayPositioning?.bottom ?? 0,
+              left: overlayPositioning?.left ?? 0,
+              right: overlayPositioning?.right ?? 0,
               child: overlay!,
             ),
         ],

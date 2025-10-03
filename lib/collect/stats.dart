@@ -180,7 +180,7 @@ class _StatsViewState extends ConsumerState<StatsView> {
 
   @override
   Widget build(BuildContext context) {
-    final level = widget.monster.level ?? 0;
+    final level = widget.monster.currentLevel ?? 0;
     final experience = widget.monster.experience ?? 0;
     final color = widget.monster.toMonsterModel().color;
     final largestStat = _maxStats.values.reduce((a, b) => a > b ? a : b);

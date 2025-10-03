@@ -1,17 +1,14 @@
-import 'package:json_annotation/json_annotation.dart';
 import '../shared/monster_model.dart';
-
-part 'monster.g.dart';
 
 enum Stat { health, attack, defense, speed, magic, intelligence }
 
-@JsonSerializable()
 class Monster {
   String? id;
-  String? name;
-  String? description;
-  String? qrCode;
-  int? level;
+  String? mnstrName;
+  String? mnstrDescription;
+  String? mnstrQrCode;
+  int? currentLevel;
+  int? currentExperience;
   int? experience;
   int? currentHealth;
   int? maxHealth;
@@ -28,11 +25,11 @@ class Monster {
 
   Monster({
     this.id,
-    this.name,
-    this.description,
-    this.qrCode,
-    this.level,
-    this.experience,
+    this.mnstrName,
+    this.mnstrDescription,
+    this.mnstrQrCode,
+    this.currentLevel,
+    this.currentExperience,
     this.currentHealth,
     this.maxHealth,
     this.currentAttack,
@@ -47,16 +44,55 @@ class Monster {
     this.maxMagic,
   });
 
-  factory Monster.fromJson(Map<String, dynamic> json) =>
-      _$MonsterFromJson(json);
+  factory Monster.fromJson(Map<String, dynamic> json) {
+    return Monster(
+      id: json['id'],
+      mnstrName: json['mnstrName'],
+      mnstrDescription: json['mnstrDescription'],
+      mnstrQrCode: json['mnstrQrCode'],
+      currentLevel: json['currentLevel'],
+      currentExperience: json['currentExperience'],
+      currentHealth: json['currentHealth'],
+      maxHealth: json['maxHealth'],
+      currentAttack: json['currentAttack'],
+      maxAttack: json['maxAttack'],
+      currentDefense: json['currentDefense'],
+      maxDefense: json['maxDefense'],
+      currentIntelligence: json['currentIntelligence'],
+      maxIntelligence: json['maxIntelligence'],
+      currentSpeed: json['currentSpeed'],
+      maxSpeed: json['maxSpeed'],
+      currentMagic: json['currentMagic'],
+      maxMagic: json['maxMagic'],
+    );
+  }
 
-  Map<String, dynamic> toJson() => _$MonsterToJson(this);
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'mnstrName': mnstrName,
+    'mnstrDescription': mnstrDescription,
+    'mnstrQrCode': mnstrQrCode,
+    'currentLevel': currentLevel,
+    'currentExperience': currentExperience,
+    'currentHealth': currentHealth,
+    'maxHealth': maxHealth,
+    'currentAttack': currentAttack,
+    'maxAttack': maxAttack,
+    'currentDefense': currentDefense,
+    'maxDefense': maxDefense,
+    'currentIntelligence': currentIntelligence,
+    'maxIntelligence': maxIntelligence,
+    'currentSpeed': currentSpeed,
+    'maxSpeed': maxSpeed,
+    'currentMagic': currentMagic,
+    'maxMagic': maxMagic,
+  };
 
   Monster copyWith({
-    String? name,
-    String? description,
-    int? level,
-    int? experience,
+    String? mnstrName,
+    String? mnstrDescription,
+    int? currentLevel,
+    int? currentExperience,
     int? currentHealth,
     int? maxHealth,
     int? currentAttack,
@@ -71,11 +107,11 @@ class Monster {
     int? maxMagic,
   }) => Monster(
     id: id,
-    name: name ?? this.name,
-    description: description ?? this.description,
-    qrCode: qrCode,
-    level: level ?? this.level,
-    experience: experience ?? this.experience,
+    mnstrName: mnstrName ?? this.mnstrName,
+    mnstrDescription: mnstrDescription ?? this.mnstrDescription,
+    mnstrQrCode: mnstrQrCode,
+    currentLevel: currentLevel ?? this.currentLevel,
+    currentExperience: currentExperience ?? this.currentExperience,
     currentHealth: currentHealth ?? this.currentHealth,
     maxHealth: maxHealth ?? this.maxHealth,
     currentAttack: currentAttack ?? this.currentAttack,
@@ -93,5 +129,5 @@ class Monster {
   MonsterModel toMonsterModel() => MonsterModel.fromMonster(this);
 
   static Monster fromMonsterModel(MonsterModel model) =>
-      Monster(id: model.id, name: model.name, qrCode: model.qrCode);
+      Monster(id: model.id, mnstrName: model.name, mnstrQrCode: model.qrCode);
 }

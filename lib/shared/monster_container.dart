@@ -34,8 +34,8 @@ class MonsterContainer extends StatelessWidget {
       0.1,
     );
     final theme = Theme.of(context);
-    final monsterName = monster.toMonster().name?.isNotEmpty ?? false
-        ? monster.toMonster().name!
+    final monsterName = monster.toMonster().mnstrName?.isNotEmpty ?? false
+        ? monster.toMonster().mnstrName!
         : 'unnamed';
 
     return Container(
