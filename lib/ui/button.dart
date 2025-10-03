@@ -78,6 +78,7 @@ class _UIButtonState extends State<UIButton> {
     final textStyle = Theme.of(context).textTheme.titleLarge?.copyWith(
       color: widget.foregroundColor ?? Theme.of(context).colorScheme.onPrimary,
       fontSize: fontSize,
+      overflow: TextOverflow.ellipsis,
     );
 
     return Padding(
