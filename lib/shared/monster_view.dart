@@ -25,35 +25,13 @@ class MonsterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isSmallPhone =
-        (size.width > smallMobileMinimumBreakpoint) &&
-        (size.width < smallMobileMaximumBreakpoint);
-    final isLargePhone =
-        (size.width > largeMobileMinimumBreakpoint) &&
-        (size.width < largeMobileMaximumBreakpoint);
-    final isFoldable =
-        (size.width > foldableMinimumBreakpoint) &&
-        (size.width < foldableMaximumBreakpoint);
-    final isTablet =
-        (size.width > tabletMinimumBreakpoint) &&
-        (size.width < tabletMaximumBreakpoint);
-    final isDesktop =
-        (size.width > tabletMinimumBreakpoint) &&
-        (size.width < widescreenMinimumBreakpoint);
-
     final factor = (monsterScale / 100);
-    log('factor: $factor');
-    log('monsterScale: $monsterScale');
-    log('isSmallPhone: $isSmallPhone');
-    log('isLargePhone: $isLargePhone');
-    log('isFoldable: $isFoldable');
-    log('isTablet: $isTablet');
-    log('isDesktop: $isDesktop');
 
     final middle = Size(
-      size.width * factor,
+      size.width / (size.width * (factor * 10)),
       size.height / 4,
     );
+
     final monsterParts = monster.monsterParts(
       scale: monsterScale,
       size: size,

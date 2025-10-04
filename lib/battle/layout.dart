@@ -190,7 +190,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
             ),
           ];
         });
-        _socket = await WebSocketChannel.connect(
+        _socket = WebSocketChannel.connect(
           Uri.parse('$wsUrl/battle_queue/${session.token}'),
         );
       }
@@ -212,6 +212,9 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
           }
         },
         onDone: () {
+          if (_socket?.closeCode == null) {
+            return;
+          }
           if (mounted) {
             setState(() {
               _messages = [
