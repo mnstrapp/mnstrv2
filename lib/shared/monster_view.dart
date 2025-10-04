@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../theme.dart';
@@ -5,18 +7,20 @@ import 'monster_model.dart';
 
 class MonsterView extends StatelessWidget {
   final MonsterModel monster;
-  final double? monsterScale;
+  final double monsterScale;
   final double? height;
   final double? width;
   final Size size;
+  final bool backside;
 
   const MonsterView({
     super.key,
     required this.monster,
-    this.monsterScale,
+    this.monsterScale = 1.0,
     this.height,
     this.width,
     required this.size,
+    this.backside = false,
   });
 
   @override
@@ -36,23 +40,25 @@ class MonsterView extends StatelessWidget {
     final isDesktop =
         (size.width > tabletMinimumBreakpoint) &&
         (size.width < widescreenMinimumBreakpoint);
+
+    final factor = (monsterScale / 100);
+    log('factor: $factor');
+    log('monsterScale: $monsterScale');
+    log('isSmallPhone: $isSmallPhone');
+    log('isLargePhone: $isLargePhone');
+    log('isFoldable: $isFoldable');
+    log('isTablet: $isTablet');
+    log('isDesktop: $isDesktop');
+
     final middle = Size(
-      (size.width - (size.width - (size.width / (monsterScale ?? scale)))) /
-          (isSmallPhone
-              ? 6
-              : isLargePhone
-              ? 4
-              : isFoldable
-              ? 10.5
-              : isTablet
-              ? 6
-              : isDesktop
-              ? 4
-              : 3),
-      (size.height - (size.height - (size.height / (monsterScale ?? scale)))) /
-          (isLargePhone ? 2.3 : 2.5),
+      size.width * factor,
+      size.height / 4,
     );
-    final monsterParts = monster.monsterParts;
+    final monsterParts = monster.monsterParts(
+      scale: monsterScale,
+      size: size,
+      backside: backside,
+    );
 
     return SizedBox(
       width: size.width,
@@ -60,44 +66,44 @@ class MonsterView extends StatelessWidget {
       child: Stack(
         children: [
           Positioned(
-            bottom: middle.height - 90,
+            bottom: middle.height,
             left: middle.width,
             child: monsterParts[MonsterPart.body]!,
           ),
           Positioned(
-            bottom: middle.height + 190,
+            bottom: middle.height + (0 * factor),
             left: middle.width,
             child: monsterParts[MonsterPart.head]!,
           ),
           monsterParts[MonsterPart.horns] != null
               ? Positioned(
-                  bottom: middle.height + 370,
+                  bottom: middle.height + (0 * factor),
                   left: middle.width,
                   child: monsterParts[MonsterPart.horns]!,
                 )
               : const SizedBox.shrink(),
           monsterParts[MonsterPart.tail] != null
               ? Positioned(
-                  bottom: middle.height - 198,
+                  bottom: middle.height - (0 * factor),
                   left: middle.width,
                   child: monsterParts[MonsterPart.tail]!,
                 )
               : const SizedBox.shrink(),
           Positioned(
-            bottom: middle.height + 19,
+            bottom: middle.height - (0 * factor),
             left: middle.width,
             child: monsterParts[MonsterPart.arms]!,
           ),
           monster.legs == 0
               ? Positioned(
-                  bottom: middle.height - 89,
+                  bottom: middle.height - (0 * factor),
                   left: middle.width,
                   child: monsterParts[MonsterPart.legs]!,
                 )
               : const SizedBox.shrink(),
           monster.legs == 1
               ? Positioned(
-                  bottom: middle.height - 189,
+                  bottom: middle.height - (0 * factor),
                   left: middle.width + 1,
                   child: monsterParts[MonsterPart.legs]!,
                 )

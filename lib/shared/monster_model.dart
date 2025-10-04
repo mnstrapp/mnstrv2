@@ -17,6 +17,8 @@ class MonsterModel {
   int? arms;
   int? legs;
   int? tail;
+  double scale;
+  bool backside;
 
   MonsterModel({
     this.id,
@@ -29,9 +31,11 @@ class MonsterModel {
     this.arms,
     this.legs,
     this.tail,
+    this.scale = 1.0,
+    this.backside = false,
   });
 
-  static MonsterModel fromQRCode(String qrCode) {
+  static MonsterModel fromQRCode(String qrCode, {double scale = 1.0}) {
     final hash = sha1.convert(utf8.encode(qrCode));
     final parts = hash.bytes;
     final color = Color.fromRGBO(parts[5], parts[10], parts[15], 100);
@@ -59,16 +63,25 @@ class MonsterModel {
       arms: arms % 2,
       legs: legs % 2,
       tail: tail % 4,
+      scale: scale,
     );
   }
 
-  Map<MonsterPart, Widget?> get monsterParts =>
-      MonsterParts(monster: this).monsterParts;
+  Map<MonsterPart, Widget?> monsterParts({
+    double scale = 1.0,
+    required Size size,
+    bool backside = false,
+  }) => MonsterParts(
+    monster: this,
+    scale: scale,
+    size: size,
+    backside: backside,
+  ).monsterParts;
 
   Monster toMonster() =>
       Monster(id: id, userId: userId, mnstrName: name, mnstrQrCode: qrCode);
 
-  static MonsterModel fromMonster(Monster monster) {
+  static MonsterModel fromMonster(Monster monster, {double scale = 1.0}) {
     try {
       if (monster.mnstrQrCode == null) {
         return MonsterModel();
@@ -85,50 +98,74 @@ class MonsterModel {
   }
 }
 
-const scale = 1.7;
+const scaleMultiplier = 1.7;
 
 class MonsterParts {
-  MonsterParts({required this.monster});
+  final double scale;
+  final Size size;
+  final bool backside;
+
+  MonsterParts({
+    required this.monster,
+    this.scale = 1.0,
+    required this.size,
+    this.backside = false,
+  });
 
   MonsterModel monster;
 
   Widget get head {
+    final factor = scale / 2;
+    final width = size.width * factor;
+    final height = size.height * factor;
     if (monster.head == 0) {
       return Image.asset(
-        'assets/mnstr_parts/head_1.png',
-        scale: scale,
+        backside
+            ? 'assets/mnstr_parts/head_1-back.png'
+            : 'assets/mnstr_parts/head_1.png',
+        width: width,
+        height: height,
         color: monster.color,
         colorBlendMode: BlendMode.srcATop,
       );
     }
     return Image.asset(
-      'assets/mnstr_parts/head_2.png',
-      scale: scale,
+      backside
+          ? 'assets/mnstr_parts/head_2-back.png'
+          : 'assets/mnstr_parts/head_2.png',
+      width: width,
+      height: height,
       color: monster.color,
       colorBlendMode: BlendMode.srcATop,
     );
   }
 
   Widget? get horns {
+    final factor = scale / 2;
+    final width = size.width * factor;
+    final height = size.height * factor;
     switch (monster.horns) {
       case 0:
         return Image.asset(
           'assets/mnstr_parts/horns_short.png',
-          scale: scale,
+          width: width,
+          height: height,
           color: monster.color,
           colorBlendMode: BlendMode.srcATop,
         );
       case 1:
         return Image.asset(
           'assets/mnstr_parts/horns_spiraled.png',
-          scale: scale,
+          width: width,
+          height: height,
           color: monster.color,
           colorBlendMode: BlendMode.srcATop,
         );
       case 2:
         return Image.asset(
           'assets/mnstr_parts/horns_striped.png',
-          scale: scale,
+          width: width,
+          height: height,
           color: monster.color,
           colorBlendMode: BlendMode.srcATop,
         );
@@ -137,59 +174,75 @@ class MonsterParts {
   }
 
   Widget get arms {
+    final factor = scale / 2;
+    final width = size.width * factor;
+    final height = size.height * factor;
     if (monster.arms == 0) {
       return Image.asset(
         'assets/mnstr_parts/arms_two.png',
-        scale: scale,
+        width: width,
+        height: height,
         color: monster.color,
         colorBlendMode: BlendMode.srcATop,
       );
     }
     return Image.asset(
       'assets/mnstr_parts/arms_four.png',
-      scale: scale,
+      width: width,
+      height: height,
       color: monster.color,
       colorBlendMode: BlendMode.srcATop,
     );
   }
 
   Widget get legs {
+    final factor = scale / 2;
+    final width = size.width * factor;
+    final height = size.height * factor;
     if (monster.legs == 0) {
       return Image.asset(
         'assets/mnstr_parts/legs_long.png',
-        scale: scale,
+        width: width,
+        height: height,
         color: monster.color,
         colorBlendMode: BlendMode.srcATop,
       );
     }
     return Image.asset(
       'assets/mnstr_parts/legs_short.png',
-      scale: scale,
+      width: width,
+      height: height,
       color: monster.color,
       colorBlendMode: BlendMode.srcATop,
     );
   }
 
   Widget? get tail {
+    final factor = scale / 2;
+    final width = size.width * factor;
+    final height = size.height * factor;
     switch (monster.horns) {
       case 0:
         return Image.asset(
           'assets/mnstr_parts/tail_long.png',
-          scale: scale,
+          width: width,
+          height: height,
           color: monster.color,
           colorBlendMode: BlendMode.srcATop,
         );
       case 1:
         return Image.asset(
           'assets/mnstr_parts/tail_twins.png',
-          scale: scale,
+          width: width,
+          height: height,
           color: monster.color,
           colorBlendMode: BlendMode.srcATop,
         );
       case 2:
         return Image.asset(
           'assets/mnstr_parts/tail_stripes.png',
-          scale: scale,
+          width: width,
+          height: height,
           color: monster.color,
           colorBlendMode: BlendMode.srcATop,
         );
@@ -197,12 +250,18 @@ class MonsterParts {
     return null;
   }
 
-  Image get body => Image.asset(
-    'assets/mnstr_parts/body_base.png',
-    scale: scale,
-    color: monster.color,
-    colorBlendMode: BlendMode.srcATop,
-  );
+  Image get body {
+    final factor = scale / 2;
+    final width = size.width * factor;
+    final height = size.height * factor;
+    return Image.asset(
+      'assets/mnstr_parts/body_base.png',
+      width: width,
+      height: height,
+      color: monster.color,
+      colorBlendMode: BlendMode.srcATop,
+    );
+  }
 
   Map<MonsterPart, Widget?> get monsterParts {
     return {

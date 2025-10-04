@@ -6,6 +6,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/session_users.dart';
 import '../shared/mnstr_list.dart';
+import '../shared/monster_container.dart';
+import '../shared/monster_view.dart';
 import '../ui/button.dart';
 import '../utils/color.dart';
 import 'data.dart';
@@ -155,8 +157,11 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
         });
         break;
       case BattleQueueAction.gameStarted:
+        final data = jsonDecode(battleQueue.data!.data!);
+        final gameData = GameData.fromJson(data);
         setState(() {
           _inBattle = true;
+          _gameData = gameData;
         });
         break;
       default:
@@ -301,6 +306,36 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
 
   @override
   Widget build(BuildContext context) {
-    return const Center(child: Text('Game time!'));
+    final challengerMnstr = _gameData!.challengerMnstr;
+    final opponentMnstr = _gameData!.opponentMnstr;
+    final size = MediaQuery.sizeOf(context);
+
+    return Stack(
+      children: [
+        Positioned(
+          top: 0,
+          left: size.width * 0.18,
+          right: 0,
+          // bottom: 0,
+          child: MonsterView(
+            monster: opponentMnstr!.toMonsterModel(),
+            monsterScale: 1.25,
+            size: Size(size.width, size.height),
+          ),
+        ),
+        Positioned(
+          top: 0,
+          left: -size.width * 1.25,
+          right: 0,
+          bottom: -size.height * 1.66,
+          child: MonsterView(
+            monster: challengerMnstr!.toMonsterModel(),
+            size: Size(size.width, size.height),
+            monsterScale: 6,
+            backside: true,
+          ),
+        ),
+      ],
+    );
   }
 }

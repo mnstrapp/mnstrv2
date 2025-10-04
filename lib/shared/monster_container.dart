@@ -9,7 +9,7 @@ class MonsterContainer extends StatelessWidget {
   final Size size;
   final double? width;
   final double? height;
-  final double? monsterScale;
+  final double monsterScale;
   final BorderRadius? borderRadius;
   final bool showName;
 
@@ -19,7 +19,7 @@ class MonsterContainer extends StatelessWidget {
     required this.size,
     this.width,
     this.height,
-    this.monsterScale,
+    this.monsterScale = 1.0,
     this.borderRadius,
     this.showName = true,
   });
