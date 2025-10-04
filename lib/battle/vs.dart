@@ -76,11 +76,6 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
   }
 
   Future<BattleQueue> _buildBattleQueue() async {
-    log('[build battle queue] _isChallenger: $_isChallenger');
-    log('[build battle queue] _userId: $_userId');
-    log('[build battle queue] _userName: $_userName');
-    log('[build battle queue] _battleQueue: ${_battleQueue?.data?.toJson()}');
-
     final data = BattleQueueData(
       action: BattleQueueDataAction.mnstrChosen,
       userId: _isChallenger ? _userId : _battleQueue!.data!.opponentId,
@@ -108,12 +103,20 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
         ).toJson(),
       ),
     );
-    return BattleQueue(
+    final battleQueue = BattleQueue(
       action: BattleQueueAction.mnstrChosen,
       userId: _userId,
       data: data,
       channel: BattleQueueChannel.battle,
     );
+    log('[build battle queue] _isChallenger: $_isChallenger');
+    log('[build battle queue] _userId: $_userId');
+    log('[build battle queue] _userName: $_userName');
+    log(
+      '[build battle queue] battle queue data: ${battleQueue.data?.toJson()}',
+    );
+    log('[build battle queue] battle queue: ${battleQueue.toJson()}');
+    return battleQueue;
   }
 
   Future<void> _handleMessage(String message) async {
@@ -127,7 +130,6 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
       log('[handle message] not user or opponent:');
       log('\tchallenger: ${battleQueue.data?.userId != _userId}');
       log('\topponent: ${battleQueue.data?.opponentId != _userId}');
-      log('battle queue: $message');
       return;
     }
 
@@ -143,7 +145,6 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
         }
         final data = jsonDecode(battleQueue.data!.data!);
         final gameData = GameData.fromJson(data);
-        log('[mnstr chosen] game data: ${gameData.toJson()}');
         setState(() {
           if (gameData.challengerMnstr != null) {
             _challengerMnstr = gameData.challengerMnstr;
@@ -151,15 +152,12 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
           if (gameData.opponentMnstr != null) {
             _opponentMnstr = gameData.opponentMnstr;
           }
-          _gameData = gameData;
-          if (_challengerMnstr != null && _opponentMnstr != null) {
-            _inBattle = true;
-          }
         });
-        log(
-          '[mnstr chosen] challenger mnstr set: ${_challengerMnstr?.toJson()}',
-        );
-        log('[mnstr chosen] opponent mnstr set: ${_opponentMnstr?.toJson()}');
+        break;
+      case BattleQueueAction.gameStarted:
+        setState(() {
+          _inBattle = true;
+        });
         break;
       default:
         break;
