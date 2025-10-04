@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/session_users.dart';
+import '../shared/layout_scaffold.dart';
 import '../shared/mnstr_list.dart';
 import '../shared/monster_container.dart';
 import '../shared/monster_view.dart';
@@ -130,8 +131,12 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
     if (battleQueue.data!.userId != _userId &&
         battleQueue.data!.opponentId != _userId) {
       log('[handle message] not user or opponent:');
-      log('\tchallenger: ${battleQueue.data?.userId != _userId}');
-      log('\topponent: ${battleQueue.data?.opponentId != _userId}');
+      log(
+        '\tchallenger: ${battleQueue.data?.userId} != $_userId ->  ${_userId} ${battleQueue.data?.userId != _userId}',
+      );
+      log(
+        '\topponent: ${battleQueue.data?.opponentId} != $_userId ->  ${_userId} ${battleQueue.data?.opponentId != _userId}',
+      );
       return;
     }
 
@@ -159,10 +164,13 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
       case BattleQueueAction.gameStarted:
         final data = jsonDecode(battleQueue.data!.data!);
         final gameData = GameData.fromJson(data);
+
         setState(() {
-          _inBattle = true;
           _gameData = gameData;
+          _inBattle = true;
         });
+        break;
+      case BattleQueueAction.rejoined:
         break;
       default:
         break;
@@ -254,6 +262,8 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
           )
         : inBattle
         ? BattleVsInGameView(
+            challengerId: _challengerId,
+            opponentId: _opponentId,
             gameData: _gameData!,
             onListen: widget.onListen,
             onSend: widget.onSend,
@@ -265,6 +275,8 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
 }
 
 class BattleVsInGameView extends ConsumerStatefulWidget {
+  final String? challengerId;
+  final String? opponentId;
   final GameData gameData;
   final Function(Function(String)) onListen;
   final Function(BattleQueue) onSend;
@@ -273,6 +285,8 @@ class BattleVsInGameView extends ConsumerStatefulWidget {
 
   const BattleVsInGameView({
     super.key,
+    required this.challengerId,
+    required this.opponentId,
     required this.gameData,
     required this.onListen,
     required this.onSend,
@@ -289,11 +303,31 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
 
   void _handleMessage(String message) {}
 
+  Future<void> _setBackgroundColor() async {
+    final user = ref.watch(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
+
+    final isChallenger = widget.challengerId == user.value?.id;
+    final theme = Theme.of(context);
+    final opponentMnstr = isChallenger
+        ? _gameData!.opponentMnstr
+        : _gameData!.challengerMnstr;
+    final color = opponentMnstr?.toMonsterModel().color ?? theme.primaryColor;
+    LayoutScaffold.of(
+      context,
+    ).setBackgroundColor(
+      Color.lerp(color, Colors.white, 0.25) ?? theme.primaryColor,
+    );
+  }
+
   @override
   void initState() {
     super.initState();
     _gameData = widget.gameData;
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      _setBackgroundColor();
       widget.onListen(_handleMessage);
     });
   }
@@ -306,17 +340,27 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
 
   @override
   Widget build(BuildContext context) {
-    final challengerMnstr = _gameData!.challengerMnstr;
-    final opponentMnstr = _gameData!.opponentMnstr;
+    final user = ref.watch(sessionUserProvider);
+    if (user.value == null) {
+      return const SizedBox.shrink();
+    }
+
+    final isChallenger = widget.challengerId == user.value?.id;
+
+    final challengerMnstr = isChallenger
+        ? _gameData!.challengerMnstr
+        : _gameData!.opponentMnstr;
+    final opponentMnstr = isChallenger
+        ? _gameData!.opponentMnstr
+        : _gameData!.challengerMnstr;
     final size = MediaQuery.sizeOf(context);
 
     return Stack(
       children: [
         Positioned(
           top: 0,
-          left: size.width * 0.18,
+          left: 0,
           right: 0,
-          // bottom: 0,
           child: MonsterView(
             monster: opponentMnstr!.toMonsterModel(),
             monsterScale: 1.25,
@@ -325,13 +369,13 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
         ),
         Positioned(
           top: 0,
-          left: -size.width * 1.25,
+          left: -size.width * 0.4,
           right: 0,
-          bottom: -size.height * 1.66,
+          bottom: -size.height * 0.68,
           child: MonsterView(
             monster: challengerMnstr!.toMonsterModel(),
             size: Size(size.width, size.height),
-            monsterScale: 6,
+            monsterScale: 2,
             backside: true,
           ),
         ),

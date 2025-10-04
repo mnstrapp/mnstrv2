@@ -10,6 +10,7 @@ import '../ui/button.dart';
 import '../utils/color.dart';
 import 'data.dart';
 import 'battle_status.dart';
+import 'game_data.dart';
 
 class BattleQueueView extends ConsumerStatefulWidget {
   final Function(BattleQueue) onLog;
@@ -245,7 +246,6 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
             battleStatus: battleStatus,
             onSend: widget.onSend,
             onChallenge: _onChallenge,
-            opponentId: _opponentId,
           ),
         ),
       ],
@@ -257,13 +257,11 @@ class _BattleStatusWidget extends ConsumerStatefulWidget {
   final BattleStatus battleStatus;
   final Function(BattleQueue) onSend;
   final Function(BattleQueue, VoidCallback) onChallenge;
-  final String? opponentId;
 
   const _BattleStatusWidget({
     required this.battleStatus,
     required this.onSend,
     required this.onChallenge,
-    this.opponentId,
   });
 
   @override
@@ -338,8 +336,42 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
     });
   }
 
+  void _rejoin() {
+    final user = ref.read(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
+
+    final gameData = GameData(
+      battleId: widget.battleStatus.id,
+    );
+    final data = BattleQueueData(
+      action: BattleQueueDataAction.rejoin,
+      userId: user.value?.id,
+      userName: user.value?.displayName,
+      message: 'rejoin battle',
+      data: jsonEncode(gameData.toJson()),
+    );
+    final battleQueue = BattleQueue(
+      action: BattleQueueAction.rejoin,
+      userId: user.value?.id,
+      data: data,
+      channel: BattleQueueChannel.battle,
+    );
+    widget.onSend(battleQueue);
+  }
+
   @override
   Widget build(BuildContext context) {
+    final user = ref.watch(sessionUserProvider);
+    if (user.value == null) {
+      return const SizedBox.shrink();
+    }
+
+    final canRejoin =
+        (widget.battleStatus.userId == user.value?.id ||
+        widget.battleStatus.opponentId == user.value?.id);
+
     final theme = Theme.of(context);
     final size = MediaQuery.sizeOf(context);
     final statusColor = switch (widget.battleStatus.status) {
@@ -349,8 +381,9 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
       null => Colors.red,
     };
     final canBattle = widget.battleStatus.status == BattleStatusState.inQueue;
-    final battling = widget.opponentId == widget.battleStatus.userId;
-    final inBattle = widget.opponentId != null;
+    final battling =
+        widget.battleStatus.opponentId == widget.battleStatus.userId;
+    final inBattle = widget.battleStatus.opponentId != null;
 
     return Container(
       height: 40,
@@ -393,7 +426,14 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
               icon: Icons.hourglass_empty_rounded,
               backgroundColor: darkenColor(theme.colorScheme.primary, 0.1),
             ),
-          if (!canBattle && !battling)
+          if (canRejoin)
+            UIButton(
+              onPressed: _rejoin,
+              text: 'Rejoin',
+              icon: Icons.refresh_rounded,
+              backgroundColor: darkenColor(theme.colorScheme.primary, 0.1),
+            ),
+          if (!canBattle && !battling && !canRejoin)
             UIButton(
               onPressed: inBattle ? () {} : () {},
               text: 'Watch',

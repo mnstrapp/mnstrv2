@@ -151,6 +151,7 @@ class _MnstrListState extends State<MnstrList> {
                               widget.overlayBuilder?.call(m) ?? widget.overlay,
                           overlayPositioning: widget.overlayPositioning,
                           showName: widget.showName,
+                          size: Size(size.width / 2, size.height),
                         ),
                       ),
                     )
@@ -194,6 +195,7 @@ class MnstrView extends StatelessWidget {
   final Widget? overlay;
   final EdgeInsets? overlayPositioning;
   final bool showName;
+  final Size? size;
 
   const MnstrView({
     super.key,
@@ -202,11 +204,12 @@ class MnstrView extends StatelessWidget {
     this.overlay,
     this.overlayPositioning,
     this.showName = true,
+    this.size,
   });
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.sizeOf(context);
+    final size = this.size ?? MediaQuery.sizeOf(context);
     final m = monster.toMonsterModel();
 
     return InkWell(

@@ -9,6 +9,9 @@ enum BattleStatusState {
 class BattleStatus {
   String? id;
   String? userId;
+  String? opponentId;
+  String? opponentName;
+  String? battleId;
   String? displayName;
   BattleStatusState? status;
   bool? connected;
@@ -16,6 +19,9 @@ class BattleStatus {
 
   BattleStatus({
     this.userId,
+    this.opponentId,
+    this.opponentName,
+    this.battleId,
     this.displayName,
     this.status,
     this.connected,
@@ -31,6 +37,9 @@ class BattleStatus {
     };
     return BattleStatus(
       userId: json['userId'] as String?,
+      opponentId: json['opponentId'] as String?,
+      opponentName: json['opponentName'] as String?,
+      battleId: json['battleId'] as String?,
       displayName: json['displayName'] as String?,
       status: status,
       connected: json['connected'] as bool?,
@@ -39,6 +48,9 @@ class BattleStatus {
   }
   Map<String, dynamic> toJson() => {
     'userId': userId,
+    'opponentId': opponentId,
+    'opponentName': opponentName,
+    'battleId': battleId,
     'displayName': displayName,
     'status': status?.name.toTitleCase(),
     'connected': connected,

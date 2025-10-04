@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:share_plus/share_plus.dart';
 
-import '../collect/collect.dart';
 import '../providers/manage.dart';
 import '../shared/empty_message.dart';
 import '../shared/layout_scaffold.dart';

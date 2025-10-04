@@ -24,6 +24,8 @@ enum BattleQueueAction {
   gameStarted,
   gameEnded,
   mnstrChosen,
+  rejoin,
+  rejoined,
 }
 
 class BattleQueue {
@@ -71,6 +73,8 @@ class BattleQueue {
       'gameStarted' => BattleQueueAction.gameStarted,
       'gameEnded' => BattleQueueAction.gameEnded,
       'mnstrChosen' => BattleQueueAction.mnstrChosen,
+      'rejoin' => BattleQueueAction.rejoin,
+      'rejoined' => BattleQueueAction.rejoined,
       _ => BattleQueueAction.error,
     };
     return BattleQueue(
@@ -122,6 +126,8 @@ enum BattleQueueDataAction {
   gameStarted,
   gameEnded,
   mnstrChosen,
+  rejoin,
+  rejoined,
 }
 
 class BattleQueueData {
@@ -169,6 +175,8 @@ class BattleQueueData {
       'gameStarted' => BattleQueueDataAction.gameStarted,
       'gameEnded' => BattleQueueDataAction.gameEnded,
       'mnstrChosen' => BattleQueueDataAction.mnstrChosen,
+      'rejoin' => BattleQueueDataAction.rejoin,
+      'rejoined' => BattleQueueDataAction.rejoined,
       _ => BattleQueueDataAction.error,
     };
     return BattleQueueData(

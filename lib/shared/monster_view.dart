@@ -27,8 +27,10 @@ class MonsterView extends StatelessWidget {
   Widget build(BuildContext context) {
     final factor = (monsterScale / 100);
 
+    bool isMobile = size.width <= largeMobileMaximumBreakpoint;
+
     final middle = Size(
-      size.width / (size.width * (factor * 10)),
+      (size.width / (size.width * factor)) + (isMobile ? 10 : 50),
       size.height / 4,
     );
 
