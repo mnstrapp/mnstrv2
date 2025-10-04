@@ -355,6 +355,17 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
         : _gameData!.challengerMnstr;
     final size = MediaQuery.sizeOf(context);
 
+    final theme = Theme.of(context);
+    final buttonColor = darkenColor(
+      Color.lerp(
+            opponentMnstr?.toMonsterModel().color ?? theme.primaryColor,
+            Colors.white,
+            0.25,
+          ) ??
+          theme.primaryColor,
+      0.5,
+    );
+
     return Stack(
       children: [
         Positioned(
@@ -377,6 +388,55 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
             size: Size(size.width, size.height),
             monsterScale: 2,
             backside: true,
+          ),
+        ),
+        Positioned(
+          right: 16,
+          bottom: 16,
+          child: Column(
+            spacing: 16,
+            children: [
+              UIButton(
+                onPressed: () {},
+                icon: Icons.bolt_rounded,
+                height: 72,
+                iconSize: 48,
+                backgroundColor: buttonColor,
+                foregroundColor: Colors.white,
+              ),
+              UIButton(
+                onPressed: () {},
+                icon: Icons.shield_moon_rounded,
+                height: 72,
+                iconSize: 48,
+                backgroundColor: buttonColor,
+                foregroundColor: Colors.white,
+              ),
+              UIButton(
+                onPressed: () {},
+                icon: Icons.auto_fix_high_rounded,
+                height: 72,
+                iconSize: 48,
+                backgroundColor: buttonColor,
+                foregroundColor: Colors.white,
+              ),
+              UIButton(
+                onPressed: () {},
+                icon: Icons.directions_run_rounded,
+                height: 72,
+                iconSize: 48,
+                backgroundColor: buttonColor,
+                foregroundColor: Colors.white,
+              ),
+              UIButton(
+                onPressed: () {},
+                icon: Icons.shelves,
+                height: 72,
+                iconSize: 48,
+                backgroundColor: buttonColor,
+                foregroundColor: Colors.white,
+              ),
+            ],
           ),
         ),
       ],
