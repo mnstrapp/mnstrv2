@@ -3,14 +3,12 @@ import 'dart:developer' show log;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mnstrv2/shared/stat_change_bar.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../providers/session_users.dart';
 import '../shared/layout_scaffold.dart';
 import '../shared/mnstr_list.dart';
-import '../shared/monster_container.dart';
 import '../shared/monster_view.dart';
-import '../shared/monster_xp_bar.dart';
 import '../shared/stat_bar_container.dart';
 import '../ui/button.dart';
 import '../utils/color.dart';
@@ -379,8 +377,15 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
       0.5,
     );
 
-    final margin = EdgeInsets.all(16);
-    final padding = EdgeInsets.all(4);
+    final statBarMargin = EdgeInsets.all(16);
+    final statBarPadding = EdgeInsets.only(
+      left: 8,
+      right: 8,
+      top: 4,
+      bottom: 4,
+    );
+    final statBarWidth =
+        size.width - (statBarMargin.left + statBarMargin.right);
 
     return Stack(
       children: [
@@ -398,13 +403,13 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
           top: 0,
           right: 0,
           child: StatBarContainer(
-            leading: Text('Health'),
+            leading: const Text('Health'),
             trailing: Text(
               '${opponentMnstr.currentHealth}/${opponentMnstr.maxHealth}',
             ),
-            width: size.width - (margin.left + margin.right),
-            margin: margin,
-            padding: padding,
+            width: statBarWidth,
+            margin: statBarMargin,
+            padding: statBarPadding,
             currentValue: opponentMnstr.currentHealth!,
             totalValue: opponentMnstr.maxHealth!,
             color: opponentMnstr.toMonsterModel().color,
@@ -426,12 +431,13 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
           bottom: 0,
           left: 0,
           child: StatBarContainer(
-            leading: Text('Health'),
+            leading: const Text('Health'),
             trailing: Text(
               '${challengerMnstr.currentHealth}/${challengerMnstr.maxHealth}',
             ),
-            width: size.width - 32,
-            margin: EdgeInsets.all(16),
+            width: statBarWidth,
+            margin: statBarMargin,
+            padding: statBarPadding,
             currentValue: challengerMnstr.currentHealth!,
             totalValue: challengerMnstr.maxHealth!,
             color: challengerMnstr.toMonsterModel().color,
@@ -443,40 +449,55 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
           child: Column(
             spacing: 24,
             children: [
-              UIButton(
-                onPressed: () {},
-                icon: Icons.bolt_rounded,
-                height: 40,
-                backgroundColor: buttonColor,
-                foregroundColor: Colors.white,
+              Tooltip(
+                message: 'Attack',
+                child: UIButton(
+                  onPressed: () {},
+                  icon: Symbols.swords_rounded,
+                  height: 40,
+                  backgroundColor: buttonColor,
+                  foregroundColor: Colors.white,
+                ),
               ),
-              UIButton(
-                onPressed: () {},
-                icon: Icons.shield_moon_rounded,
-                height: 40,
-                backgroundColor: buttonColor,
-                foregroundColor: Colors.white,
+              Tooltip(
+                message: 'Defend',
+                child: UIButton(
+                  onPressed: () {},
+                  icon: Icons.shield_moon_rounded,
+                  height: 40,
+                  backgroundColor: buttonColor,
+                  foregroundColor: Colors.white,
+                ),
               ),
-              UIButton(
-                onPressed: () {},
-                icon: Icons.auto_fix_high_rounded,
-                height: 40,
-                backgroundColor: buttonColor,
-                foregroundColor: Colors.white,
+              Tooltip(
+                message: 'Magic',
+                child: UIButton(
+                  onPressed: () {},
+                  icon: Symbols.magic_button_rounded,
+                  height: 40,
+                  backgroundColor: buttonColor,
+                  foregroundColor: Colors.white,
+                ),
               ),
-              UIButton(
-                onPressed: () {},
-                icon: Icons.directions_run_rounded,
-                height: 40,
-                backgroundColor: buttonColor,
-                foregroundColor: Colors.white,
+              Tooltip(
+                message: 'Escape from battle',
+                child: UIButton(
+                  onPressed: () {},
+                  icon: Icons.directions_run_rounded,
+                  height: 40,
+                  backgroundColor: buttonColor,
+                  foregroundColor: Colors.white,
+                ),
               ),
-              UIButton(
-                onPressed: () {},
-                icon: Icons.shelves,
-                height: 40,
-                backgroundColor: buttonColor,
-                foregroundColor: Colors.white,
+              Tooltip(
+                message: 'View inventory',
+                child: UIButton(
+                  onPressed: () {},
+                  icon: Icons.shelves,
+                  height: 40,
+                  backgroundColor: buttonColor,
+                  foregroundColor: Colors.white,
+                ),
               ),
             ],
           ),
