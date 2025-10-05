@@ -9,6 +9,7 @@ class BackgroundMusic {
   static bool _muted = false;
   static bool _paused = false;
   static bool _playing = false;
+  static double _volume = 0.75;
 
   BackgroundMusic() {
     backgroundSoundMuted ? mute() : unmute();
@@ -33,7 +34,7 @@ class BackgroundMusic {
     if (_playing) return;
     _playing = true;
     FlameAudio.bgm.initialize();
-    FlameAudio.bgm.play(_backgroundMusic);
+    FlameAudio.bgm.play(_backgroundMusic, volume: _volume);
     loop();
   }
 
@@ -61,11 +62,19 @@ class BackgroundMusic {
     await saveSoundPreferences();
     play();
   }
+
+  static double get volume => _volume;
+  static set volume(double value) {
+    _volume = value;
+  }
+
+  static bool get isMuted => _muted;
 }
 
 class ButtonSound {
   static const String _buttonSound = 'accept-2.mp3';
   static bool _muted = false;
+  static double _volume = 1.0;
 
   ButtonSound() {
     buttonSoundMuted ? mute() : unmute();
@@ -73,7 +82,7 @@ class ButtonSound {
 
   Future<void> play() async {
     if (_muted) return;
-    FlameAudio.play(_buttonSound);
+    FlameAudio.play(_buttonSound, volume: _volume);
   }
 
   Future<void> mute() async {
@@ -88,12 +97,20 @@ class ButtonSound {
     buttonSoundMuted = false;
     await saveSoundPreferences();
   }
+
+  static double get volume => _volume;
+  static set volume(double value) {
+    _volume = value;
+  }
+
+  static bool get isMuted => _muted;
 }
 
 class CollectSound {
   static const String _collectSound = 'collect-2.mp3';
   static AudioPlayer? _collectSoundPlayer;
   static bool _muted = false;
+  static double _volume = 0.15;
 
   CollectSound() {
     collectSoundMuted ? mute() : unmute();
@@ -101,7 +118,7 @@ class CollectSound {
 
   Future<void> play() async {
     if (_muted) return;
-    _collectSoundPlayer = await FlameAudio.play(_collectSound, volume: 0.15);
+    _collectSoundPlayer = await FlameAudio.play(_collectSound, volume: _volume);
   }
 
   Future<void> stop() async {
@@ -120,4 +137,11 @@ class CollectSound {
     collectSoundMuted = false;
     await saveSoundPreferences();
   }
+
+  static double get volume => _volume;
+  static set volume(double value) {
+    _volume = value;
+  }
+
+  static bool get isMuted => _muted;
 }
