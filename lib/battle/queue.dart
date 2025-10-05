@@ -344,7 +344,7 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
     }
 
     final gameData = GameData(
-      battleId: widget.battleStatus.id,
+      battleId: widget.battleStatus.battleId,
     );
     final data = BattleQueueData(
       action: BattleQueueDataAction.rejoin,
