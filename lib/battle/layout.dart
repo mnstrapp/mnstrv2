@@ -14,6 +14,7 @@ import '../shared/layout_scaffold.dart';
 import '../ui/button.dart';
 import '../utils/color.dart';
 import 'data.dart';
+import 'game_data.dart';
 import 'queue.dart';
 import 'vs.dart';
 
@@ -152,6 +153,20 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
           }
         });
         break;
+      // case BattleQueueAction.rejoined:
+      //   if (battleQueue.data?.userId == user.value?.id ||
+      //       battleQueue.data?.opponentId == user.value?.id) {
+      //     final data = jsonDecode(battleQueue.data!.data!);
+      //     final gameData = GameData.fromJson(data);
+      //     log('[layout] rejoined battleQueue: ${gameData.battleId}');
+      //     setState(() {
+      //       _isInBattle = true;
+      //       _isLoading = false;
+      //       _battleQueue = battleQueue;
+      //       _isJoined = false;
+      //     });
+      //   }
+      //   break;
       default:
         break;
     }

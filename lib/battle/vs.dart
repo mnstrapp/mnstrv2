@@ -43,7 +43,6 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
   List<Monster>? _opponentMnstrs;
   String? _userId;
   String? _userName;
-  String? _battleId;
   String? _challengerId;
   String? _opponentId;
   GameData? _gameData;
@@ -171,8 +170,22 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
           _inBattle = true;
         });
         break;
-      case BattleQueueAction.rejoined:
-        break;
+      // case BattleQueueAction.rejoined:
+      //   log('[rejoined] battleQueue: ${battleQueue.toJson()}');
+      //   if (battleQueue.data?.userId == _userId ||
+      //       battleQueue.data?.opponentId == _userId) {
+      //     final data = jsonDecode(battleQueue.data!.data!);
+      //     final gameData = GameData.fromJson(data);
+
+      //     setState(() {
+      //       _gameData = gameData;
+      //       _challengerMnstr = gameData.challengerMnstr;
+      //       _opponentMnstr = gameData.opponentMnstr;
+      //       _choosingMnstr = false;
+      //       _inBattle = true;
+      //     });
+      //   }
+      //   break;
       default:
         break;
     }
@@ -225,6 +238,9 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
     final inBattle = _inBattle;
 
     final size = MediaQuery.sizeOf(context);
+
+    log('[BattleVsView] choosingMnstr: $choosingMnstr');
+    log('[BattleVsView] inBattle: $inBattle');
 
     return choosingMnstr && mnstrs.isNotEmpty
         ? SizedBox(

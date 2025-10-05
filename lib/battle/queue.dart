@@ -383,9 +383,9 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
       return const SizedBox.shrink();
     }
 
-    final canRejoin =
-        (widget.battleStatus.userId == user.value?.id ||
-        widget.battleStatus.opponentId == user.value?.id);
+    // final canRejoin =
+    //     (widget.battleStatus.userId == user.value?.id ||
+    //     widget.battleStatus.opponentId == user.value?.id);
 
     final theme = Theme.of(context);
     final size = MediaQuery.sizeOf(context);
@@ -441,25 +441,25 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
               icon: Icons.hourglass_empty_rounded,
               backgroundColor: darkenColor(theme.colorScheme.primary, 0.1),
             ),
-          if (canRejoin)
-            UIButton(
-              onPressed: _rejoin,
-              text: 'Rejoin',
-              icon: Icons.refresh_rounded,
-              backgroundColor: darkenColor(theme.colorScheme.primary, 0.1),
-            ),
-          if (!canBattle && !battling && !canRejoin)
-            UIButton(
-              onPressed: inBattle ? () {} : () {},
-              text: 'Watch',
-              icon: Icons.remove_red_eye_rounded,
-              backgroundColor: inBattle
-                  ? Colors.grey
-                  : darkenColor(theme.colorScheme.primary, 0.1),
-              foregroundColor: inBattle
-                  ? lightenColor(theme.colorScheme.onSurface, 0.3)
-                  : theme.colorScheme.onPrimary,
-            ),
+          // if (canRejoin)
+          //   UIButton(
+          //     onPressed: _rejoin,
+          //     text: 'Rejoin',
+          //     icon: Icons.refresh_rounded,
+          //     backgroundColor: darkenColor(theme.colorScheme.primary, 0.1),
+          //   ),
+          // if (!canBattle && !battling)
+          //   UIButton(
+          //     onPressed: inBattle ? () {} : () {},
+          //     text: 'Watch',
+          //     icon: Icons.remove_red_eye_rounded,
+          //     backgroundColor: inBattle
+          //         ? Colors.grey
+          //         : darkenColor(theme.colorScheme.primary, 0.1),
+          //     foregroundColor: inBattle
+          //         ? lightenColor(theme.colorScheme.onSurface, 0.3)
+          //         : theme.colorScheme.onPrimary,
+          //   ),
           if (battling)
             Text(
               'Battling...',
