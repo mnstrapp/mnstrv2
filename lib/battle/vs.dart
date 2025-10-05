@@ -3,12 +3,15 @@ import 'dart:developer' show log;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mnstrv2/shared/stat_change_bar.dart';
 
 import '../providers/session_users.dart';
 import '../shared/layout_scaffold.dart';
 import '../shared/mnstr_list.dart';
 import '../shared/monster_container.dart';
 import '../shared/monster_view.dart';
+import '../shared/monster_xp_bar.dart';
+import '../shared/stat_bar_container.dart';
 import '../ui/button.dart';
 import '../utils/color.dart';
 import 'data.dart';
@@ -322,12 +325,19 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     );
   }
 
+  void _removeStatBar() {
+    LayoutScaffold.of(
+      context,
+    ).setShowStatBar(false);
+  }
+
   @override
   void initState() {
     super.initState();
     _gameData = widget.gameData;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setBackgroundColor();
+      _removeStatBar();
       widget.onListen(_handleMessage);
     });
   }
@@ -355,6 +365,9 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
         : _gameData!.challengerMnstr;
     final size = MediaQuery.sizeOf(context);
 
+    log('[BattleVsInGameView] challengerMnstr: ${challengerMnstr?.toJson()}');
+    log('[BattleVsInGameView] opponentMnstr: ${opponentMnstr?.toJson()}');
+
     final theme = Theme.of(context);
     final buttonColor = darkenColor(
       Color.lerp(
@@ -365,6 +378,9 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
           theme.primaryColor,
       0.5,
     );
+
+    final margin = EdgeInsets.all(16);
+    final padding = EdgeInsets.all(4);
 
     return Stack(
       children: [
@@ -380,6 +396,22 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
         ),
         Positioned(
           top: 0,
+          right: 0,
+          child: StatBarContainer(
+            leading: Text('Health'),
+            trailing: Text(
+              '${opponentMnstr.currentHealth}/${opponentMnstr.maxHealth}',
+            ),
+            width: size.width - (margin.left + margin.right),
+            margin: margin,
+            padding: padding,
+            currentValue: opponentMnstr.currentHealth!,
+            totalValue: opponentMnstr.maxHealth!,
+            color: opponentMnstr.toMonsterModel().color,
+          ),
+        ),
+        Positioned(
+          top: 0,
           left: -size.width * 0.4,
           right: 0,
           bottom: -size.height * 0.68,
@@ -391,48 +423,58 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
           ),
         ),
         Positioned(
+          bottom: 0,
+          left: 0,
+          child: StatBarContainer(
+            leading: Text('Health'),
+            trailing: Text(
+              '${challengerMnstr.currentHealth}/${challengerMnstr.maxHealth}',
+            ),
+            width: size.width - 32,
+            margin: EdgeInsets.all(16),
+            currentValue: challengerMnstr.currentHealth!,
+            totalValue: challengerMnstr.maxHealth!,
+            color: challengerMnstr.toMonsterModel().color,
+          ),
+        ),
+        Positioned(
           right: 16,
-          bottom: 16,
+          bottom: 70,
           child: Column(
-            spacing: 16,
+            spacing: 24,
             children: [
               UIButton(
                 onPressed: () {},
                 icon: Icons.bolt_rounded,
-                height: 72,
-                iconSize: 48,
+                height: 40,
                 backgroundColor: buttonColor,
                 foregroundColor: Colors.white,
               ),
               UIButton(
                 onPressed: () {},
                 icon: Icons.shield_moon_rounded,
-                height: 72,
-                iconSize: 48,
+                height: 40,
                 backgroundColor: buttonColor,
                 foregroundColor: Colors.white,
               ),
               UIButton(
                 onPressed: () {},
                 icon: Icons.auto_fix_high_rounded,
-                height: 72,
-                iconSize: 48,
+                height: 40,
                 backgroundColor: buttonColor,
                 foregroundColor: Colors.white,
               ),
               UIButton(
                 onPressed: () {},
                 icon: Icons.directions_run_rounded,
-                height: 72,
-                iconSize: 48,
+                height: 40,
                 backgroundColor: buttonColor,
                 foregroundColor: Colors.white,
               ),
               UIButton(
                 onPressed: () {},
                 icon: Icons.shelves,
-                height: 72,
-                iconSize: 48,
+                height: 40,
                 backgroundColor: buttonColor,
                 foregroundColor: Colors.white,
               ),

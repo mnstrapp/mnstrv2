@@ -12,7 +12,8 @@
             "args": [
                 "--dart-define=API_HOST=http://localhost:8080",
                 "--dart-define=WS_HOST=ws://localhost:8080",
-                "--web-port=9000"
+                "--web-port=9000",
+                "--web-experimental-hot-reload"
             ]
         },
         {
@@ -23,7 +24,8 @@
             "args": [
                 "--dart-define=API_HOST=http://localhost:8080",
                 "--dart-define=WS_HOST=ws://localhost:8080",
-                "--web-port=9000"
+                "--web-port=9000",
+                "--web-experimental-hot-reload"
             ]
         },
         {
@@ -34,7 +36,8 @@
             "args": [
                 "--dart-define=API_HOST=http://localhost:8080",
                 "--dart-define=WS_HOST=ws://localhost:8080",
-                "--web-port=9000"
+                "--web-port=9000",
+                "--web-experimental-hot-reload"
             ]
         },
         {
@@ -43,7 +46,8 @@
             "type": "dart",
             "flutterMode": "debug",
             "args": [
-                "--web-port=9000"
+                "--web-port=9000",
+                "--web-experimental-hot-reload"
             ]
         },
         {
@@ -52,7 +56,8 @@
             "type": "dart",
             "flutterMode": "profile",
             "args": [
-                "--web-port=9000"
+                "--web-port=9000",
+                "--web-experimental-hot-reload"
             ]
         },
         {
@@ -61,7 +66,8 @@
             "type": "dart",
             "flutterMode": "release",
             "args": [
-                "--web-port=9000"
+                "--web-port=9000",
+                "--web-experimental-hot-reload"
             ]
         }
     ]

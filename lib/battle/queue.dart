@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
 
 import '../providers/session_users.dart';
+import '../shared/layout_scaffold.dart';
 import '../ui/button.dart';
 import '../utils/color.dart';
 import 'data.dart';
@@ -359,6 +360,20 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
       channel: BattleQueueChannel.battle,
     );
     widget.onSend(battleQueue);
+  }
+
+  void setShowStatBar() {
+    LayoutScaffold.of(
+      context,
+    ).setShowStatBar(true);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      setShowStatBar();
+    });
   }
 
   @override
