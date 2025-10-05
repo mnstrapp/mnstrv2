@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flame_audio/flame_audio.dart';
-import 'package:flutter/foundation.dart';
 
 import '../providers/sounds.dart';
 
@@ -9,6 +8,7 @@ class BackgroundMusic {
   static const String _backgroundMusic = 'mnstr-game-music.m4a';
   static bool _muted = false;
   static bool _paused = false;
+  static bool _playing = false;
 
   BackgroundMusic() {
     backgroundSoundMuted ? mute() : unmute();
@@ -24,13 +24,14 @@ class BackgroundMusic {
   }
 
   Future<void> play() async {
-    if (kIsWeb || kIsWasm) return;
     if (_muted) return;
     if (_paused) {
       _paused = false;
       FlameAudio.bgm.resume();
       return;
     }
+    if (_playing) return;
+    _playing = true;
     FlameAudio.bgm.initialize();
     FlameAudio.bgm.play(_backgroundMusic);
     loop();
@@ -71,7 +72,6 @@ class ButtonSound {
   }
 
   Future<void> play() async {
-    if (kIsWeb || kIsWasm) return;
     if (_muted) return;
     FlameAudio.play(_buttonSound);
   }
@@ -100,7 +100,6 @@ class CollectSound {
   }
 
   Future<void> play() async {
-    if (kIsWeb || kIsWasm) return;
     if (_muted) return;
     _collectSoundPlayer = await FlameAudio.play(_collectSound, volume: 0.15);
   }

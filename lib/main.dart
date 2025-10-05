@@ -19,8 +19,5 @@ void main() async {
     sessionUserProvider.overrideWith(() => SessionUserNotifier(user: user)),
   ];
 
-  final backgroundSound = BackgroundMusic();
-  backgroundSound.play();
-
   runApp(ProviderScope(overrides: overrides, child: const App()));
 }

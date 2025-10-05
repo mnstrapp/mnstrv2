@@ -49,6 +49,7 @@ class _UIButtonState extends State<UIButton> {
   final _buttonSound = ButtonSound();
 
   Future<void> _onPressed() async {
+    BackgroundMusic().play();
     _buttonSound.play();
     if (_isLoading) {
       return;

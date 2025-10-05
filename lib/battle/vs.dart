@@ -170,22 +170,6 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
           _inBattle = true;
         });
         break;
-      // case BattleQueueAction.rejoined:
-      //   log('[rejoined] battleQueue: ${battleQueue.toJson()}');
-      //   if (battleQueue.data?.userId == _userId ||
-      //       battleQueue.data?.opponentId == _userId) {
-      //     final data = jsonDecode(battleQueue.data!.data!);
-      //     final gameData = GameData.fromJson(data);
-
-      //     setState(() {
-      //       _gameData = gameData;
-      //       _challengerMnstr = gameData.challengerMnstr;
-      //       _opponentMnstr = gameData.opponentMnstr;
-      //       _choosingMnstr = false;
-      //       _inBattle = true;
-      //     });
-      //   }
-      //   break;
       default:
         break;
     }
