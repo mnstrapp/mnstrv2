@@ -1,0 +1,64 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "flutter",
+			"command": "dart",
+			"args": [
+				"bin/create_env.dart"
+			],
+			"group": "build",
+			"problemMatcher": [],
+			"label": "flutter: create env",
+			"detail": "Create env"
+		},
+		{
+			"type": "flutter",
+			"command": "flutter",
+			"args": [
+				"build",
+				"web",
+				"--release",
+			],
+			"group": "build",
+			"problemMatcher": [],
+			"label": "flutter: flutter build web",
+			"detail": "Build web release",
+			"dependsOn": [
+				"flutter: create env"
+			]
+		},
+		{
+			"type": "flutter",
+			"command": "flutter",
+			"args": [
+				"build",
+				"appbundle",
+				"--release",
+			],
+			"group": "build",
+			"problemMatcher": [],
+			"label": "flutter: flutter build appbundle",
+			"detail": "Build appbundle release",
+			"dependsOn": [
+				"flutter: create env"
+			]
+		},
+		{
+			"type": "flutter",
+			"command": "flutter",
+			"args": [
+				"build",
+				"ipa",
+				"--release",
+			],
+			"group": "build",
+			"problemMatcher": [],
+			"label": "flutter: flutter build ipa",
+			"detail": "Build ipa release",
+			"dependsOn": [
+				"flutter: create env"
+			]
+		}
+	]
+}

@@ -1,7 +1,7 @@
 name: mnstrv2
 description: "A new adventure awaits!"
 publish_to: "none"
-version: 2.10.2+26
+version: 2.10.3+27
 
 environment:
   sdk: ^3.8.0
@@ -31,6 +31,10 @@ dependencies:
   platform: ^3.1.6
   universal_platform: ^1.1.0
   material_symbols_icons: ^4.2874.0
+  wiredash: ^2.5.0
+  dotenv: ^4.2.0
+  flutter_dotenv: ^6.0.0
+  yaml: ^3.1.3
 
 dev_dependencies:
   flutter_test:
