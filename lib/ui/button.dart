@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:mnstrv2/utils/color.dart';
 import '../shared/sounds.dart';
@@ -50,7 +51,9 @@ class _UIButtonState extends State<UIButton> {
 
   Future<void> _onPressed() async {
     BackgroundMusic().play();
-    _buttonSound.play();
+    if (!kIsWeb) {
+      _buttonSound.play();
+    }
     if (_isLoading) {
       return;
     }

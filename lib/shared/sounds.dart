@@ -19,7 +19,7 @@ class BackgroundMusic {
     Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (_muted) return;
       if (!FlameAudio.bgm.isPlaying) {
-        FlameAudio.bgm.play(_backgroundMusic);
+        FlameAudio.bgm.play(_backgroundMusic, volume: _volume);
       }
     });
   }

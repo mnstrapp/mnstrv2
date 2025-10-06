@@ -482,17 +482,19 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
         Positioned(
           top: 0,
           right: 0,
-          child: StatBarContainer(
-            leading: const Text('Health'),
-            trailing: Text(
-              '${opponentMnstr.currentHealth}/${opponentMnstr.maxHealth}',
+          child: SafeArea(
+            child: StatBarContainer(
+              leading: const Text('Health'),
+              trailing: Text(
+                '${opponentMnstr.currentHealth}/${opponentMnstr.maxHealth}',
+              ),
+              width: statBarWidth,
+              margin: statBarMargin,
+              padding: statBarPadding,
+              currentValue: opponentMnstr.currentHealth!,
+              totalValue: opponentMnstr.maxHealth!,
+              color: opponentMnstr.toMonsterModel().color,
             ),
-            width: statBarWidth,
-            margin: statBarMargin,
-            padding: statBarPadding,
-            currentValue: opponentMnstr.currentHealth!,
-            totalValue: opponentMnstr.maxHealth!,
-            color: opponentMnstr.toMonsterModel().color,
           ),
         ),
         Positioned(
