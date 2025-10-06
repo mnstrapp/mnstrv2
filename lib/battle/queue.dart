@@ -337,31 +337,6 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
     });
   }
 
-  void _rejoin() {
-    final user = ref.read(sessionUserProvider);
-    if (user.value == null) {
-      return;
-    }
-
-    final gameData = GameData(
-      battleId: widget.battleStatus.battleId,
-    );
-    final data = BattleQueueData(
-      action: BattleQueueDataAction.rejoin,
-      userId: user.value?.id,
-      userName: user.value?.displayName,
-      message: 'rejoin battle',
-      data: jsonEncode(gameData.toJson()),
-    );
-    final battleQueue = BattleQueue(
-      action: BattleQueueAction.rejoin,
-      userId: user.value?.id,
-      data: data,
-      channel: BattleQueueChannel.battle,
-    );
-    widget.onSend(battleQueue);
-  }
-
   void setShowStatBar() {
     LayoutScaffold.of(
       context,

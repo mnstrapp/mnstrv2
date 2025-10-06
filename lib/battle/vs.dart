@@ -21,6 +21,7 @@ class BattleVsView extends ConsumerStatefulWidget {
   final Function(BattleQueue) onSend;
   final Function(BattleQueue) onLog;
   final Function(Function(String)) onDispose;
+  final Function(GameData) onGameEnded;
   final BattleQueue? battleQueue;
 
   const BattleVsView({
@@ -30,6 +31,7 @@ class BattleVsView extends ConsumerStatefulWidget {
     required this.onLog,
     required this.onDispose,
     required this.battleQueue,
+    required this.onGameEnded,
   });
 
   @override
@@ -130,13 +132,7 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
 
     if (battleQueue.data!.userId != _userId &&
         battleQueue.data!.opponentId != _userId) {
-      log('[handle message] not user or opponent:');
-      log(
-        '\tchallenger: ${battleQueue.data?.userId} != $_userId ->  ${_userId} ${battleQueue.data?.userId != _userId}',
-      );
-      log(
-        '\topponent: ${battleQueue.data?.opponentId} != $_userId ->  ${_userId} ${battleQueue.data?.opponentId != _userId}',
-      );
+      log('[handle message] not user or opponent');
       return;
     }
 
@@ -223,9 +219,6 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
 
     final size = MediaQuery.sizeOf(context);
 
-    log('[BattleVsView] choosingMnstr: $choosingMnstr');
-    log('[BattleVsView] inBattle: $inBattle');
-
     return choosingMnstr && mnstrs.isNotEmpty
         ? SizedBox(
             height: size.height,
@@ -270,6 +263,7 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
             onSend: widget.onSend,
             onLog: widget.onLog,
             onDispose: widget.onDispose,
+            onGameEnded: widget.onGameEnded,
           )
         : const Center(child: Text('Waiting for opponent...'));
   }
@@ -283,6 +277,7 @@ class BattleVsInGameView extends ConsumerStatefulWidget {
   final Function(BattleQueue) onSend;
   final Function(BattleQueue) onLog;
   final Function(Function(String)) onDispose;
+  final Function(GameData) onGameEnded;
 
   const BattleVsInGameView({
     super.key,
@@ -293,6 +288,7 @@ class BattleVsInGameView extends ConsumerStatefulWidget {
     required this.onSend,
     required this.onLog,
     required this.onDispose,
+    required this.onGameEnded,
   });
 
   @override
@@ -301,8 +297,79 @@ class BattleVsInGameView extends ConsumerStatefulWidget {
 
 class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
   GameData? _gameData;
+  String? _winnerId;
+  bool _isLoading = false;
+  String? _loadingAction;
 
-  void _handleMessage(String message) {}
+  void _handleMessage(String message) {
+    final battleQueue = BattleQueue.fromJson(jsonDecode(message));
+    if (battleQueue.data?.userId != widget.challengerId &&
+        battleQueue.data?.userId != widget.opponentId) {
+      log('[BattleVsInGameView] not user or opponent:');
+      log(
+        '\tchallenger: ${battleQueue.data?.userId} != ${widget.challengerId} ->  ${widget.challengerId} ${battleQueue.data?.userId != widget.challengerId}',
+      );
+      log(
+        '\topponent: ${battleQueue.data?.opponentId} != ${widget.opponentId} ->  ${widget.opponentId} ${battleQueue.data?.opponentId != widget.opponentId}',
+      );
+      log('[BattleVsInGameView] battleQueue: ${battleQueue.toJson()}');
+      return;
+    }
+
+    switch (battleQueue.action) {
+      case BattleQueueAction.gameEnded:
+        final data = jsonDecode(battleQueue.data!.data!);
+        final gameData = GameData.fromJson(data);
+        setState(() {
+          _gameData = gameData;
+          _winnerId = gameData.winnerId;
+          _isLoading = false;
+        });
+        break;
+      default:
+        break;
+    }
+  }
+
+  void _escape() {
+    final user = ref.watch(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _loadingAction = 'Escaping from battle...';
+    });
+
+    String? winnerId;
+    if (widget.gameData.opponentMnstr?.userId == user.value?.id) {
+      winnerId = widget.gameData.challengerMnstr?.userId;
+    } else {
+      winnerId = widget.gameData.opponentMnstr?.userId;
+    }
+
+    final gameData = GameData(
+      battleId: widget.gameData.battleId,
+      challengerMnstr: widget.gameData.challengerMnstr,
+      opponentMnstr: widget.gameData.opponentMnstr,
+      winnerId: winnerId,
+    );
+    final data = BattleQueueData(
+      userId: user.value?.id,
+      userName: user.value?.displayName,
+      action: BattleQueueDataAction.escape,
+      message: 'Escape from battle',
+      data: jsonEncode(gameData.toJson()),
+    );
+    final battleQueue = BattleQueue(
+      action: BattleQueueAction.escape,
+      userId: widget.challengerId,
+      data: data,
+      channel: BattleQueueChannel.battle,
+    );
+    widget.onSend(battleQueue);
+  }
 
   Future<void> _setBackgroundColor() async {
     final user = ref.watch(sessionUserProvider);
@@ -363,13 +430,10 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
         : _gameData!.challengerMnstr;
     final size = MediaQuery.sizeOf(context);
 
-    log('[BattleVsInGameView] challengerMnstr: ${challengerMnstr?.toJson()}');
-    log('[BattleVsInGameView] opponentMnstr: ${opponentMnstr?.toJson()}');
-
     final theme = Theme.of(context);
     final buttonColor = darkenColor(
       Color.lerp(
-            opponentMnstr?.toMonsterModel().color ?? theme.primaryColor,
+            challengerMnstr?.toMonsterModel().color ?? theme.primaryColor,
             Colors.white,
             0.25,
           ) ??
@@ -386,6 +450,22 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     );
     final statBarWidth =
         size.width - (statBarMargin.left + statBarMargin.right);
+
+    final winnerMnstr = _winnerId == user.value?.id
+        ? challengerMnstr
+        : opponentMnstr;
+
+    final loserMnstr = _winnerId == user.value?.id
+        ? opponentMnstr
+        : challengerMnstr;
+
+    final xpAwarded = _winnerId == user.value?.id
+        ? _gameData!.winnerXpAwarded
+        : _gameData!.loserXpAwarded;
+
+    final coinsAwarded = _winnerId == user.value?.id
+        ? _gameData!.winnerCoinsAwarded
+        : _gameData!.loserCoinsAwarded;
 
     return Stack(
       children: [
@@ -482,7 +562,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
               Tooltip(
                 message: 'Escape from battle',
                 child: UIButton(
-                  onPressed: () {},
+                  onPressed: _escape,
                   icon: Icons.directions_run_rounded,
                   height: 40,
                   backgroundColor: buttonColor,
@@ -502,6 +582,127 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
             ],
           ),
         ),
+        if (_winnerId != null)
+          Positioned(
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: size.height,
+              width: size.width,
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.5),
+              ),
+              child: Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
+                    spacing: 16,
+                    children: [
+                      if (_winnerId == user.value?.id) ...[
+                        Text(
+                          'You defeated',
+                          style: theme.textTheme.displaySmall?.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          loserMnstr?.mnstrName ?? 'your opponent',
+                          style: theme.textTheme.displayMedium?.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                      if (_winnerId != user.value?.id) ...[
+                        Text(
+                          'You were defeated by',
+                          style: theme.textTheme.displaySmall?.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          winnerMnstr?.mnstrName ?? 'your opponent',
+                          style: theme.textTheme.displayMedium?.copyWith(
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                      Text(
+                        '+ $xpAwarded XP',
+                        style: theme.textTheme.displayLarge?.copyWith(
+                          color: Colors.yellow,
+                        ),
+                      ),
+                      Row(
+                        spacing: 8,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            '+ $coinsAwarded',
+                            style: theme.textTheme.displayLarge?.copyWith(
+                              color: Colors.yellow,
+                            ),
+                          ),
+                          Image.asset(
+                            'assets/items/coin.png',
+                            width: 60,
+                            height: 60,
+                          ),
+                        ],
+                      ),
+                      UIButton(
+                        onPressed: () {
+                          widget.onGameEnded(_gameData!);
+                        },
+                        icon: Symbols.social_leaderboard_rounded,
+                        height: 40,
+                        text: 'exit battle',
+                        backgroundColor: buttonColor,
+                        foregroundColor: Colors.white,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        if (_isLoading)
+          Positioned(
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: size.height,
+              width: size.width,
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.5),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 16,
+                  children: [
+                    Text(
+                      _loadingAction ?? 'Processing...',
+                      style: theme.textTheme.displaySmall?.copyWith(
+                        color: Colors.white,
+                      ),
+                    ),
+                    CircularProgressIndicator(
+                      color: buttonColor,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
       ],
     );
   }

@@ -1,4 +1,3 @@
-import 'package:change_case/change_case.dart';
 import 'package:uuid/uuid.dart' as uuid;
 
 enum BattleQueueChannel {
@@ -26,6 +25,10 @@ enum BattleQueueAction {
   mnstrChosen,
   rejoin,
   rejoined,
+  escape,
+  attack,
+  defend,
+  magic,
 }
 
 class BattleQueue {
@@ -75,6 +78,10 @@ class BattleQueue {
       'mnstrChosen' => BattleQueueAction.mnstrChosen,
       'rejoin' => BattleQueueAction.rejoin,
       'rejoined' => BattleQueueAction.rejoined,
+      'escape' => BattleQueueAction.escape,
+      'attack' => BattleQueueAction.attack,
+      'defend' => BattleQueueAction.defend,
+      'magic' => BattleQueueAction.magic,
       _ => BattleQueueAction.error,
     };
     return BattleQueue(
@@ -128,6 +135,10 @@ enum BattleQueueDataAction {
   mnstrChosen,
   rejoin,
   rejoined,
+  escape,
+  attack,
+  defend,
+  magic,
 }
 
 class BattleQueueData {
@@ -177,6 +188,10 @@ class BattleQueueData {
       'mnstrChosen' => BattleQueueDataAction.mnstrChosen,
       'rejoin' => BattleQueueDataAction.rejoin,
       'rejoined' => BattleQueueDataAction.rejoined,
+      'escape' => BattleQueueDataAction.escape,
+      'attack' => BattleQueueDataAction.attack,
+      'defend' => BattleQueueDataAction.defend,
+      'magic' => BattleQueueDataAction.magic,
       _ => BattleQueueDataAction.error,
     };
     return BattleQueueData(

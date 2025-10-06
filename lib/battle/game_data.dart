@@ -8,6 +8,11 @@ class GameData {
   final List<Monster>? challengerMnstrs;
   final Monster? opponentMnstr;
   final List<Monster>? opponentMnstrs;
+  final String? winnerId;
+  final int? winnerXpAwarded;
+  final int? winnerCoinsAwarded;
+  final int? loserXpAwarded;
+  final int? loserCoinsAwarded;
 
   GameData({
     this.battleId,
@@ -15,10 +20,14 @@ class GameData {
     this.challengerMnstrs,
     this.opponentMnstr,
     this.opponentMnstrs,
+    this.winnerId,
+    this.winnerXpAwarded,
+    this.loserXpAwarded,
+    this.winnerCoinsAwarded,
+    this.loserCoinsAwarded,
   });
 
   factory GameData.fromJson(Map<String, dynamic> json) {
-    log('[game data from json] $json');
     final challengerMnstrs = <Monster>[];
 
     if (json['challengerMnstrs'] != null) {
@@ -33,6 +42,10 @@ class GameData {
         opponentMnstrs.add(Monster.fromJson(e));
       }
     }
+    final winnerXpAwarded = json['winnerXpAwarded'] as int?;
+    final loserXpAwarded = json['loserXpAwarded'] as int?;
+    final winnerCoinsAwarded = json['winnerCoinsAwarded'] as int?;
+    final loserCoinsAwarded = json['loserCoinsAwarded'] as int?;
 
     return GameData(
       battleId: json['battleId'] as String?,
@@ -44,6 +57,11 @@ class GameData {
       opponentMnstr: json['opponentMnstr'] != null
           ? Monster.fromJson(json['opponentMnstr'])
           : null,
+      winnerId: json['winnerId'] as String?,
+      winnerXpAwarded: winnerXpAwarded,
+      loserXpAwarded: loserXpAwarded,
+      winnerCoinsAwarded: winnerCoinsAwarded,
+      loserCoinsAwarded: loserCoinsAwarded,
     );
   }
 
@@ -53,5 +71,10 @@ class GameData {
     'challengerMnstrs': challengerMnstrs?.map((e) => e.toJson()).toList(),
     'opponentMnstr': opponentMnstr?.toJson(),
     'opponentMnstrs': opponentMnstrs?.map((e) => e.toJson()).toList(),
+    'winnerId': winnerId,
+    'winnerXpAwarded': winnerXpAwarded,
+    'loserXpAwarded': loserXpAwarded,
+    'winnerCoinsAwarded': winnerCoinsAwarded,
+    'loserCoinsAwarded': loserCoinsAwarded,
   };
 }

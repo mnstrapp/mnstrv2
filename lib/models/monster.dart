@@ -26,6 +26,7 @@ class Monster {
   DateTime? createdAt;
   DateTime? updatedAt;
   DateTime? archivedAt;
+  int? experienceToNextLevel;
 
   Monster({
     this.id,
@@ -50,6 +51,7 @@ class Monster {
     this.createdAt,
     this.updatedAt,
     this.archivedAt,
+    this.experienceToNextLevel,
   });
 
   factory Monster.fromJson(Map<String, dynamic> json) {
@@ -73,6 +75,7 @@ class Monster {
       maxSpeed: json['maxSpeed'],
       currentMagic: json['currentMagic'],
       maxMagic: json['maxMagic'],
+      experienceToNextLevel: json['experienceToNextLevel'],
       createdAt: json['createdAt'] == null
           ? null
           : DateTime.parse(json['createdAt']),
@@ -108,6 +111,7 @@ class Monster {
     'createdAt': createdAt?.toIso8601String(),
     'updatedAt': updatedAt?.toIso8601String(),
     'archivedAt': archivedAt?.toIso8601String(),
+    'experienceToNextLevel': experienceToNextLevel,
   };
 
   Monster copyWith({
@@ -128,6 +132,7 @@ class Monster {
     int? maxSpeed,
     int? currentMagic,
     int? maxMagic,
+    int? experienceToNextLevel,
     DateTime? createdAt,
     DateTime? updatedAt,
     DateTime? archivedAt,
@@ -151,6 +156,7 @@ class Monster {
     maxSpeed: maxSpeed ?? this.maxSpeed,
     currentMagic: currentMagic ?? this.currentMagic,
     maxMagic: maxMagic ?? this.maxMagic,
+    experienceToNextLevel: experienceToNextLevel ?? this.experienceToNextLevel,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
     archivedAt: archivedAt ?? this.archivedAt,

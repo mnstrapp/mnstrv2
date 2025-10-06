@@ -153,20 +153,6 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
           }
         });
         break;
-      // case BattleQueueAction.rejoined:
-      //   if (battleQueue.data?.userId == user.value?.id ||
-      //       battleQueue.data?.opponentId == user.value?.id) {
-      //     final data = jsonDecode(battleQueue.data!.data!);
-      //     final gameData = GameData.fromJson(data);
-      //     log('[layout] rejoined battleQueue: ${gameData.battleId}');
-      //     setState(() {
-      //       _isInBattle = true;
-      //       _isLoading = false;
-      //       _battleQueue = battleQueue;
-      //       _isJoined = false;
-      //     });
-      //   }
-      //   break;
       default:
         break;
     }
@@ -323,6 +309,24 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
               onLog: _log,
               onDispose: _removeListener,
               battleQueue: _battleQueue,
+              onGameEnded: (_) {
+                setState(() {
+                  _isInBattle = false;
+                  _battleQueue = null;
+                });
+                final battleQueueData = BattleQueueData(
+                  action: BattleQueueDataAction.connect,
+                  userId: _battleQueue?.data?.userId,
+                  userName: _battleQueue?.data?.userName,
+                );
+                final battleQueue = BattleQueue(
+                  action: BattleQueueAction.joined,
+                  userId: _battleQueue?.data?.userId,
+                  data: battleQueueData,
+                  channel: BattleQueueChannel.lobby,
+                );
+                _socket?.sink.add(jsonEncode(battleQueue.toJson()));
+              },
             )
           : SafeArea(
               child: _isLoading
