@@ -12,6 +12,7 @@ class MnstrList extends StatefulWidget {
   final EdgeInsets? overlayPositioning;
   final Widget Function(Monster)? overlayBuilder;
   final bool showName;
+  final bool Function(Monster)? filter;
 
   const MnstrList({
     super.key,
@@ -21,6 +22,7 @@ class MnstrList extends StatefulWidget {
     this.overlayBuilder,
     this.overlayPositioning,
     this.showName = true,
+    this.filter,
   });
 
   @override
@@ -132,7 +134,12 @@ class _MnstrListState extends State<MnstrList> {
       );
     } else if (isTablet) {
       final row = <Monster>[];
-      for (var entry in widget.monsters.asMap().entries) {
+      for (var entry
+          in widget.monsters
+              .where(widget.filter ?? (m) => true)
+              .toList()
+              .asMap()
+              .entries) {
         final index = entry.key;
         final m = entry.value;
         if ((index % 2) == 0) {
@@ -165,15 +172,17 @@ class _MnstrListState extends State<MnstrList> {
       }
     } else {
       mnstrs.addAll(
-        widget.monsters.map(
-          (m) => MnstrView(
-            monster: m,
-            onTap: widget.onTap,
-            overlay: widget.overlayBuilder?.call(m) ?? widget.overlay,
-            overlayPositioning: widget.overlayPositioning,
-            showName: widget.showName,
-          ),
-        ),
+        widget.monsters
+            .where(widget.filter ?? (m) => true)
+            .map(
+              (m) => MnstrView(
+                monster: m,
+                onTap: widget.onTap,
+                overlay: widget.overlayBuilder?.call(m) ?? widget.overlay,
+                overlayPositioning: widget.overlayPositioning,
+                showName: widget.showName,
+              ),
+            ),
       );
     }
 

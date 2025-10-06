@@ -132,7 +132,12 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
 
     if (battleQueue.data!.userId != _userId &&
         battleQueue.data!.opponentId != _userId) {
-      log('[handle message] not user or opponent');
+      log('\n\n[handle message] not user or opponent\n\n');
+      log('[handle message] userId: ${battleQueue.data?.userId} != $_userId');
+      log(
+        '[handle message] opponentId: ${battleQueue.data?.opponentId} != $_userId',
+      );
+      log('[handle message] battleQueue: ${battleQueue.toJson()}');
       return;
     }
 
@@ -227,6 +232,9 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
               showName: false,
               monsters: mnstrs,
               onTap: _chooseMnstr,
+              filter: (mnstr) {
+                return mnstr.currentHealth != null && mnstr.currentHealth! > 0;
+              },
               overlayBuilder: (mnstr) {
                 final m = mnstr.toMonsterModel();
                 final color = darkenColor(
@@ -300,8 +308,14 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
   String? _winnerId;
   bool _isLoading = false;
   String? _loadingAction;
+  String? _turnUserId;
 
   void _handleMessage(String message) {
+    final user = ref.watch(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
+
     final battleQueue = BattleQueue.fromJson(jsonDecode(message));
     if (battleQueue.data?.userId != widget.challengerId &&
         battleQueue.data?.userId != widget.opponentId) {
@@ -325,6 +339,22 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
           _winnerId = gameData.winnerId;
           _isLoading = false;
         });
+        break;
+      case BattleQueueAction.attack:
+        final data = jsonDecode(battleQueue.data!.data!);
+        final gameData = GameData.fromJson(data);
+        log(
+          '[BattleVsInGameView] attack turn userId: ${gameData.turnUserId} -> ${user.value?.id}',
+        );
+        setState(() {
+          _gameData = gameData;
+          _isLoading = false;
+          _turnUserId = gameData.turnUserId;
+        });
+        break;
+      case BattleQueueAction.defend:
+        break;
+      case BattleQueueAction.magic:
         break;
       default:
         break;
@@ -371,6 +401,57 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     widget.onSend(battleQueue);
   }
 
+  void _attack() {
+    final user = ref.watch(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _loadingAction = 'Attacking...';
+    });
+
+    String? turnUserId;
+    if (_turnUserId != user.value?.id) {
+      turnUserId = user.value?.id;
+    } else {
+      if (_turnUserId == widget.opponentId) {
+        turnUserId = widget.challengerId;
+      } else {
+        turnUserId = widget.opponentId;
+      }
+    }
+
+    final gameData = GameData(
+      battleId: widget.gameData.battleId,
+      challengerMnstr: widget.gameData.challengerMnstr,
+      opponentMnstr: widget.gameData.opponentMnstr,
+      turnUserId: turnUserId,
+    );
+    final data = BattleQueueData(
+      userId: user.value?.id,
+      userName: user.value?.displayName,
+      action: BattleQueueDataAction.attack,
+      message: 'Attack',
+      data: jsonEncode(gameData.toJson()),
+    );
+    final battleQueue = BattleQueue(
+      action: BattleQueueAction.attack,
+      userId: widget.challengerId,
+      data: data,
+      channel: BattleQueueChannel.battle,
+    );
+    widget.onSend(battleQueue);
+  }
+
+  void _defend() {
+    final user = ref.watch(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
+  }
+
   Future<void> _setBackgroundColor() async {
     final user = ref.watch(sessionUserProvider);
     if (user.value == null) {
@@ -400,6 +481,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
   void initState() {
     super.initState();
     _gameData = widget.gameData;
+    _turnUserId = widget.gameData.turnUserId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _setBackgroundColor();
       _removeStatBar();
@@ -509,6 +591,57 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
             backside: true,
           ),
         ),
+
+        if (_turnUserId == user.value?.id)
+          Positioned(
+            right: 16,
+            bottom: 70,
+            child: Column(
+              spacing: 24,
+              children: [
+                Tooltip(
+                  message: 'Attack',
+                  child: UIButton(
+                    onPressed: _attack,
+                    icon: Symbols.swords_rounded,
+                    height: 40,
+                    backgroundColor: buttonColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                Tooltip(
+                  message: 'Defend',
+                  child: UIButton(
+                    onPressed: () {},
+                    icon: Icons.shield_moon_rounded,
+                    height: 40,
+                    backgroundColor: buttonColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                Tooltip(
+                  message: 'Magic',
+                  child: UIButton(
+                    onPressed: () {},
+                    icon: Symbols.magic_button_rounded,
+                    height: 40,
+                    backgroundColor: buttonColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+                Tooltip(
+                  message: 'Escape from battle',
+                  child: UIButton(
+                    onPressed: _escape,
+                    icon: Icons.directions_run_rounded,
+                    height: 40,
+                    backgroundColor: buttonColor,
+                    foregroundColor: Colors.white,
+                  ),
+                ),
+              ],
+            ),
+          ),
         Positioned(
           bottom: 0,
           left: 0,
@@ -523,65 +656,6 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
             currentValue: challengerMnstr.currentHealth!,
             totalValue: challengerMnstr.maxHealth!,
             color: challengerMnstr.toMonsterModel().color,
-          ),
-        ),
-        Positioned(
-          right: 16,
-          bottom: 70,
-          child: Column(
-            spacing: 24,
-            children: [
-              Tooltip(
-                message: 'Attack',
-                child: UIButton(
-                  onPressed: () {},
-                  icon: Symbols.swords_rounded,
-                  height: 40,
-                  backgroundColor: buttonColor,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-              Tooltip(
-                message: 'Defend',
-                child: UIButton(
-                  onPressed: () {},
-                  icon: Icons.shield_moon_rounded,
-                  height: 40,
-                  backgroundColor: buttonColor,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-              Tooltip(
-                message: 'Magic',
-                child: UIButton(
-                  onPressed: () {},
-                  icon: Symbols.magic_button_rounded,
-                  height: 40,
-                  backgroundColor: buttonColor,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-              Tooltip(
-                message: 'Escape from battle',
-                child: UIButton(
-                  onPressed: _escape,
-                  icon: Icons.directions_run_rounded,
-                  height: 40,
-                  backgroundColor: buttonColor,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-              Tooltip(
-                message: 'View inventory',
-                child: UIButton(
-                  onPressed: () {},
-                  icon: Icons.shelves,
-                  height: 40,
-                  backgroundColor: buttonColor,
-                  foregroundColor: Colors.white,
-                ),
-              ),
-            ],
           ),
         ),
         if (_winnerId != null)

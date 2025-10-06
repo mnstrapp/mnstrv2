@@ -13,6 +13,7 @@ class GameData {
   final int? winnerCoinsAwarded;
   final int? loserXpAwarded;
   final int? loserCoinsAwarded;
+  final String? turnUserId;
 
   GameData({
     this.battleId,
@@ -25,6 +26,7 @@ class GameData {
     this.loserXpAwarded,
     this.winnerCoinsAwarded,
     this.loserCoinsAwarded,
+    this.turnUserId,
   });
 
   factory GameData.fromJson(Map<String, dynamic> json) {
@@ -62,6 +64,7 @@ class GameData {
       loserXpAwarded: loserXpAwarded,
       winnerCoinsAwarded: winnerCoinsAwarded,
       loserCoinsAwarded: loserCoinsAwarded,
+      turnUserId: json['turnUserId'] as String?,
     );
   }
 
@@ -76,5 +79,6 @@ class GameData {
     'loserXpAwarded': loserXpAwarded,
     'winnerCoinsAwarded': winnerCoinsAwarded,
     'loserCoinsAwarded': loserCoinsAwarded,
+    'turnUserId': turnUserId,
   };
 }
