@@ -89877,22 +89877,25 @@ q=l.gm(l)
 q=q==null?m:q.b
 o=A.kR(B.mU,m,B.fq,m,new A.i6(B.n3,m,r,q,m,m,m,m,B.G.ho(new A.oC(s.a,s.b,m,s.d,m,p,m,m,m,m,m).c9(),m),m,"Escape from battle"),m,m,n.a.d)
 n.a.kg(o)},
-a8A(){var s,r,q,p,o,n=this,m=null,l=n.gbv().el($.ee(),t.g)
-if(l.gm(l)==null)return
-n.H(new A.auQ(n))
-s=n.Q
-r=l.gm(l)
-if(s!=(r==null?m:r.a)){s=l.gm(l)
-q=s==null?m:s.a}else{s=n.Q
-r=n.a
+a8A(){var s,r,q,p,o,n,m,l=this,k=null,j=l.gbv().el($.ee(),t.g)
+if(j.gm(j)==null)return
+l.H(new A.auQ(l))
+s=l.Q
+r=j.gm(j)
+if(s!=(r==null?k:r.a)){s=j.gm(j)
+q=s==null?k:s.a}else{s=l.Q
+r=l.a
 q=r.e
-if(s==q)q=r.d}s=n.a.f
-r=l.gm(l)
-r=r==null?m:r.a
-p=l.gm(l)
-p=p==null?m:p.b
-o=A.kR(B.mV,m,B.fq,m,new A.i6(B.n4,m,r,p,m,m,m,m,B.G.ho(new A.oC(s.a,s.b,m,s.d,m,m,m,m,m,m,q).c9(),m),m,"Attack"),m,m,n.a.d)
-n.a.kg(o)},
+if(s==q)q=r.d}s=l.a.f
+r=l.w
+p=r.b
+r=r.d
+o=j.gm(j)
+o=o==null?k:o.a
+n=j.gm(j)
+n=n==null?k:n.b
+m=A.kR(B.mV,k,B.fq,k,new A.i6(B.n4,k,o,n,k,k,k,k,B.G.ho(new A.oC(s.a,p,k,r,k,k,k,k,k,k,q).c9(),k),k,"Attack"),k,k,l.a.d)
+l.a.kg(m)},
 Hs(){var s=0,r=A.p(t.H),q,p=this,o,n,m,l,k,j,i,h
 var $async$Hs=A.l(function(a,b){if(a===1)return A.m(b,r)
 while(true)switch(s){case 0:h=p.gbv().el($.ee(),t.g)

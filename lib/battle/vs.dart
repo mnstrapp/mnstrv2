@@ -425,8 +425,8 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
 
     final gameData = GameData(
       battleId: widget.gameData.battleId,
-      challengerMnstr: widget.gameData.challengerMnstr,
-      opponentMnstr: widget.gameData.opponentMnstr,
+      challengerMnstr: _gameData!.challengerMnstr,
+      opponentMnstr: _gameData!.opponentMnstr,
       turnUserId: turnUserId,
     );
     final data = BattleQueueData(
