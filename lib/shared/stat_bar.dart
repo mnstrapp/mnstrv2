@@ -32,8 +32,8 @@ class StatBar extends StatelessWidget {
     );
     final barWidth = width;
     final barHeight = 20.0;
-    final barValue = currentValue;
-    final barTotal = totalValue;
+    final barValue = currentValue >= 0 ? currentValue : 0;
+    final barTotal = totalValue >= 0 ? totalValue : 0;
     final barValuePercentage = barValue / barTotal;
     final borderRadius = BorderRadius.circular(20);
     final barValueWidth = barWidth * barValuePercentage;
