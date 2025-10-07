@@ -343,9 +343,6 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
       case BattleQueueAction.attack:
         final data = jsonDecode(battleQueue.data!.data!);
         final gameData = GameData.fromJson(data);
-        log(
-          '[BattleVsInGameView] attack turn userId: ${gameData.turnUserId} -> ${user.value?.id}',
-        );
         setState(() {
           _gameData = gameData;
           _isLoading = false;
@@ -353,8 +350,22 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
         });
         break;
       case BattleQueueAction.defend:
+        final data = jsonDecode(battleQueue.data!.data!);
+        final gameData = GameData.fromJson(data);
+        setState(() {
+          _gameData = gameData;
+          _isLoading = false;
+          _turnUserId = gameData.turnUserId;
+        });
         break;
       case BattleQueueAction.magic:
+        final data = jsonDecode(battleQueue.data!.data!);
+        final gameData = GameData.fromJson(data);
+        setState(() {
+          _gameData = gameData;
+          _isLoading = false;
+          _turnUserId = gameData.turnUserId;
+        });
         break;
       default:
         break;
@@ -450,6 +461,89 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     if (user.value == null) {
       return;
     }
+
+    setState(() {
+      _isLoading = true;
+      _loadingAction = 'Defending...';
+    });
+
+    String? turnUserId;
+    if (_turnUserId != user.value?.id) {
+      turnUserId = user.value?.id;
+    } else {
+      if (_turnUserId == widget.opponentId) {
+        turnUserId = widget.challengerId;
+      } else {
+        turnUserId = widget.opponentId;
+      }
+    }
+
+    final gameData = GameData(
+      battleId: widget.gameData.battleId,
+      challengerMnstr: _gameData!.challengerMnstr,
+      opponentMnstr: _gameData!.opponentMnstr,
+      turnUserId: turnUserId,
+    );
+    final data = BattleQueueData(
+      userId: user.value?.id,
+      userName: user.value?.displayName,
+      action: BattleQueueDataAction.defend,
+      message: 'Defend',
+      data: jsonEncode(gameData.toJson()),
+    );
+    final battleQueue = BattleQueue(
+      action: BattleQueueAction.defend,
+      userId: widget.challengerId,
+      data: data,
+      channel: BattleQueueChannel.battle,
+    );
+    widget.onSend(battleQueue);
+  }
+
+  void _magic() {
+    final user = ref.watch(sessionUserProvider);
+    if (user.value == null) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+      _loadingAction = 'Magic...';
+    });
+
+    String? turnUserId;
+    if (_turnUserId != user.value?.id) {
+      turnUserId = user.value?.id;
+    } else {
+      if (_turnUserId == widget.opponentId) {
+        turnUserId = widget.challengerId;
+      } else {
+        turnUserId = widget.opponentId;
+      }
+    }
+
+    final gameData = GameData(
+      battleId: widget.gameData.battleId,
+      challengerMnstr: _gameData!.challengerMnstr,
+      opponentMnstr: _gameData!.opponentMnstr,
+      turnUserId: turnUserId,
+    );
+
+    final data = BattleQueueData(
+      userId: user.value?.id,
+      userName: user.value?.displayName,
+      action: BattleQueueDataAction.magic,
+      message: 'Magic',
+      data: jsonEncode(gameData.toJson()),
+    );
+
+    final battleQueue = BattleQueue(
+      action: BattleQueueAction.magic,
+      userId: widget.challengerId,
+      data: data,
+      channel: BattleQueueChannel.battle,
+    );
+    widget.onSend(battleQueue);
   }
 
   Future<void> _setBackgroundColor() async {
@@ -612,7 +706,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                 Tooltip(
                   message: 'Defend',
                   child: UIButton(
-                    onPressed: () {},
+                    onPressed: _defend,
                     icon: Icons.shield_moon_rounded,
                     height: 40,
                     backgroundColor: buttonColor,
@@ -622,7 +716,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                 Tooltip(
                   message: 'Magic',
                   child: UIButton(
-                    onPressed: () {},
+                    onPressed: _magic,
                     icon: Symbols.magic_button_rounded,
                     height: 40,
                     backgroundColor: buttonColor,
