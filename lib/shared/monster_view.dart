@@ -26,8 +26,8 @@ class MonsterView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final middle = Size(
-      ((size.width * (monsterScale / 100)) + (size.width / 4)),
-      size.height / 4,
+      size.width / (4 * monsterScale),
+      size.height / (4 * monsterScale),
     );
 
     final monsterParts = monster.monsterParts(
