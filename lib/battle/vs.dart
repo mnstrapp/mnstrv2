@@ -659,17 +659,12 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
           top: 0,
           right: 0,
           child: SafeArea(
-            child: StatBarContainer(
-              leading: const Text('Health'),
-              trailing: Text(
-                '${opponentMnstr.currentHealth}/${opponentMnstr.maxHealth}',
-              ),
+            child: _StatsBar(
+              monster: opponentMnstr,
+              position: _StatsBarPosition.bottom,
               width: statBarWidth,
               margin: statBarMargin,
               padding: statBarPadding,
-              currentValue: opponentMnstr.currentHealth!,
-              totalValue: opponentMnstr.maxHealth!,
-              color: opponentMnstr.toMonsterModel().color,
             ),
           ),
         ),
@@ -681,7 +676,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
           child: MonsterView(
             monster: challengerMnstr!.toMonsterModel(),
             size: Size(size.width, size.height),
-            monsterScale: 2,
+            monsterScale: 2.5,
             backside: true,
           ),
         ),
@@ -739,17 +734,12 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
         Positioned(
           bottom: 0,
           left: 0,
-          child: StatBarContainer(
-            leading: const Text('Health'),
-            trailing: Text(
-              '${challengerMnstr.currentHealth}/${challengerMnstr.maxHealth}',
-            ),
+          child: _StatsBar(
+            monster: challengerMnstr,
+            position: _StatsBarPosition.top,
             width: statBarWidth,
             margin: statBarMargin,
             padding: statBarPadding,
-            currentValue: challengerMnstr.currentHealth!,
-            totalValue: challengerMnstr.maxHealth!,
-            color: challengerMnstr.toMonsterModel().color,
           ),
         ),
         if (_winnerId != null)
@@ -874,6 +864,207 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
             ),
           ),
       ],
+    );
+  }
+}
+
+enum _StatsBarPosition {
+  top,
+  bottom,
+}
+
+class _StatsBar extends StatefulWidget {
+  final Monster monster;
+  final _StatsBarPosition position;
+  final double width;
+  final EdgeInsets margin;
+  final EdgeInsets padding;
+
+  const _StatsBar({
+    required this.monster,
+    required this.position,
+    required this.width,
+    required this.margin,
+    required this.padding,
+  });
+
+  @override
+  State<_StatsBar> createState() => _StatsBarState();
+}
+
+class _StatsBarState extends State<_StatsBar> {
+  bool _expanded = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return InkWell(
+      onTap: () {
+        setState(() {
+          _expanded = !_expanded;
+        });
+      },
+      child: Container(
+        margin: widget.margin,
+        decoration: BoxDecoration(
+          color: darkenColor(
+            Color.lerp(
+                  widget.monster.toMonsterModel().color ?? theme.primaryColor,
+                  Colors.white,
+                  0.25,
+                ) ??
+                theme.primaryColor,
+            0.5,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+
+          children: [
+            if (_expanded && widget.position == _StatsBarPosition.top)
+              _StatsBarContainer(
+                monster: widget.monster,
+                width: widget.width,
+              ),
+            Container(
+              width: widget.width,
+              decoration: BoxDecoration(
+                color: Color.lerp(
+                  widget.monster.toMonsterModel().color ?? theme.primaryColor,
+                  Colors.white,
+                  0.5,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  UIButton(
+                    onPressed: () {
+                      setState(() {
+                        _expanded = !_expanded;
+                      });
+                    },
+                    icon: widget.position == _StatsBarPosition.bottom
+                        ? _expanded
+                              ? Icons.keyboard_arrow_up_rounded
+                              : Icons.keyboard_arrow_down_rounded
+                        : _expanded
+                        ? Icons.keyboard_arrow_down_rounded
+                        : Icons.keyboard_arrow_up_rounded,
+                    height: 32,
+                    margin: 0,
+                    padding: 0,
+                    backgroundColor: darkenColor(
+                      Color.lerp(
+                            widget.monster.toMonsterModel().color ??
+                                theme.primaryColor,
+                            Colors.white,
+                            0.25,
+                          ) ??
+                          theme.primaryColor,
+                      0.5,
+                    ),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  Expanded(
+                    child: StatBarContainer(
+                      leading: const Icon(Symbols.health_metrics_rounded),
+                      trailing: Text(
+                        '${widget.monster.currentHealth}/${widget.monster.maxHealth}',
+                      ),
+                      padding: widget.padding,
+                      currentValue: widget.monster.currentHealth!,
+                      totalValue: widget.monster.maxHealth!,
+                      color: widget.monster.toMonsterModel().color,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            if (_expanded && widget.position == _StatsBarPosition.bottom)
+              _StatsBarContainer(
+                monster: widget.monster,
+                width: widget.width,
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _StatsBarContainer extends StatelessWidget {
+  final Monster monster;
+  final double width;
+
+  const _StatsBarContainer({
+    required this.monster,
+    required this.width,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(8),
+      width: width,
+      child: Column(
+        spacing: 8,
+        children: [
+          StatBarContainer(
+            leading: const Icon(Symbols.swords_rounded),
+            trailing: Text(
+              '${monster.currentAttack}/${monster.maxAttack}',
+            ),
+            currentValue: monster.currentAttack!,
+            totalValue: monster.maxAttack!,
+            color: monster.toMonsterModel().color,
+            width: width,
+          ),
+          StatBarContainer(
+            leading: const Icon(Symbols.shield_moon_rounded),
+            trailing: Text(
+              '${monster.currentDefense}/${monster.maxDefense}',
+            ),
+            currentValue: monster.currentDefense!,
+            totalValue: monster.maxDefense!,
+            color: monster.toMonsterModel().color,
+            width: width,
+          ),
+          StatBarContainer(
+            leading: const Icon(Symbols.psychology_rounded),
+            trailing: Text(
+              '${monster.currentIntelligence}/${monster.maxIntelligence}',
+            ),
+            currentValue: monster.currentIntelligence!,
+            totalValue: monster.maxIntelligence!,
+            color: monster.toMonsterModel().color,
+            width: width,
+          ),
+          StatBarContainer(
+            leading: const Icon(Symbols.speed_rounded),
+            trailing: Text(
+              '${monster.currentSpeed}/${monster.maxSpeed}',
+            ),
+            currentValue: monster.currentSpeed!,
+            totalValue: monster.maxSpeed!,
+            color: monster.toMonsterModel().color,
+            width: width,
+          ),
+          StatBarContainer(
+            leading: const Icon(Symbols.magic_button_rounded),
+            trailing: Text(
+              '${monster.currentMagic}/${monster.maxMagic}',
+            ),
+            currentValue: monster.currentMagic!,
+            totalValue: monster.maxMagic!,
+            color: monster.toMonsterModel().color,
+            width: width,
+          ),
+        ],
+      ),
     );
   }
 }

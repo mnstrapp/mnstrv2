@@ -6,6 +6,21 @@ import 'package:mnstrv2/utils/color.dart';
 import '../shared/sounds.dart';
 
 class UIButton extends StatefulWidget {
+  final VoidCallback? onPressed;
+  final Future<void> Function()? onPressedAsync;
+  final IconData? icon;
+  final String? text;
+  final double? fontSize;
+  final Color? backgroundColor;
+  final Color? foregroundColor;
+  final BorderRadius? borderRadius;
+  final double? iconSize;
+  final double? margin;
+  final double? padding;
+  final double? width;
+  final double? height;
+  final bool center;
+
   const UIButton({
     super.key,
     this.onPressed,
@@ -21,25 +36,12 @@ class UIButton extends StatefulWidget {
     this.iconSize,
     this.center = true,
     this.onPressedAsync,
+    this.borderRadius,
   }) : assert(
          (onPressed != null && onPressedAsync == null) ||
              (onPressed == null && onPressedAsync != null),
          'Either onPressed or onPressedAsync must be provided',
        );
-
-  final VoidCallback? onPressed;
-  final Future<void> Function()? onPressedAsync;
-  final IconData? icon;
-  final String? text;
-  final double? fontSize;
-  final Color? backgroundColor;
-  final Color? foregroundColor;
-  final double? iconSize;
-  final double? margin;
-  final double? padding;
-  final double? width;
-  final double? height;
-  final bool center;
 
   @override
   State<UIButton> createState() => _UIButtonState();
@@ -95,6 +97,9 @@ class _UIButtonState extends State<UIButton> {
             backgroundColor: _isLoading
                 ? lightenColor(widget.backgroundColor ?? Colors.grey)
                 : widget.backgroundColor,
+            shape: RoundedRectangleBorder(
+              borderRadius: widget.borderRadius ?? BorderRadius.circular(16),
+            ),
           ),
           child: Padding(
             padding: EdgeInsets.all(padding),
