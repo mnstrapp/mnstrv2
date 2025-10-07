@@ -98,8 +98,6 @@ class MonsterModel {
   }
 }
 
-const scaleMultiplier = 1.7;
-
 class MonsterParts {
   final double scale;
   final Size size;
