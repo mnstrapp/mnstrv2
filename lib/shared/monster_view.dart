@@ -25,12 +25,8 @@ class MonsterView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final factor = (monsterScale / 100);
-
-    bool isMobile = size.width <= largeMobileMaximumBreakpoint;
-
     final middle = Size(
-      (size.width / (size.width * factor)) + (isMobile ? 10 : 50),
+      ((size.width * (monsterScale / 100)) + (size.width / 4)),
       size.height / 4,
     );
 
@@ -51,39 +47,39 @@ class MonsterView extends StatelessWidget {
             child: monsterParts[MonsterPart.body]!,
           ),
           Positioned(
-            bottom: middle.height + (0 * factor),
+            bottom: middle.height,
             left: middle.width,
             child: monsterParts[MonsterPart.head]!,
           ),
           monsterParts[MonsterPart.horns] != null
               ? Positioned(
-                  bottom: middle.height + (0 * factor),
+                  bottom: middle.height,
                   left: middle.width,
                   child: monsterParts[MonsterPart.horns]!,
                 )
               : const SizedBox.shrink(),
           monsterParts[MonsterPart.tail] != null
               ? Positioned(
-                  bottom: middle.height - (0 * factor),
+                  bottom: middle.height,
                   left: middle.width,
                   child: monsterParts[MonsterPart.tail]!,
                 )
               : const SizedBox.shrink(),
           Positioned(
-            bottom: middle.height - (0 * factor),
+            bottom: middle.height,
             left: middle.width,
             child: monsterParts[MonsterPart.arms]!,
           ),
           monster.legs == 0
               ? Positioned(
-                  bottom: middle.height - (0 * factor),
+                  bottom: middle.height,
                   left: middle.width,
                   child: monsterParts[MonsterPart.legs]!,
                 )
               : const SizedBox.shrink(),
           monster.legs == 1
               ? Positioned(
-                  bottom: middle.height - (0 * factor),
+                  bottom: middle.height,
                   left: middle.width + 1,
                   child: monsterParts[MonsterPart.legs]!,
                 )
