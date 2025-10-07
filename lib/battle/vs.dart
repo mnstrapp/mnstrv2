@@ -699,20 +699,20 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                   ),
                 ),
                 Tooltip(
-                  message: 'Defend',
+                  message: 'Magic',
                   child: UIButton(
-                    onPressed: _defend,
-                    icon: Icons.shield_moon_rounded,
+                    onPressed: _magic,
+                    icon: Symbols.magic_button_rounded,
                     height: 40,
                     backgroundColor: buttonColor,
                     foregroundColor: Colors.white,
                   ),
                 ),
                 Tooltip(
-                  message: 'Magic',
+                  message: 'Defend',
                   child: UIButton(
-                    onPressed: _magic,
-                    icon: Symbols.magic_button_rounded,
+                    onPressed: _defend,
+                    icon: Icons.shield_moon_rounded,
                     height: 40,
                     backgroundColor: buttonColor,
                     foregroundColor: Colors.white,

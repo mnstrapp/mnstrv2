@@ -90029,7 +90029,7 @@ b=t.p
 e=A.b([h,e,A.cm(-r*0.68,A.Re(!0,a4,A.dW(p),2.5,new A.M(s,r),a4),a4,a4,-s*0.4,0,0,a4)],b)
 h=a3.Q
 a=a6.gm(a6)
-if(h==(a==null?a4:a.a))e.push(A.cm(70,A.cL(A.b([A.UX(A.e1(l,a4,a4,B.j,40,B.pf,a4,0,a3.ga8z(),a4,0,a4,a4),"Attack"),A.UX(A.e1(l,a4,a4,B.j,40,B.I6,a4,0,a3.gaav(),a4,0,a4,a4),"Defend"),A.UX(A.e1(l,a4,a4,B.j,40,B.pg,a4,0,a3.gagL(),a4,0,a4,a4),"Magic"),A.UX(A.e1(l,a4,a4,B.j,40,B.HZ,a4,0,a3.gabl(),a4,0,a4,a4),"Escape from battle")],b),B.v,B.A,B.N,24),a4,a4,a4,16,a4,a4))
+if(h==(a==null?a4:a.a))e.push(A.cm(70,A.cL(A.b([A.UX(A.e1(l,a4,a4,B.j,40,B.pf,a4,0,a3.ga8z(),a4,0,a4,a4),"Attack"),A.UX(A.e1(l,a4,a4,B.j,40,B.pg,a4,0,a3.gagL(),a4,0,a4,a4),"Magic"),A.UX(A.e1(l,a4,a4,B.j,40,B.I6,a4,0,a3.gaav(),a4,0,a4,a4),"Defend"),A.UX(A.e1(l,a4,a4,B.j,40,B.HZ,a4,0,a3.gabl(),a4,0,a4,a4),"Escape from battle")],b),B.v,B.A,B.N,24),a4,a4,a4,16,a4,a4))
 e.push(A.cm(0,new A.zP(p,B.BN,i,k,j,a4),a4,a4,0,a4,a4,a4))
 if(a3.x!=null){h=B.l.px(0.5)
 a=A.b([],b)
