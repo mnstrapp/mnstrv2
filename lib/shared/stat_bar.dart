@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 
 import '../utils/color.dart';
@@ -22,14 +24,22 @@ class StatBar extends StatelessWidget {
     final size = MediaQuery.sizeOf(context);
     final width = this.width ?? size.width;
 
-    final barBackgroundColor = darkenColor(color ?? theme.primaryColor, 0.1);
-    final barForegroundColor = darkenColor(color ?? theme.primaryColor, 0.2);
+    final barBackgroundColor = darkenColor(color ?? theme.primaryColor, 0.25);
+    final barForegroundColor = darkenColor(
+      Color.lerp(color ?? theme.primaryColor, Colors.white, 0.25) ??
+          theme.primaryColor,
+      0.5,
+    );
     final barWidth = width;
     final barHeight = 20.0;
     final barValue = currentValue;
     final barTotal = totalValue;
+    final barValuePercentage = barValue / barTotal;
     final borderRadius = BorderRadius.circular(20);
-    final barValueWidth = barWidth * (barValue / barTotal);
+    final barValueWidth = barWidth * barValuePercentage;
+
+    log('barValuePercentage: $barValuePercentage');
+    log('barValueWidth: $barValueWidth / $barWidth');
 
     return Stack(
       children: [

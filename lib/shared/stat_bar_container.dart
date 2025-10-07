@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mnstrv2/shared/stat_bar.dart';
 
-import '../utils/color.dart';
-
 class StatBarContainer extends StatelessWidget {
   final Widget? leading;
   final Widget? trailing;
@@ -40,6 +38,7 @@ class StatBarContainer extends StatelessWidget {
     final height = this.height ?? 32;
     final padding = this.padding ?? EdgeInsets.all(4);
     final margin = this.margin ?? EdgeInsets.all(0);
+    final spacing = 8.0;
 
     Color? backgroundColor = Color.lerp(
       this.backgroundColor ?? (color ?? theme.primaryColor),
@@ -58,7 +57,7 @@ class StatBarContainer extends StatelessWidget {
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
-        spacing: 4,
+        spacing: spacing,
         children: [
           if (leading != null) leading!,
           Expanded(
@@ -66,6 +65,12 @@ class StatBarContainer extends StatelessWidget {
               currentValue: currentValue,
               totalValue: totalValue,
               color: color,
+              width:
+                  width -
+                  padding.horizontal -
+                  margin.horizontal -
+                  (leading != null ? spacing : 0) -
+                  (trailing != null ? spacing : 0),
             ),
           ),
           if (trailing != null) trailing!,

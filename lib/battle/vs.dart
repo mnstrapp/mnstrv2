@@ -1007,8 +1007,9 @@ class _StatsBarContainer extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final padding = EdgeInsets.all(8);
     return Container(
-      padding: const EdgeInsets.all(8),
+      padding: padding,
       width: width,
       child: Column(
         spacing: 8,
@@ -1021,7 +1022,7 @@ class _StatsBarContainer extends StatelessWidget {
             currentValue: monster.currentAttack!,
             totalValue: monster.maxAttack!,
             color: monster.toMonsterModel().color,
-            width: width,
+            width: width - padding.horizontal,
           ),
           StatBarContainer(
             leading: const Icon(Symbols.shield_moon_rounded),
@@ -1031,7 +1032,7 @@ class _StatsBarContainer extends StatelessWidget {
             currentValue: monster.currentDefense!,
             totalValue: monster.maxDefense!,
             color: monster.toMonsterModel().color,
-            width: width,
+            width: width - padding.horizontal,
           ),
           StatBarContainer(
             leading: const Icon(Symbols.psychology_rounded),
@@ -1041,7 +1042,7 @@ class _StatsBarContainer extends StatelessWidget {
             currentValue: monster.currentIntelligence!,
             totalValue: monster.maxIntelligence!,
             color: monster.toMonsterModel().color,
-            width: width,
+            width: width - padding.horizontal,
           ),
           StatBarContainer(
             leading: const Icon(Symbols.speed_rounded),
@@ -1051,7 +1052,7 @@ class _StatsBarContainer extends StatelessWidget {
             currentValue: monster.currentSpeed!,
             totalValue: monster.maxSpeed!,
             color: monster.toMonsterModel().color,
-            width: width,
+            width: width - padding.horizontal,
           ),
           StatBarContainer(
             leading: const Icon(Symbols.magic_button_rounded),
@@ -1061,7 +1062,7 @@ class _StatsBarContainer extends StatelessWidget {
             currentValue: monster.currentMagic!,
             totalValue: monster.maxMagic!,
             color: monster.toMonsterModel().color,
-            width: width,
+            width: width - padding.horizontal,
           ),
         ],
       ),
