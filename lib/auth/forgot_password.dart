@@ -1,13 +1,8 @@
-import 'dart:convert';
-import 'dart:developer';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wiredash/wiredash.dart';
 import '../shared/layout_scaffold.dart';
 import '../providers/session_users.dart';
-import '../qr/scanner.dart';
 import '../ui/button.dart';
 import 'login.dart';
 import 'register.dart';
@@ -36,6 +31,8 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
   bool _passwordVisible = false;
   bool _codeVisible = false;
   bool _resetVisible = false;
+  final GlobalKey<LayoutScaffoldState> layoutKey =
+      GlobalKey<LayoutScaffoldState>();
 
   @override
   void initState() {
@@ -56,12 +53,12 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
   Future<void> _getUserId() async {
     final messenger = ScaffoldMessenger.of(context);
     if (!_formKey.currentState!.validate()) {
-      messenger.showSnackBar(SnackBar(content: Text('Email is required')));
+      layoutKey.currentState?.addError('Email is required');
       return;
     }
 
     if (_emailController.text.isEmpty) {
-      messenger.showSnackBar(SnackBar(content: Text('Email is required')));
+      layoutKey.currentState?.addError('Email is required');
       return;
     }
 
@@ -81,7 +78,7 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
           'error': error,
         },
       );
-      messenger.showSnackBar(SnackBar(content: Text(error)));
+      layoutKey.currentState?.addError(error);
       return;
     }
 
@@ -102,7 +99,7 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
   Future<void> _verifyCode() async {
     final messenger = ScaffoldMessenger.of(context);
     if (!_codeFormKey.currentState!.validate()) {
-      messenger.showSnackBar(SnackBar(content: Text('Code is required')));
+      layoutKey.currentState?.addError('Code is required');
       return;
     }
 
@@ -122,7 +119,7 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
           'error': error,
         },
       );
-      messenger.showSnackBar(SnackBar(content: Text(error)));
+      layoutKey.currentState?.addError(error);
       return;
     }
 
@@ -140,14 +137,14 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
       _passwordFocusNode.requestFocus();
     });
 
-    messenger.showSnackBar(SnackBar(content: Text('Code verified')));
+    layoutKey.currentState?.addSuccess('Code verified');
   }
 
   Future<void> _sendReset() async {
     final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     if (!_resetFormKey.currentState!.validate()) {
-      messenger.showSnackBar(SnackBar(content: Text('Code is required')));
+      layoutKey.currentState?.addError('Code is required');
       return;
     }
 
@@ -170,7 +167,7 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
           'error': error,
         },
       );
-      messenger.showSnackBar(SnackBar(content: Text(error)));
+      layoutKey.currentState?.addError(error);
       return;
     }
 
@@ -184,7 +181,7 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
     navigator.pushReplacement(
       MaterialPageRoute(builder: (context) => LoginView()),
     );
-    messenger.showSnackBar(SnackBar(content: Text('Reset successful')));
+    layoutKey.currentState?.addSuccess('Reset successful');
   }
 
   @override
@@ -199,6 +196,7 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
     final size = MediaQuery.sizeOf(context);
 
     return LayoutScaffold(
+      key: layoutKey,
       showStatBar: false,
       child: SingleChildScrollView(
         child: SizedBox(

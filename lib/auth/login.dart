@@ -22,23 +22,20 @@ class _LoginViewState extends ConsumerState<LoginView> {
 
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
+  final GlobalKey<LayoutScaffoldState> layoutKey =
+      GlobalKey<LayoutScaffoldState>();
 
   Future<void> _login(BuildContext context) async {
     if (_emailController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Email is required')));
+      layoutKey.currentState?.addError('Email is required');
       return;
     }
 
     if (_passwordController.text.isEmpty) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Password is required')));
+      layoutKey.currentState?.addError('Password is required');
       return;
     }
 
-    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
     final error = await ref
@@ -53,7 +50,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
           'email': _emailController.text,
         },
       );
-      messenger.showSnackBar(SnackBar(content: Text(error)));
+      layoutKey.currentState?.addError(error);
       return;
     }
 
@@ -67,7 +64,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
     navigator.pushReplacement(
       MaterialPageRoute(builder: (context) => HomeView()),
     );
-    messenger.showSnackBar(SnackBar(content: Text('Login successful')));
+    layoutKey.currentState?.addSuccess('Login successful');
   }
 
   @override
@@ -94,6 +91,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
   @override
   Widget build(BuildContext context) {
     return LayoutScaffold(
+      key: layoutKey,
       showStatBar: false,
       child: Stack(
         children: [

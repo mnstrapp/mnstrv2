@@ -4,6 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mnstrv2/providers/auth.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:wiredash/wiredash.dart';
 
@@ -15,7 +16,6 @@ import '../shared/layout_scaffold.dart';
 import '../ui/button.dart';
 import '../utils/color.dart';
 import 'data.dart';
-import 'game_data.dart';
 import 'queue.dart';
 import 'vs.dart';
 
@@ -47,6 +47,8 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
   List<BattleMessage> _messages = [];
   final List<Function(String)> _listeners = [];
   BattleQueue? _battleQueue;
+  final GlobalKey<LayoutScaffoldState> layoutKey =
+      GlobalKey<LayoutScaffoldState>();
 
   void _keepConnection() {
     if (!mounted) {
@@ -244,6 +246,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
               'id': user.value?.id,
             },
           );
+          layoutKey.currentState?.addError('Socket is disconnected');
           if (_socket?.closeCode == null) {
             return;
           }
@@ -271,6 +274,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
               'id': user.value?.id,
             },
           );
+          layoutKey.currentState?.addError('Socket error: $error');
           if (mounted) {
             setState(() {
               _messages = [
@@ -296,6 +300,8 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
           'id': user.value?.id,
         },
       );
+      Sentry.captureException(e, stackTrace: stackTrace);
+      layoutKey.currentState?.addError('Socket error: $e');
       setState(() {
         _messages = [
           ..._messages,
@@ -359,6 +365,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
     }
 
     return LayoutScaffold(
+      key: layoutKey,
       child: _isInBattle
           ? BattleVsView(
               onListen: _addListener,

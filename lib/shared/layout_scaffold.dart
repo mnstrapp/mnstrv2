@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../theme.dart';
 import 'monster_xp_bar.dart';
+import '../utils/color.dart';
 
 class LayoutScaffold extends ConsumerStatefulWidget {
   final Widget child;
@@ -68,10 +69,11 @@ class LayoutScaffold extends ConsumerStatefulWidget {
   static void addMessage(
     BuildContext context,
     String message,
+    IconData? icon,
     Color backgroundColor,
     Color foregroundColor,
   ) {
-    of(context).addMessage(message, backgroundColor, foregroundColor);
+    of(context).addMessage(message, icon, backgroundColor, foregroundColor);
   }
 
   static void addError(BuildContext context, String message) {
@@ -93,7 +95,7 @@ class LayoutScaffoldState extends ConsumerState<LayoutScaffold> {
   bool _useSafeArea = false;
   bool _showStatBar = true;
   bool _disableBackButton = false;
-  final List<_Message> _messages = [];
+  _Message? _message;
 
   @override
   void initState() {
@@ -141,31 +143,46 @@ class LayoutScaffoldState extends ConsumerState<LayoutScaffold> {
 
   void addMessage(
     String message,
+    IconData? icon,
     Color backgroundColor,
     Color foregroundColor,
   ) {
     setState(() {
-      _messages.add(
-        _Message(
-          message: message,
-          backgroundColor: backgroundColor,
-          foregroundColor: foregroundColor,
-          onRemove: () {},
-        ),
+      _message = _Message(
+        message: message,
+        icon: icon,
+        backgroundColor: backgroundColor,
+        foregroundColor: foregroundColor,
+        onRemove: () {},
       );
     });
   }
 
   void addError(String message) {
-    addMessage(message, Colors.red, Colors.white);
+    addMessage(
+      message,
+      Icons.error,
+      lightenColor(Colors.red, 0.25),
+      Colors.white,
+    );
   }
 
   void addSuccess(String message) {
-    addMessage(message, Colors.green, Colors.white);
+    addMessage(
+      message,
+      Icons.check,
+      lightenColor(Colors.green, 0.25),
+      Colors.white,
+    );
   }
 
   void addInfo(String message) {
-    addMessage(message, primaryColor, Colors.white);
+    addMessage(
+      message,
+      Icons.info,
+      lightenColor(primaryColor, 0.25),
+      Colors.white,
+    );
   }
 
   @override
@@ -202,24 +219,17 @@ class LayoutScaffoldState extends ConsumerState<LayoutScaffold> {
                 ),
               ),
             ),
-          if (_messages.isNotEmpty)
+          if (_message != null)
             Positioned(
-              top: 16,
+              bottom: 0,
               left: 0,
               right: 0,
-              child: Column(
-                spacing: 16,
-                children: _messages
-                    .map(
-                      (message) => message.copyWith(
-                        onRemove: () {
-                          setState(() {
-                            _messages.remove(message);
-                          });
-                        },
-                      ),
-                    )
-                    .toList(),
+              child: _message!.copyWith(
+                onRemove: () {
+                  setState(() {
+                    _message = null;
+                  });
+                },
               ),
             ),
         ],
@@ -230,12 +240,14 @@ class LayoutScaffoldState extends ConsumerState<LayoutScaffold> {
 
 class _Message extends StatelessWidget {
   final String message;
+  final IconData? icon;
   final Color backgroundColor;
   final Color foregroundColor;
   final VoidCallback onRemove;
 
   const _Message({
     required this.message,
+    required this.icon,
     required this.backgroundColor,
     required this.foregroundColor,
     required this.onRemove,
@@ -243,12 +255,14 @@ class _Message extends StatelessWidget {
 
   _Message copyWith({
     String? message,
+    IconData? icon,
     Color? backgroundColor,
     Color? foregroundColor,
     VoidCallback? onRemove,
   }) {
     return _Message(
       message: message ?? this.message,
+      icon: icon ?? this.icon,
       backgroundColor: backgroundColor ?? this.backgroundColor,
       foregroundColor: foregroundColor ?? this.foregroundColor,
       onRemove: onRemove ?? this.onRemove,
@@ -257,22 +271,29 @@ class _Message extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final size = MediaQuery.sizeOf(context);
 
     return Container(
-      width: size.width * 0.66,
+      width: size.width,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: backgroundColor.withValues(alpha: 0.75),
-        borderRadius: BorderRadius.circular(20),
+        color: backgroundColor,
       ),
       child: InkWell(
         onTap: onRemove,
-        child: Text(
-          message,
-          style: theme.textTheme.bodyMedium?.copyWith(
-            color: foregroundColor,
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            spacing: 8,
+            children: [
+              if (icon != null) Icon(icon, color: foregroundColor),
+              Text(
+                message,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: foregroundColor),
+              ),
+            ],
           ),
         ),
       ),

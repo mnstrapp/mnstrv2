@@ -21,6 +21,8 @@ class HomeView extends ConsumerStatefulWidget {
 
 class _HomeViewState extends ConsumerState<HomeView> {
   List<Map<String, dynamic>> buttons = [];
+  final GlobalKey<LayoutScaffoldState> layoutKey =
+      GlobalKey<LayoutScaffoldState>();
 
   @override
   void initState() {
@@ -77,10 +79,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
         'description': 'Logout of your account',
         'onPressed': () async {
           final navigator = Navigator.of(context);
-          final messenger = ScaffoldMessenger.of(context);
+
           final error = await ref.read(authProvider.notifier).logout();
           if (error != null) {
-            messenger.showSnackBar(SnackBar(content: Text(error)));
+            layoutKey.currentState?.addError(error);
           }
           navigator.pushReplacement(
             MaterialPageRoute(builder: (context) => LoginView()),
@@ -115,6 +117,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final buttonColor = Theme.of(context).colorScheme.onPrimary;
 
     return LayoutScaffold(
+      key: layoutKey,
       useSizedBox: true,
       disableBackButton: true,
       child: SizedBox(

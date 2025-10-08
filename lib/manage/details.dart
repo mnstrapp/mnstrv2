@@ -2,10 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../providers/manage.dart';
+import '../shared/layout_scaffold.dart';
 import '../ui/inplace_text.dart';
 
 class ManageDetailsView extends ConsumerStatefulWidget {
-  const ManageDetailsView({super.key});
+  final GlobalKey<LayoutScaffoldState> layoutKey;
+
+  const ManageDetailsView({super.key, required this.layoutKey});
 
   @override
   ConsumerState<ManageDetailsView> createState() => _ManageDetailsViewState();
@@ -46,10 +49,13 @@ class _ManageDetailsViewState extends ConsumerState<ManageDetailsView> {
                   ),
                   backgroundColor: backgroundColor,
                   foregroundColor: labelColor,
-                  onSubmitted: (value) {
-                    ref
+                  onSubmitted: (value) async {
+                    final error = await ref
                         .read(manageEditProvider.notifier)
                         .editMonster(monster.copyWith(mnstrName: value));
+                    if (error != null) {
+                      widget.layoutKey.currentState?.addError(error);
+                    }
                   },
                 ),
                 InplaceText(
@@ -63,12 +69,15 @@ class _ManageDetailsViewState extends ConsumerState<ManageDetailsView> {
                   maxLines: 10,
                   backgroundColor: backgroundColor,
                   foregroundColor: labelColor,
-                  onSubmitted: (value) {
-                    ref
+                  onSubmitted: (value) async {
+                    final error = await ref
                         .read(manageEditProvider.notifier)
                         .editMonster(
                           monster.copyWith(mnstrDescription: value),
                         );
+                    if (error != null) {
+                      widget.layoutKey.currentState?.addError(error);
+                    }
                   },
                 ),
               ],

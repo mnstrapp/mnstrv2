@@ -30,13 +30,13 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
   final FocusNode _confirmPasswordFocusNode = FocusNode();
   final FocusNode _codeFocusNode = FocusNode();
   bool _isVerifying = false;
+  final GlobalKey<LayoutScaffoldState> layoutKey =
+      GlobalKey<LayoutScaffoldState>();
 
   void _register(BuildContext context) async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
-
-    final messenger = ScaffoldMessenger.of(context);
 
     final error = await ref
         .read(sessionUserProvider.notifier)
@@ -54,7 +54,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
           'email': _emailController.text,
         },
       );
-      messenger.showSnackBar(SnackBar(content: Text(error)));
+      layoutKey.currentState?.addError(error);
       return;
     }
 
@@ -72,7 +72,6 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
   }
 
   Future<void> _verifyEmail() async {
-    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
 
     final user = ref.read(sessionUserProvider).value;
@@ -95,7 +94,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
           'id': user.id,
         },
       );
-      messenger.showSnackBar(SnackBar(content: Text(error)));
+      layoutKey.currentState?.addError(error);
       return;
     }
 
@@ -110,9 +109,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
     navigator.pushReplacement(
       MaterialPageRoute(builder: (context) => LoginView()),
     );
-    messenger.showSnackBar(
-      SnackBar(content: Text('User registered and verified')),
-    );
+    layoutKey.currentState?.addSuccess('User registered and verified');
   }
 
   @override
@@ -147,6 +144,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
     final size = MediaQuery.sizeOf(context);
 
     return LayoutScaffold(
+      key: layoutKey,
       showStatBar: false,
       child: SingleChildScrollView(
         child: SizedBox(

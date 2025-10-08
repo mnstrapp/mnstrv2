@@ -9,7 +9,6 @@ import '../shared/layout_scaffold.dart';
 import '../ui/navigation_bar.dart';
 import '../utils/color.dart';
 import 'details.dart';
-import 'shop.dart';
 import 'skills.dart';
 import 'view.dart';
 
@@ -26,29 +25,32 @@ class ManageEditView extends ConsumerStatefulWidget {
 class _ManageEditViewState extends ConsumerState<ManageEditView> {
   late Monster monster;
   int _currentIndex = 0;
-  final _pages = <_NavigationPage>[
-    _NavigationPage(
-      label: 'view',
-      icon: Icons.view_carousel_rounded,
-      page: ManageView(),
-    ),
-    _NavigationPage(
-      label: 'details',
-      icon: Icons.abc_rounded,
-      page: ManageDetailsView(),
-    ),
-    _NavigationPage(
-      label: 'skills',
-      icon: Icons.school,
-      page: ManageSkillsView(),
-    ),
-    _NavigationPage(label: 'shop', icon: Icons.shop, page: ManageShopView()),
-  ];
+  final GlobalKey<LayoutScaffoldState> layoutKey =
+      GlobalKey<LayoutScaffoldState>();
+  final _pages = <_NavigationPage>[];
 
   @override
   void initState() {
     super.initState();
     monster = widget.monster;
+    _pages.addAll([
+      _NavigationPage(
+        label: 'view',
+        icon: Icons.view_carousel_rounded,
+        page: ManageView(),
+      ),
+      _NavigationPage(
+        label: 'details',
+        icon: Icons.abc_rounded,
+        page: ManageDetailsView(layoutKey: layoutKey),
+      ),
+      _NavigationPage(
+        label: 'skills',
+        icon: Icons.school,
+        page: ManageSkillsView(layoutKey: layoutKey),
+      ),
+    ]);
+
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       ref.read(manageEditProvider.notifier).set(monster);
       final user = ref.watch(sessionUserProvider);
@@ -79,7 +81,7 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
 
     return LayoutScaffold(
       backgroundColor: backgroundColor,
-
+      key: layoutKey,
       child: Stack(
         children: [
           _pages[_currentIndex].page,

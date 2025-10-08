@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,9 +6,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../collect/stats.dart';
 import '../models/monster.dart';
 import '../providers/manage.dart';
+import '../shared/layout_scaffold.dart';
 
 class ManageSkillsView extends ConsumerStatefulWidget {
-  const ManageSkillsView({super.key});
+  final GlobalKey<LayoutScaffoldState> layoutKey;
+
+  const ManageSkillsView({super.key, required this.layoutKey});
 
   @override
   ConsumerState<ManageSkillsView> createState() => _ManageSkillsViewState();
@@ -101,7 +103,12 @@ class _ManageSkillsViewState extends ConsumerState<ManageSkillsView> {
       changed = true;
     }
     if (changed) {
-      await ref.read(manageEditProvider.notifier).editMonster(monster);
+      final error = await ref
+          .read(manageEditProvider.notifier)
+          .editMonster(monster);
+      if (error != null) {
+        widget.layoutKey.currentState?.addError(error);
+      }
     }
 
     final usedPoints =
@@ -123,11 +130,14 @@ class _ManageSkillsViewState extends ConsumerState<ManageSkillsView> {
     if (monster == null) {
       return;
     }
-    await ref
+    final error = await ref
         .read(manageEditProvider.notifier)
         .editMonster(
           _copyMonster(monster),
         );
+    if (error != null) {
+      widget.layoutKey.currentState?.addError(error);
+    }
   }
 
   Monster _copyMonster(Monster monster) {
@@ -479,9 +489,6 @@ class _ManageSkillsViewState extends ConsumerState<ManageSkillsView> {
           _speed = (monster.maxSpeed ?? 0);
           _magic = (monster.maxMagic ?? 0);
         });
-        log(
-          'initState: $_health, $_attack, $_defense, $_intelligence, $_speed, $_magic',
-        );
       }
     });
   }
@@ -502,7 +509,6 @@ class _ManageSkillsViewState extends ConsumerState<ManageSkillsView> {
     }
     final size = MediaQuery.of(context).size;
 
-    log('available points: $_availablePoints');
     return SafeArea(
       child: Container(
         height: size.height - (48 - 32),
