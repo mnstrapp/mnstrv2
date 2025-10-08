@@ -34,6 +34,8 @@ migrate_working_dir/
 build/*
 !build/web/*
 
+.sentry-native/
+
 .env.yaml
 lib/config/env.dart
 
