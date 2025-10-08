@@ -1,7 +1,4 @@
-import 'dart:developer';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../config/endpoints.dart' as endpoints;
 import '../providers/auth.dart';
@@ -65,10 +62,6 @@ class ManageNotifier extends Notifier<List<Monster>> {
       );
 
       if (response['errors'] != null) {
-        Sentry.captureException(
-          Exception('Get monsters errors: ${response['errors']}'),
-          stackTrace: StackTrace.current,
-        );
         return "There was an error getting the monsters";
       }
 
@@ -79,7 +72,6 @@ class ManageNotifier extends Notifier<List<Monster>> {
       state = monsters;
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error getting the monsters";
     }
   }
@@ -100,10 +92,6 @@ class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
     final auth = ref.read(authProvider);
 
     if (auth.value == null) {
-      Sentry.captureException(
-        Exception('Get monster by QR code auth error'),
-        stackTrace: StackTrace.current,
-      );
       return "There was an error getting the monster by QR code";
     }
 
@@ -150,10 +138,6 @@ class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
       );
 
       if (response['errors'] != null) {
-        Sentry.captureException(
-          Exception('Get monster by QR code errors: ${response['errors']}'),
-          stackTrace: StackTrace.current,
-        );
         return "There was an error getting the monster by QR code";
       }
 
@@ -167,7 +151,6 @@ class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
 
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error getting the monster by QR code";
     }
   }
@@ -191,10 +174,6 @@ class ManageEditNotifier extends Notifier<Monster?> {
     final auth = ref.read(authProvider);
 
     if (auth.value == null) {
-      Sentry.captureException(
-        Exception('Edit monster auth error'),
-        stackTrace: StackTrace.current,
-      );
       return "There was an error editing the monster";
     }
 
@@ -292,10 +271,6 @@ class ManageEditNotifier extends Notifier<Monster?> {
       );
 
       if (response['errors'] != null) {
-        Sentry.captureException(
-          Exception('Edit monster errors: ${response['errors']}'),
-          stackTrace: StackTrace.current,
-        );
         return "There was an error editing the monster";
       }
 
@@ -306,7 +281,6 @@ class ManageEditNotifier extends Notifier<Monster?> {
 
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error editing the monster";
     }
   }

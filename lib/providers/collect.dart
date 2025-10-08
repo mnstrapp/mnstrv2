@@ -1,8 +1,4 @@
-import 'dart:convert';
-import 'dart:developer';
-
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../providers/auth.dart';
 import '../models/monster.dart';
@@ -23,10 +19,6 @@ class CollectNotifier extends Notifier<Monster?> {
     final auth = ref.read(authProvider);
 
     if (auth.value == null) {
-      Sentry.captureException(
-        Exception('Create monster auth error'),
-        stackTrace: StackTrace.current,
-      );
       return "There was an error creating the monster";
     }
 
@@ -77,10 +69,6 @@ class CollectNotifier extends Notifier<Monster?> {
       );
 
       if (response['errors'] != null) {
-        Sentry.captureException(
-          Exception('Create monster errors: ${response['errors']}'),
-          stackTrace: StackTrace.current,
-        );
         return "There was an error creating the monster";
       }
 
@@ -88,7 +76,6 @@ class CollectNotifier extends Notifier<Monster?> {
       state = monster;
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error creating the monster";
     }
   }

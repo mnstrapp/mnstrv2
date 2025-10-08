@@ -1,9 +1,7 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../models/monster.dart';
 
@@ -93,7 +91,6 @@ class MonsterModel {
       model.name = monster.mnstrName;
       return model;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
       return MonsterModel();
     }
   }

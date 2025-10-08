@@ -4,7 +4,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mnstrv2/providers/auth.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:wiredash/wiredash.dart';
 
@@ -272,7 +271,6 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
               'id': user.value?.id,
             },
           );
-          Sentry.captureException(error, stackTrace: StackTrace.current);
           if (mounted) {
             setState(() {
               _messages = [
@@ -298,7 +296,6 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
           'id': user.value?.id,
         },
       );
-      Sentry.captureException(e, stackTrace: stackTrace);
       setState(() {
         _messages = [
           ..._messages,

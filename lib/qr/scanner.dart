@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:wiredash/wiredash.dart';
 
 import '../providers/session_users.dart';
@@ -25,7 +24,6 @@ class ScannerView extends ConsumerWidget {
             'id': user.value?.id,
           },
         );
-        Sentry.captureException(error, stackTrace: stackTrace);
       },
       onDetect: (capture) {
         final user = ref.read(sessionUserProvider);

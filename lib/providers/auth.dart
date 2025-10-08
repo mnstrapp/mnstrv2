@@ -1,8 +1,6 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:riverpod/riverpod.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/auth.dart';
@@ -46,17 +44,12 @@ class AuthNotifier extends AsyncNotifier<Auth?> {
       );
 
       if (response['errors'] != null) {
-        Sentry.captureException(
-          Exception('Verify errors: ${response['errors']}'),
-          stackTrace: StackTrace.current,
-        );
         logout();
         return "There was an error verifying the auth";
       }
 
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
       logout();
       return "There was an error verifying the auth";
     }
@@ -97,10 +90,6 @@ mutation login($email: String!, $password:String!) {
       );
 
       if (response['errors'] != null) {
-        Sentry.captureException(
-          Exception('Login errors: ${response['errors']}'),
-          stackTrace: StackTrace.current,
-        );
         return "There was an error logging in";
       }
 
@@ -114,7 +103,6 @@ mutation login($email: String!, $password:String!) {
 
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error logging in";
     }
   }
@@ -146,16 +134,11 @@ mutation logout {
       );
 
       if (response['errors'] != null) {
-        Sentry.captureException(
-          Exception('Logout errors: ${response['errors']}'),
-          stackTrace: StackTrace.current,
-        );
         return "There was an error logging out";
       }
 
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error logging out";
     }
   }
