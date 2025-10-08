@@ -4,10 +4,8 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   audioplayers_windows
-  connectivity_plus
   sentry_flutter
   share_plus
-  sqlite3_flutter_libs
   url_launcher_windows
 )
 

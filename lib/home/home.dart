@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:feature_discovery/feature_discovery.dart';
 import 'package:wiredash/wiredash.dart';
 
 import '../battle/layout.dart';

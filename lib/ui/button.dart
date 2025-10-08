@@ -54,7 +54,6 @@ class _UIButtonState extends State<UIButton> {
   Future<void> _onPressed() async {
     BackgroundMusic().play();
     _buttonSound.play();
-    Wiredash.of(context).show();
     if (_isLoading) {
       return;
     }
