@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wiredash/wiredash.dart';
 
 import '../auth/login.dart';
 import '../providers/auth.dart';
+import '../providers/session_users.dart';
 import '../providers/sounds.dart';
 import '../providers/users.dart';
 import '../shared/layout_scaffold.dart';
@@ -56,6 +58,15 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                               UISwitch(
                                 value: !backgroundSoundMuted,
                                 onChanged: (value) async {
+                                  final user = ref.watch(sessionUserProvider);
+                                  Wiredash.trackEvent(
+                                    'Settings Background Sound Changed',
+                                    data: {
+                                      'value': value,
+                                      'displayName': user.value?.displayName,
+                                      'id': user.value?.id,
+                                    },
+                                  );
                                   await ref
                                       .read(backgroundSoundProvider.notifier)
                                       .setMuted(!value);
@@ -71,6 +82,15 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                               UISwitch(
                                 value: !buttonSoundMuted,
                                 onChanged: (value) async {
+                                  final user = ref.watch(sessionUserProvider);
+                                  Wiredash.trackEvent(
+                                    'Settings Button Sound Changed',
+                                    data: {
+                                      'value': value,
+                                      'displayName': user.value?.displayName,
+                                      'id': user.value?.id,
+                                    },
+                                  );
                                   await ref
                                       .read(buttonSoundProvider.notifier)
                                       .setMuted(!value);
@@ -86,6 +106,15 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                               UISwitch(
                                 value: !collectSoundMuted,
                                 onChanged: (value) async {
+                                  final user = ref.watch(sessionUserProvider);
+                                  Wiredash.trackEvent(
+                                    'Settings Collect Sound Changed',
+                                    data: {
+                                      'value': value,
+                                      'displayName': user.value?.displayName,
+                                      'id': user.value?.id,
+                                    },
+                                  );
                                   await ref
                                       .read(collectSoundProvider.notifier)
                                       .setMuted(!value);
@@ -100,6 +129,10 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                               backgroundColor: Colors.red,
                             ),
                             onPressed: () async {
+                              Wiredash.trackEvent(
+                                'Settings Delete Account Pressed',
+                                data: {},
+                              );
                               _overlayPortalController.show();
                             },
                             child: Text(
@@ -152,9 +185,16 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 TextButton(
-                                  onPressed: () => !_isLoading
-                                      ? null
-                                      : _overlayPortalController.hide(),
+                                  onPressed: () {
+                                    if (_isLoading) {
+                                      return;
+                                    }
+                                    Wiredash.trackEvent(
+                                      'Settings Delete Account Cancel Pressed',
+                                      data: {},
+                                    );
+                                    _overlayPortalController.hide();
+                                  },
                                   child: Text('Cancel'),
                                 ),
                                 FilledButton(
@@ -162,6 +202,10 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                     if (_isLoading) {
                                       return;
                                     }
+                                    Wiredash.trackEvent(
+                                      'Settings Delete Account Delete Pressed',
+                                      data: {},
+                                    );
                                     final messenger = ScaffoldMessenger.of(
                                       context,
                                     );
@@ -173,6 +217,12 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                         .read(userProvider.notifier)
                                         .deleteAccount();
                                     if (error != null) {
+                                      Wiredash.trackEvent(
+                                        'Settings Delete Account Delete Error',
+                                        data: {
+                                          'error': error,
+                                        },
+                                      );
                                       messenger.showSnackBar(
                                         SnackBar(content: Text(error)),
                                       );

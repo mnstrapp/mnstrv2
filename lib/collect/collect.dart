@@ -4,9 +4,11 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wiredash/wiredash.dart';
 
 import '../manage/edit.dart';
 import '../home/home.dart';
+import '../providers/session_users.dart';
 import '../shared/sounds.dart';
 import '../shared/stars.dart';
 import '../shared/monster_view.dart';
@@ -41,9 +43,18 @@ class _CollectState extends ConsumerState<Collect> {
   }
 
   Future<MonsterModel?> _getMonster(String qrCode) async {
+    final user = ref.watch(sessionUserProvider);
     final error = await ref.read(manageGetByQRProvider.notifier).get(qrCode);
     if (error != null) {
-      log('[getMonster] error: $error');
+      Wiredash.trackEvent(
+        'Collect Monster Error',
+        data: {
+          'error': error,
+          'monster': _monster?.id,
+          'displayName': user.value?.displayName,
+          'id': user.value?.id,
+        },
+      );
       return MonsterModel.fromQRCode(qrCode);
     }
     final mnstr = ref.read(manageGetByQRProvider);
@@ -62,8 +73,18 @@ class _CollectState extends ConsumerState<Collect> {
 
   Future<void> _collectMonster() async {
     final messenger = ScaffoldMessenger.of(context);
+    final user = ref.watch(sessionUserProvider);
 
     if (_monster?.id != null) {
+      Wiredash.trackEvent(
+        'Collect Monster Previously Collected',
+        data: {
+          'error': 'Monster previously collected',
+          'monster': _monster?.id,
+          'displayName': user.value?.displayName,
+          'id': user.value?.id,
+        },
+      );
       messenger.showSnackBar(
         SnackBar(content: Text('Monster previously collected')),
       );
@@ -82,15 +103,33 @@ class _CollectState extends ConsumerState<Collect> {
   }
 
   Future<void> _saveMonster() async {
+    final user = ref.watch(sessionUserProvider);
     final messenger = ScaffoldMessenger.of(context);
     final error = await ref
         .read(collectProvider.notifier)
         .createMonster(_monster!.toMonster());
     if (error != null) {
+      Wiredash.trackEvent(
+        'Collect Monster Error',
+        data: {
+          'error': error,
+          'monster': _monster?.id,
+          'displayName': user.value?.displayName,
+          'id': user.value?.id,
+        },
+      );
       messenger.showSnackBar(SnackBar(content: Text(error)));
       return;
     }
     final monster = ref.read(collectProvider);
+    Wiredash.trackEvent(
+      'Collect Monster Success',
+      data: {
+        'monster': monster?.id,
+        'displayName': user.value?.displayName,
+        'id': user.value?.id,
+      },
+    );
     setState(() {
       _monster = monster?.toMonsterModel();
       _saved = true;

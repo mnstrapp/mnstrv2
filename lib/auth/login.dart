@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wiredash/wiredash.dart';
 import '../shared/layout_scaffold.dart';
 import '../providers/auth.dart';
 import '../ui/button.dart';
@@ -45,14 +46,42 @@ class _LoginViewState extends ConsumerState<LoginView> {
         .login(_emailController.text, _passwordController.text);
 
     if (error != null) {
+      Wiredash.trackEvent(
+        'Login User Error',
+        data: {
+          'error': error,
+          'email': _emailController.text,
+        },
+      );
       messenger.showSnackBar(SnackBar(content: Text(error)));
       return;
     }
+
+    Wiredash.trackEvent(
+      'Login User Success',
+      data: {
+        'email': _emailController.text,
+      },
+    );
 
     navigator.pushReplacement(
       MaterialPageRoute(builder: (context) => HomeView()),
     );
     messenger.showSnackBar(SnackBar(content: Text('Login successful')));
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _emailController.clear();
+    _passwordController.clear();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      Wiredash.trackEvent(
+        'Login View',
+        data: {},
+      );
+    });
   }
 
   @override

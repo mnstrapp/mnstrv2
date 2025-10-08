@@ -1,13 +1,10 @@
-import 'dart:convert';
-import 'dart:developer';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wiredash/wiredash.dart';
+
 import '../shared/layout_scaffold.dart';
 import '../providers/session_users.dart';
 import '../ui/button.dart';
-import '../qr/scanner.dart';
 import 'forgot_password.dart';
 import 'login.dart';
 
@@ -40,7 +37,6 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
     }
 
     final messenger = ScaffoldMessenger.of(context);
-    final navigator = Navigator.of(context);
 
     final error = await ref
         .read(sessionUserProvider.notifier)
@@ -50,9 +46,25 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
           password: _passwordController.text,
         );
     if (error != null) {
+      Wiredash.trackEvent(
+        'Register User Error',
+        data: {
+          'error': error,
+          'displayName': _displayNameController.text,
+          'email': _emailController.text,
+        },
+      );
       messenger.showSnackBar(SnackBar(content: Text(error)));
       return;
     }
+
+    Wiredash.trackEvent(
+      'Register User Success',
+      data: {
+        'displayName': _displayNameController.text,
+        'email': _emailController.text,
+      },
+    );
 
     setState(() {
       _isVerifying = true;
@@ -73,9 +85,27 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
         .verifyEmail(id: user.id!, code: _codeController.text);
 
     if (error != null) {
+      Wiredash.trackEvent(
+        'Register User Error',
+        data: {
+          'error': error,
+          'code': _codeController.text,
+          'email': user.email,
+          'displayName': user.displayName,
+          'id': user.id,
+        },
+      );
       messenger.showSnackBar(SnackBar(content: Text(error)));
       return;
     }
+
+    Wiredash.trackEvent(
+      'Register User Success',
+      data: {
+        'displayName': _displayNameController.text,
+        'email': _emailController.text,
+      },
+    );
 
     navigator.pushReplacement(
       MaterialPageRoute(builder: (context) => LoginView()),
@@ -83,6 +113,23 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
     messenger.showSnackBar(
       SnackBar(content: Text('User registered and verified')),
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _displayNameController.clear();
+    _emailController.clear();
+    _passwordController.clear();
+    _confirmPasswordController.clear();
+    _codeController.clear();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      Wiredash.trackEvent(
+        'Register View',
+        data: {},
+      );
+    });
   }
 
   @override

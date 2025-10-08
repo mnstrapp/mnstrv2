@@ -4,6 +4,7 @@ import 'dart:developer' show log;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:wiredash/wiredash.dart';
 
 import '../providers/session_users.dart';
 import '../shared/layout_scaffold.dart';
@@ -319,14 +320,6 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     final battleQueue = BattleQueue.fromJson(jsonDecode(message));
     if (battleQueue.data?.userId != widget.challengerId &&
         battleQueue.data?.userId != widget.opponentId) {
-      log('[BattleVsInGameView] not user or opponent:');
-      log(
-        '\tchallenger: ${battleQueue.data?.userId} != ${widget.challengerId} ->  ${widget.challengerId} ${battleQueue.data?.userId != widget.challengerId}',
-      );
-      log(
-        '\topponent: ${battleQueue.data?.opponentId} != ${widget.opponentId} ->  ${widget.opponentId} ${battleQueue.data?.opponentId != widget.opponentId}',
-      );
-      log('[BattleVsInGameView] battleQueue: ${battleQueue.toJson()}');
       return;
     }
 
@@ -334,6 +327,19 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
       case BattleQueueAction.gameEnded:
         final data = jsonDecode(battleQueue.data!.data!);
         final gameData = GameData.fromJson(data);
+        Wiredash.trackEvent(
+          'Battle Vs In Game View Game Ended Received',
+          data: {
+            'displayName': user.value?.displayName,
+            'id': user.value?.id,
+            'battleId': widget.gameData.battleId,
+            'winnerId': gameData.winnerId,
+            'challengerId': widget.gameData.challengerMnstr?.userId,
+            'challengerMnstr': widget.gameData.challengerMnstr?.id,
+            'opponentId': widget.gameData.opponentMnstr?.userId,
+            'opponentMnstr': widget.gameData.opponentMnstr?.id,
+          },
+        );
         setState(() {
           _gameData = gameData;
           _winnerId = gameData.winnerId;
@@ -343,6 +349,17 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
       case BattleQueueAction.attack:
         final data = jsonDecode(battleQueue.data!.data!);
         final gameData = GameData.fromJson(data);
+        Wiredash.trackEvent(
+          'Battle Vs In Game View Attack Received',
+          data: {
+            'displayName': user.value?.displayName,
+            'id': user.value?.id,
+            'battleId': widget.gameData.battleId,
+            'turnUserId': gameData.turnUserId,
+            'challengerMnstr': widget.gameData.challengerMnstr?.id,
+            'opponentMnstr': widget.gameData.opponentMnstr?.id,
+          },
+        );
         setState(() {
           _gameData = gameData;
           _isLoading = false;
@@ -352,6 +369,17 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
       case BattleQueueAction.defend:
         final data = jsonDecode(battleQueue.data!.data!);
         final gameData = GameData.fromJson(data);
+        Wiredash.trackEvent(
+          'Battle Vs In Game View Defend Received',
+          data: {
+            'displayName': user.value?.displayName,
+            'id': user.value?.id,
+            'battleId': widget.gameData.battleId,
+            'turnUserId': gameData.turnUserId,
+            'challengerMnstr': widget.gameData.challengerMnstr?.id,
+            'opponentMnstr': widget.gameData.opponentMnstr?.id,
+          },
+        );
         setState(() {
           _gameData = gameData;
           _isLoading = false;
@@ -361,6 +389,17 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
       case BattleQueueAction.magic:
         final data = jsonDecode(battleQueue.data!.data!);
         final gameData = GameData.fromJson(data);
+        Wiredash.trackEvent(
+          'Battle Vs In Game View Magic Received',
+          data: {
+            'displayName': user.value?.displayName,
+            'id': user.value?.id,
+            'battleId': widget.gameData.battleId,
+            'turnUserId': gameData.turnUserId,
+            'challengerMnstr': widget.gameData.challengerMnstr?.id,
+            'opponentMnstr': widget.gameData.opponentMnstr?.id,
+          },
+        );
         setState(() {
           _gameData = gameData;
           _isLoading = false;
@@ -377,6 +416,20 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     if (user.value == null) {
       return;
     }
+
+    Wiredash.trackEvent(
+      'Battle Vs In Game View Escape',
+      data: {
+        'displayName': user.value?.displayName,
+        'id': user.value?.id,
+        'battleId': widget.gameData.battleId,
+        'turnUserId': _turnUserId,
+        'challengerId': widget.gameData.challengerMnstr?.userId,
+        'challengerMnstr': widget.gameData.challengerMnstr?.id,
+        'opponentId': widget.gameData.opponentMnstr?.userId,
+        'opponentMnstr': widget.gameData.opponentMnstr?.id,
+      },
+    );
 
     setState(() {
       _isLoading = true;
@@ -417,6 +470,18 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     if (user.value == null) {
       return;
     }
+
+    Wiredash.trackEvent(
+      'Battle Vs In Game View Attack',
+      data: {
+        'displayName': user.value?.displayName,
+        'id': user.value?.id,
+        'battleId': widget.gameData.battleId,
+        'turnUserId': _turnUserId,
+        'challengerMnstr': widget.gameData.challengerMnstr?.id,
+        'opponentMnstr': widget.gameData.opponentMnstr?.id,
+      },
+    );
 
     setState(() {
       _isLoading = true;
@@ -462,6 +527,18 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
       return;
     }
 
+    Wiredash.trackEvent(
+      'Battle Vs In Game View Defend',
+      data: {
+        'displayName': user.value?.displayName,
+        'id': user.value?.id,
+        'battleId': widget.gameData.battleId,
+        'turnUserId': _turnUserId,
+        'challengerMnstr': widget.gameData.challengerMnstr?.id,
+        'opponentMnstr': widget.gameData.opponentMnstr?.id,
+      },
+    );
+
     setState(() {
       _isLoading = true;
       _loadingAction = 'Defending...';
@@ -505,6 +582,18 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     if (user.value == null) {
       return;
     }
+
+    Wiredash.trackEvent(
+      'Battle Vs In Game View Magic',
+      data: {
+        'displayName': user.value?.displayName,
+        'id': user.value?.id,
+        'battleId': widget.gameData.battleId,
+        'turnUserId': _turnUserId,
+        'challengerMnstr': widget.gameData.challengerMnstr?.id,
+        'opponentMnstr': widget.gameData.opponentMnstr?.id,
+      },
+    );
 
     setState(() {
       _isLoading = true;
@@ -580,6 +669,18 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
       _setBackgroundColor();
       _removeStatBar();
       widget.onListen(_handleMessage);
+      final user = ref.watch(sessionUserProvider);
+      Wiredash.trackEvent(
+        'Battle Vs In Game View',
+        data: {
+          'displayName': user.value?.displayName,
+          'id': user.value?.id,
+          'battleId': widget.gameData.battleId,
+          'turnUserId': _turnUserId,
+          'challengerMnstr': widget.gameData.challengerMnstr?.id,
+          'opponentMnstr': widget.gameData.opponentMnstr?.id,
+        },
+      );
     });
   }
 

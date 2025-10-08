@@ -4,6 +4,7 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wiredash/wiredash.dart';
 import '../shared/layout_scaffold.dart';
 import '../providers/session_users.dart';
 import '../qr/scanner.dart';
@@ -43,6 +44,13 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
     _passwordController.clear();
     _confirmPasswordController.clear();
     _codeController.clear();
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      Wiredash.trackEvent(
+        'Forgot Password',
+        data: {},
+      );
+    });
   }
 
   Future<void> _getUserId() async {
@@ -66,9 +74,23 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
         .forgotPassword(email: _emailController.text);
 
     if (error != null) {
+      Wiredash.trackEvent(
+        'Forgot Password User Not Found',
+        data: {
+          'email': _emailController.text,
+          'error': error,
+        },
+      );
       messenger.showSnackBar(SnackBar(content: Text(error)));
       return;
     }
+
+    Wiredash.trackEvent(
+      'Forgot Password User Found',
+      data: {
+        'email': _emailController.text,
+      },
+    );
 
     setState(() {
       _isLoading = false;
@@ -93,9 +115,23 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
         .verifyCode(code: _codeController.text);
 
     if (error != null) {
+      Wiredash.trackEvent(
+        'Forgot Password Code Verify Error',
+        data: {
+          'code': _codeController.text,
+          'error': error,
+        },
+      );
       messenger.showSnackBar(SnackBar(content: Text(error)));
       return;
     }
+
+    Wiredash.trackEvent(
+      'Forgot Password Code Verified',
+      data: {
+        'code': _codeController.text,
+      },
+    );
 
     setState(() {
       _isLoading = false;
@@ -127,9 +163,23 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
       setState(() {
         _isLoading = false;
       });
+      Wiredash.trackEvent(
+        'Forgot Password Reset Error',
+        data: {
+          'email': _emailController.text,
+          'error': error,
+        },
+      );
       messenger.showSnackBar(SnackBar(content: Text(error)));
       return;
     }
+
+    Wiredash.trackEvent(
+      'Forgot Password Reset',
+      data: {
+        'email': _emailController.text,
+      },
+    );
 
     navigator.pushReplacement(
       MaterialPageRoute(builder: (context) => LoginView()),

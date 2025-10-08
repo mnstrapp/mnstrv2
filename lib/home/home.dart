@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:feature_discovery/feature_discovery.dart';
+import 'package:wiredash/wiredash.dart';
 
 import '../battle/layout.dart';
 import '../collect/collect.dart';
+import '../providers/session_users.dart';
 import '../settings/settings.dart';
 import '../ui/button.dart';
 import '../providers/auth.dart';
@@ -10,21 +13,25 @@ import '../auth/login.dart';
 import '../manage/list.dart';
 import '../shared/layout_scaffold.dart';
 
-class HomeView extends ConsumerWidget {
+class HomeView extends ConsumerStatefulWidget {
   const HomeView({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final size = MediaQuery.sizeOf(context);
-    final loadingFigureSize = (size.width > size.height)
-        ? size.height * 0.55
-        : size.width * 0.55;
-    final displayPortrait = (size.width > size.height);
+  ConsumerState<HomeView> createState() => _HomeViewState();
+}
 
-    final buttons = [
+class _HomeViewState extends ConsumerState<HomeView> {
+  List<Map<String, dynamic>> buttons = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    buttons.addAll([
       {
         'icon': Icons.qr_code_rounded,
         'text': 'Catch',
+        'description': 'Catch MNSTRs',
         'onPressed': () {
           Navigator.push(
             context,
@@ -35,6 +42,7 @@ class HomeView extends ConsumerWidget {
       {
         'icon': Icons.view_carousel_rounded,
         'text': 'MNSTRs',
+        'description': 'Manage your MNSTRs',
         'onPressed': () {
           Navigator.push(
             context,
@@ -45,6 +53,7 @@ class HomeView extends ConsumerWidget {
       {
         'icon': Icons.map_rounded,
         'text': 'Battle',
+        'description': 'Battle with other players',
         'onPressed': () {
           Navigator.push(
             context,
@@ -55,6 +64,7 @@ class HomeView extends ConsumerWidget {
       {
         'icon': Icons.settings,
         'text': 'Settings',
+        'description': 'Manage your account settings',
         'onPressed': () {
           Navigator.push(
             context,
@@ -65,6 +75,7 @@ class HomeView extends ConsumerWidget {
       {
         'icon': Icons.logout,
         'text': 'Logout',
+        'description': 'Logout of your account',
         'onPressed': () async {
           final navigator = Navigator.of(context);
           final messenger = ScaffoldMessenger.of(context);
@@ -77,7 +88,26 @@ class HomeView extends ConsumerWidget {
           );
         },
       },
-    ];
+    ]);
+
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      final user = ref.watch(sessionUserProvider);
+      Wiredash.trackEvent(
+        'Home View',
+        data: {
+          'displayName': user.value?.displayName,
+        },
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final size = MediaQuery.sizeOf(context);
+    final loadingFigureSize = (size.width > size.height)
+        ? size.height * 0.55
+        : size.width * 0.55;
+    final displayPortrait = (size.width > size.height);
 
     final buttonWidth = size.width * 0.66;
     final buttonHeight = 70.0;

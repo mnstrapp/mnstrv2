@@ -33,8 +33,9 @@ class App extends ConsumerWidget {
             log('Error: $error\n$stack');
             return const LoginView();
           },
-          loading: () =>
-              const Scaffold(body: Center(child: CircularProgressIndicator())),
+          loading: () => const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          ),
         ),
         debugShowCheckedModeBanner: false,
         theme: theme,

@@ -1,8 +1,8 @@
-import 'dart:developer';
-
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:mnstrv2/utils/color.dart';
+import 'package:wiredash/wiredash.dart';
+
 import '../shared/sounds.dart';
 
 class UIButton extends StatefulWidget {
@@ -53,12 +53,17 @@ class _UIButtonState extends State<UIButton> {
 
   Future<void> _onPressed() async {
     BackgroundMusic().play();
-    if (!kIsWeb) {
-      _buttonSound.play();
-    }
+    _buttonSound.play();
+    Wiredash.of(context).show();
     if (_isLoading) {
       return;
     }
+    Wiredash.trackEvent(
+      'UIButton Pressed',
+      data: {
+        'text': widget.text,
+      },
+    );
     if (widget.onPressedAsync != null) {
       setState(() {
         _isLoading = true;
