@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wiredash/wiredash.dart';
 
 import '../models/monster.dart';
 import 'layout_scaffold.dart';
@@ -112,6 +113,16 @@ class _MnstrListState extends State<MnstrList> {
     });
   }
 
+  void _onTap(Monster monster) {
+    Wiredash.trackEvent(
+      'MnstrList Tapped',
+      data: {
+        'monster': monster.id,
+      },
+    );
+    widget.onTap?.call(monster);
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
@@ -124,7 +135,7 @@ class _MnstrListState extends State<MnstrList> {
       mnstrs.add(
         MnstrView(
           monster: widget.monsters.first,
-          onTap: widget.onTap,
+          onTap: _onTap,
           overlay:
               widget.overlayBuilder?.call(widget.monsters.first) ??
               widget.overlay,
@@ -153,7 +164,7 @@ class _MnstrListState extends State<MnstrList> {
                         width: size.width / 2,
                         child: MnstrView(
                           monster: m,
-                          onTap: widget.onTap,
+                          onTap: _onTap,
                           overlay:
                               widget.overlayBuilder?.call(m) ?? widget.overlay,
                           overlayPositioning: widget.overlayPositioning,
@@ -177,7 +188,7 @@ class _MnstrListState extends State<MnstrList> {
             .map(
               (m) => MnstrView(
                 monster: m,
-                onTap: widget.onTap,
+                onTap: _onTap,
                 overlay: widget.overlayBuilder?.call(m) ?? widget.overlay,
                 overlayPositioning: widget.overlayPositioning,
                 showName: widget.showName,

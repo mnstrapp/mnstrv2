@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:wiredash/wiredash.dart';
 
 import '../models/monster.dart';
 import '../providers/manage.dart';
+import '../providers/session_users.dart';
 import '../shared/layout_scaffold.dart';
 import '../ui/navigation_bar.dart';
 import '../utils/color.dart';
@@ -49,6 +51,15 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
     monster = widget.monster;
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       ref.read(manageEditProvider.notifier).set(monster);
+      final user = ref.watch(sessionUserProvider);
+      Wiredash.trackEvent(
+        'Manage Edit View',
+        data: {
+          'monster': monster.id,
+          'displayName': user.value?.displayName,
+          'id': user.value?.id,
+        },
+      );
     });
   }
 

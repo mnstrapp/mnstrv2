@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wiredash/wiredash.dart';
 
 class UINavigationBar extends StatefulWidget {
   final Function(int) onSelected;
@@ -73,6 +74,12 @@ class _UINavigationBarState extends State<UINavigationBar> {
             child: entry.value.copyWith(
               selected: entry.key == _selectedIndex,
               onPressed: () {
+                Wiredash.trackEvent(
+                  'UINavigationBar Pressed',
+                  data: {
+                    'label': entry.value.label,
+                  },
+                );
                 setState(() {
                   _selectedIndex = entry.key;
                 });

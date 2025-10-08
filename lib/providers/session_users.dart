@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'dart:developer';
 
 import 'package:mnstrv2/utils/graphql.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/endpoints.dart' as endpoints;
@@ -66,7 +66,10 @@ mutation register(
       );
 
       if (response['errors'] != null) {
-        log('[register] errors: ${response['errors']}');
+        Sentry.captureException(
+          Exception('Register errors: ${response['errors']}'),
+          stackTrace: StackTrace.current,
+        );
         return "There was an error registering the user";
       }
       final user = User.fromJson(response['data']['users']['register']);
@@ -74,8 +77,7 @@ mutation register(
       state = AsyncData(user);
       return null;
     } catch (e, stackTrace) {
-      log('[register] catch error: $e');
-      log('[register] catch stackTrace: $stackTrace');
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error registering the user";
     }
   }
@@ -102,18 +104,26 @@ mutation verifyEmail($id: String!, $code: String!) {
       );
 
       if (response['errors'] != null) {
-        log('[verifyEmail] errors: ${response['errors']}');
+        Sentry.captureException(
+          Exception('Verify email errors: ${response['errors']}'),
+          stackTrace: StackTrace.current,
+        );
         return "There was an error verifying the email";
       }
 
       if (response['data']['users']['verifyEmail'] != true) {
+        Sentry.captureException(
+          Exception(
+            'Verify email data: ${response['data']['users']['verifyEmail']}',
+          ),
+          stackTrace: StackTrace.current,
+        );
         return "There was an error verifying the email";
       }
 
       return null;
     } catch (e, stackTrace) {
-      log('[verifyEmail] catch error: $e');
-      log('[verifyEmail] catch stackTrace: $stackTrace');
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error verifying the email";
     }
   }
@@ -160,7 +170,10 @@ mutation verifyEmail($id: String!, $code: String!) {
       );
 
       if (response['errors'] != null) {
-        log('[refresh] errors: ${response['errors']}');
+        Sentry.captureException(
+          Exception('Refresh errors: ${response['errors']}'),
+          stackTrace: StackTrace.current,
+        );
         return "There was an error refreshing the user";
       }
 
@@ -170,8 +183,7 @@ mutation verifyEmail($id: String!, $code: String!) {
 
       return null;
     } catch (e, stackTrace) {
-      log('[refresh] catch error: $e');
-      log('[refresh] catch stackTrace: $stackTrace');
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error refreshing the user";
     }
   }
@@ -202,15 +214,17 @@ query forgotPassword($email: String!) {
       );
 
       if (response['errors'] != null) {
-        log('[forgotPassword] errors: ${response['errors']}');
+        Sentry.captureException(
+          Exception('Forgot password errors: ${response['errors']}'),
+          stackTrace: StackTrace.current,
+        );
         return "There was an error resetting the password";
       }
 
       state = response['data']['users']['forgotPassword'];
       return null;
     } catch (e, stackTrace) {
-      log('[forgotPassword] catch error: $e');
-      log('[forgotPassword] catch stackTrace: $stackTrace');
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error resetting the password";
     }
   }
@@ -239,14 +253,16 @@ mutation verifyEmail($id: String!, $code: String!) {
       );
 
       if (response['errors'] != null) {
-        log('[verifyCode] errors: ${response['errors']}');
+        Sentry.captureException(
+          Exception('Verify code errors: ${response['errors']}'),
+          stackTrace: StackTrace.current,
+        );
         return "There was an error verifying the code";
       }
 
       return null;
     } catch (e, stackTrace) {
-      log('[verifyCode] catch error: $e');
-      log('[verifyCode] catch stackTrace: $stackTrace');
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error verifying the code";
     }
   }
@@ -271,15 +287,17 @@ mutation resetPassword($id: String!, $password: String!) {
       );
 
       if (response['errors'] != null) {
-        log('[resetPassword] errors: ${response['errors']}');
+        Sentry.captureException(
+          Exception('Reset password errors: ${response['errors']}'),
+          stackTrace: StackTrace.current,
+        );
         return "There was an error resetting the password";
       }
 
       state = null;
       return null;
     } catch (e, stackTrace) {
-      log('[resetPassword] catch error: $e');
-      log('[resetPassword] catch stackTrace: $stackTrace');
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error resetting the password";
     }
   }

@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:io';
 
 import 'package:http/http.dart' as http;
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 //graphql - helper method that is used to submit any qraphql request (query, mutation) to the server
 Future<Map<String, dynamic>> graphql({
@@ -25,22 +25,25 @@ Future<Map<String, dynamic>> graphql({
     if (response.statusCode == HttpStatus.ok) {
       try {
         return jsonDecode(response.body);
-      } catch (e) {
-        log(
-          'Failed to parse response: ${response.statusCode}, ${response.body}, $e',
-        );
+      } catch (e, stackTrace) {
+        Sentry.captureException(e, stackTrace: stackTrace);
         throw Exception(
           'Failed to parse response: ${response.statusCode}, ${response.body}, $e',
         );
       }
     } else {
-      log('Failed to load data: ${response.statusCode}, ${response.body}');
+      Sentry.captureException(
+        Exception(
+          'Failed to load data: ${response.statusCode}, ${response.body}',
+        ),
+        stackTrace: StackTrace.current,
+      );
       throw Exception(
         'Failed to load data: ${response.statusCode}, ${response.body}',
       );
     }
   } catch (e, stackTrace) {
-    log('Failed to load data: $e $stackTrace');
+    Sentry.captureException(e, stackTrace: stackTrace);
     throw Exception(
       'Failed to load data: $e $stackTrace',
     );

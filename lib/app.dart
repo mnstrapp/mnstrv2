@@ -2,6 +2,7 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:wiredash/wiredash.dart';
 
 import 'theme.dart';
@@ -15,8 +16,6 @@ class App extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    log('[app] wiredashProjectId: $wiredashProjectId');
-    log('[app] wiredashApiKey: $wiredashApiKey');
     final auth = ref.watch(authProvider);
     return Wiredash(
       projectId: wiredashProjectId,
@@ -30,7 +29,7 @@ class App extends ConsumerWidget {
             return const HomeView();
           },
           error: (error, stack) {
-            log('Error: $error\n$stack');
+            Sentry.captureException(error, stackTrace: stack);
             return const LoginView();
           },
           loading: () => const Scaffold(
