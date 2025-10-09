@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wiredash/wiredash.dart';
@@ -77,6 +79,10 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
     final selectedBackgroundColor = darkenColor(
       backgroundColor ?? Theme.of(context).primaryColor,
       0.2,
+    );
+
+    log(
+      'mnstr: XP ${widget.monster.currentExperience}, Level ${widget.monster.currentLevel}',
     );
 
     return LayoutScaffold(

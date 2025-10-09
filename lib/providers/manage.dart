@@ -32,6 +32,7 @@ class ManageNotifier extends Notifier<List<Monster>> {
           mnstrQrCode
           currentLevel
           currentExperience
+          experienceToNextLevel
           currentHealth
           maxHealth
           currentAttack

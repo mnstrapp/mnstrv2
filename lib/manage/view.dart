@@ -19,9 +19,8 @@ class _ManageViewState extends ConsumerState<ManageView> {
     if (monster == null) {
       return const SizedBox.shrink();
     }
-    final mnstr = monster.toMonsterModel();
     return MonsterContainer(
-      monster: mnstr,
+      monster: monster,
       showName: false,
       size: size,
     );

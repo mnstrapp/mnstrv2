@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -181,16 +183,24 @@ class _StatsViewState extends ConsumerState<StatsView> {
   @override
   Widget build(BuildContext context) {
     final level = widget.monster.currentLevel ?? 0;
-    final experience = widget.monster.experience ?? 0;
+    final experience = widget.monster.currentExperience ?? 0;
+    final experienceToNextLevel = widget.monster.experienceToNextLevel ?? 0;
     final color = widget.monster.toMonsterModel().color;
     final largestStat = _maxStats.values.reduce((a, b) => a > b ? a : b);
+
+    log(
+      'mnstr: XP ${widget.monster.currentExperience} / ${widget.monster.experienceToNextLevel}, Level $level',
+    );
 
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [Text('Lv: $level'), Text('Xp: $experience')],
+          children: [
+            Text('Lv: $level'),
+            Text('Xp: $experience / $experienceToNextLevel'),
+          ],
         ),
         Text('Available Points: $_availablePoints'),
         Text('Health'),

@@ -230,13 +230,12 @@ class MnstrView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final size = this.size ?? MediaQuery.sizeOf(context);
-    final m = monster.toMonsterModel();
 
     return InkWell(
       onTap: () => onTap?.call(monster),
       child: Stack(
         children: [
-          MonsterContainer(monster: m, size: size, showName: showName),
+          MonsterContainer(monster: monster, size: size, showName: showName),
           if (overlay != null)
             Positioned(
               top: overlayPositioning?.top ?? 0,

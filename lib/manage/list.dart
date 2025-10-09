@@ -81,14 +81,18 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
                       Colors.black,
                   0.1,
                 );
-                final container = MonsterContainer(monster: m, size: size);
+                final container = MonsterContainer(
+                  monster: monster,
+                  size: size,
+                );
 
                 return Stack(
                   children: [
                     Positioned(
-                      bottom: 116,
+                      bottom: 16,
                       left: 13,
                       child: UIButton(
+                        height: 80,
                         onPressedAsync: () async {
                           Navigator.push(
                             context,
@@ -103,9 +107,10 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
                       ),
                     ),
                     Positioned(
-                      bottom: 116,
+                      bottom: 16,
                       right: 13,
                       child: UIButton(
+                        height: 80,
                         onPressedAsync: () async {
                           final image = await _screenshotController
                               .captureFromWidget(

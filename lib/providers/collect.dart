@@ -36,6 +36,7 @@ class CollectNotifier extends Notifier<Monster?> {
           mnstrQrCode
           currentLevel
           currentExperience
+          experienceToNextLevel
           currentHealth
           maxHealth
           currentAttack

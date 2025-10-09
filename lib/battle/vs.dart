@@ -230,7 +230,7 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
             height: size.height,
             width: size.width,
             child: MnstrList(
-              showName: false,
+              // showName: false,
               monsters: mnstrs,
               onTap: _chooseMnstr,
               filter: (mnstr) {
