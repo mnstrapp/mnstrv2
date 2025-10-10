@@ -1,13 +1,14 @@
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import 'app.dart';
 import 'providers/auth.dart';
+import 'providers/local_storage.dart';
 import 'providers/session_users.dart';
 import 'providers/sounds.dart';
 import 'shared/sounds.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -16,6 +17,8 @@ void main() async {
 
   final auth = await getAuth();
   final user = await getSessionUser();
+
+  await LocalStorage.init();
 
   final overrides = [
     authProvider.overrideWith(() => AuthNotifier(auth: auth)),

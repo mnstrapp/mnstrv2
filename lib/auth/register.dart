@@ -74,7 +74,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
   Future<void> _verifyEmail() async {
     final navigator = Navigator.of(context);
 
-    final user = ref.read(sessionUserProvider).value;
+    final user = ref.read(sessionUserProvider);
     if (user == null) {
       return;
     }

@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:mnstrv2/utils/graphql.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -8,17 +9,17 @@ import '../config/endpoints.dart' as endpoints;
 import '../models/user.dart';
 import 'auth.dart';
 
-final sessionUserProvider = AsyncNotifierProvider<SessionUserNotifier, User?>(
+final sessionUserProvider = NotifierProvider<SessionUserNotifier, User?>(
   () => SessionUserNotifier(),
 );
 
-class SessionUserNotifier extends AsyncNotifier<User?> {
+class SessionUserNotifier extends Notifier<User?> {
   User? user;
 
   SessionUserNotifier({this.user});
 
   @override
-  Future<User?> build() async {
+  User? build() {
     return user;
   }
 
@@ -69,9 +70,10 @@ mutation register(
       }
       final user = User.fromJson(response['data']['users']['register']);
 
-      state = AsyncData(user);
+      state = user;
       return null;
     } catch (e, stackTrace) {
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error registering the user";
     }
   }
@@ -107,17 +109,18 @@ mutation verifyEmail($id: String!, $code: String!) {
 
       return null;
     } catch (e, stackTrace) {
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error verifying the email";
     }
   }
 
   void setUser(User user) {
-    state = AsyncData(user);
+    state = user;
   }
 
   Future<void> logout() async {
     await removeSessionUser();
-    state = AsyncData(null);
+    state = null;
   }
 
   Future<String?> refresh() async {
@@ -157,11 +160,12 @@ mutation verifyEmail($id: String!, $code: String!) {
       }
 
       final user = User.fromJson(response['data']['users']['my']);
-      state = AsyncData(user);
+      state = user;
       await saveSessionUser(user);
 
       return null;
     } catch (e, stackTrace) {
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error refreshing the user";
     }
   }
@@ -198,6 +202,7 @@ query forgotPassword($email: String!) {
       state = response['data']['users']['forgotPassword'];
       return null;
     } catch (e, stackTrace) {
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error resetting the password";
     }
   }
@@ -231,6 +236,7 @@ mutation verifyEmail($id: String!, $code: String!) {
 
       return null;
     } catch (e, stackTrace) {
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error verifying the code";
     }
   }
@@ -261,6 +267,7 @@ mutation resetPassword($id: String!, $password: String!) {
       state = null;
       return null;
     } catch (e, stackTrace) {
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error resetting the password";
     }
   }

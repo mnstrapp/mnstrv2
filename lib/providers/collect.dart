@@ -5,6 +5,7 @@ import '../providers/auth.dart';
 import '../models/monster.dart';
 import '../config/endpoints.dart' as endpoints;
 import '../utils/graphql.dart';
+import 'local_storage.dart';
 
 final collectProvider = NotifierProvider<CollectNotifier, Monster?>(
   () => CollectNotifier(),
@@ -20,7 +21,9 @@ class CollectNotifier extends Notifier<Monster?> {
     final auth = ref.read(authProvider);
 
     if (auth == null) {
-      return "There was an error creating the monster";
+      await LocalStorage.addMnstr(monster);
+      state = monster;
+      return null;
     }
 
     final document = r'''

@@ -60,18 +60,18 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
     }
 
     final user = ref.read(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
     final data = BattleQueueData(
-      userId: user.value?.id,
-      userName: user.value?.displayName,
+      userId: user.id,
+      userName: user.displayName,
       message: 'ping',
       action: BattleQueueDataAction.ping,
     );
     final battleQueue = BattleQueue(
       action: BattleQueueAction.ping,
-      userId: user.value?.id,
+      userId: user.id,
       data: data,
       channel: BattleQueueChannel.lobby,
     );
@@ -87,12 +87,12 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
 
   void _log(BattleQueue battleQueue) {
     final user = ref.read(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
-    battleQueue.data?.userName ??= user.value?.displayName;
-    battleQueue.data?.userId ??= user.value?.id;
-    battleQueue.userId ??= user.value?.id;
+    battleQueue.data?.userName ??= user.displayName;
+    battleQueue.data?.userId ??= user.id;
+    battleQueue.userId ??= user.id;
 
     final newMessage = BattleMessage();
 
@@ -119,7 +119,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
 
   Future<void> _handleMessage(String message) async {
     final user = ref.read(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
 
@@ -132,14 +132,14 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
 
     switch (battleQueue.action) {
       case BattleQueueAction.joined:
-        if (battleQueue.data?.userId == user.value?.id) {
+        if (battleQueue.data?.userId == user.id) {
           setState(() {
             _isJoined = true;
           });
         }
         break;
       case BattleQueueAction.left:
-        if (battleQueue.data?.userId == user.value?.id) {
+        if (battleQueue.data?.userId == user.id) {
           setState(() {
             _isJoined = false;
             _reconnect = true;
@@ -149,8 +149,8 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
         break;
       case BattleQueueAction.gameStarted:
         setState(() {
-          if (battleQueue.data?.userId == user.value?.id ||
-              battleQueue.data?.opponentId == user.value?.id) {
+          if (battleQueue.data?.userId == user.id ||
+              battleQueue.data?.opponentId == user.id) {
             _isInBattle = true;
             _battleQueue = battleQueue;
           }
@@ -191,8 +191,8 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
           Wiredash.trackEvent(
             'Battle Layout View Connecting',
             data: {
-              'displayName': user.value?.displayName,
-              'id': user.value?.id,
+              'displayName': user?.displayName,
+              'id': user?.id,
             },
           );
           _messages = [
@@ -211,8 +211,8 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
         Wiredash.trackEvent(
           'Battle Layout View Connected',
           data: {
-            'displayName': user.value?.displayName,
-            'id': user.value?.id,
+            'displayName': user?.displayName,
+            'id': user?.id,
           },
         );
         setState(() {
@@ -230,8 +230,8 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
           Wiredash.trackEvent(
             'Battle Layout View Message',
             data: {
-              'displayName': user.value?.displayName,
-              'id': user.value?.id,
+              'displayName': user?.displayName,
+              'id': user?.id,
             },
           );
           if (mounted) {
@@ -242,8 +242,8 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
           Wiredash.trackEvent(
             'Battle Layout View Done',
             data: {
-              'displayName': user.value?.displayName,
-              'id': user.value?.id,
+              'displayName': user?.displayName,
+              'id': user?.id,
             },
           );
           layoutKey.currentState?.addError('Socket is disconnected');
@@ -270,8 +270,8 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
             'Battle Layout View Socket Error',
             data: {
               'error': error,
-              'displayName': user.value?.displayName,
-              'id': user.value?.id,
+              'displayName': user?.displayName,
+              'id': user?.id,
             },
           );
           layoutKey.currentState?.addError('Socket error: $error');
@@ -296,8 +296,8 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
         'Battle Layout View Socket Error',
         data: {
           'error': e,
-          'displayName': user.value?.displayName,
-          'id': user.value?.id,
+          'displayName': user?.displayName,
+          'id': user?.id,
         },
       );
       Sentry.captureException(e, stackTrace: stackTrace);
@@ -333,8 +333,8 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
       Wiredash.trackEvent(
         'Battle Layout View',
         data: {
-          'displayName': user.value?.displayName,
-          'id': user.value?.id,
+          'displayName': user?.displayName,
+          'id': user?.id,
         },
       );
 

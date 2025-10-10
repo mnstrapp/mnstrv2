@@ -130,7 +130,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
       Wiredash.trackEvent(
         'Home View',
         data: {
-          'displayName': user.value?.displayName,
+          'displayName': user?.displayName,
+          'id': user?.id,
         },
       );
     });

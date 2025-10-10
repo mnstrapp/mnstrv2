@@ -63,8 +63,8 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                     'Settings Background Sound Changed',
                                     data: {
                                       'value': value,
-                                      'displayName': user.value?.displayName,
-                                      'id': user.value?.id,
+                                      'displayName': user?.displayName,
+                                      'id': user?.id,
                                     },
                                   );
                                   await ref
@@ -87,8 +87,8 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                     'Settings Button Sound Changed',
                                     data: {
                                       'value': value,
-                                      'displayName': user.value?.displayName,
-                                      'id': user.value?.id,
+                                      'displayName': user?.displayName,
+                                      'id': user?.id,
                                     },
                                   );
                                   await ref
@@ -111,8 +111,8 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                     'Settings Collect Sound Changed',
                                     data: {
                                       'value': value,
-                                      'displayName': user.value?.displayName,
-                                      'id': user.value?.id,
+                                      'displayName': user?.displayName,
+                                      'id': user?.id,
                                     },
                                   );
                                   await ref

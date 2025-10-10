@@ -5,6 +5,7 @@ import '../config/endpoints.dart' as endpoints;
 import '../providers/auth.dart';
 import '../models/monster.dart';
 import '../utils/graphql.dart';
+import 'local_storage.dart';
 
 final manageProvider = NotifierProvider<ManageNotifier, List<Monster>>(
   () => ManageNotifier(),
@@ -80,14 +81,13 @@ class ManageNotifier extends Notifier<List<Monster>> {
   }
 }
 
-final manageGetByQRProvider =
-    AsyncNotifierProvider<ManageGetByQRNotifier, Monster?>(
-      () => ManageGetByQRNotifier(),
-    );
+final manageGetByQRProvider = NotifierProvider<ManageGetByQRNotifier, Monster?>(
+  () => ManageGetByQRNotifier(),
+);
 
-class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
+class ManageGetByQRNotifier extends Notifier<Monster?> {
   @override
-  Future<Monster?> build() async {
+  Monster? build() {
     return null;
   }
 
@@ -95,7 +95,12 @@ class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
     final auth = ref.read(authProvider);
 
     if (auth == null) {
-      return "There was an error getting the monster by QR code";
+      final mnstr = await LocalStorage.getMnstrByQrCode(qrCode);
+      if (mnstr == null) {
+        return "Monster not found";
+      }
+      state = mnstr;
+      return null;
     }
 
     final document = r'''
@@ -150,7 +155,7 @@ class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
 
       final monster = Monster.fromJson(response['data']['mnstrs']['qrCode']);
 
-      state = AsyncData(monster);
+      state = monster;
 
       return null;
     } catch (e, stackTrace) {
@@ -178,7 +183,9 @@ class ManageEditNotifier extends Notifier<Monster?> {
     final auth = ref.read(authProvider);
 
     if (auth == null) {
-      return "There was an error editing the monster";
+      await LocalStorage.addMnstr(monster);
+      state = monster;
+      return null;
     }
 
     final document = r'''

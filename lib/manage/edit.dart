@@ -60,8 +60,8 @@ class _ManageEditViewState extends ConsumerState<ManageEditView> {
         'Manage Edit View',
         data: {
           'monster': monster.id,
-          'displayName': user.value?.displayName,
-          'id': user.value?.id,
+          'displayName': user?.displayName,
+          'id': user?.id,
         },
       );
     });

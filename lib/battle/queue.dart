@@ -51,7 +51,7 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
 
   void _acceptChallenge(int index) {
     final user = ref.read(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
 
@@ -59,13 +59,13 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
       action: BattleQueueDataAction.accept,
       userId: _challenges[index].data?.userId,
       userName: _challenges[index].data?.userName,
-      opponentId: user.value?.id,
-      opponentName: user.value?.displayName,
+      opponentId: user.id,
+      opponentName: user.displayName,
       message: 'accept challenge',
     );
     final battleQueue = BattleQueue(
       action: BattleQueueAction.accept,
-      userId: user.value?.id,
+      userId: user.id,
       data: data,
       channel: BattleQueueChannel.lobby,
     );
@@ -79,7 +79,7 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
 
   void _rejectChallenge(int index) {
     final user = ref.read(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
 
@@ -88,13 +88,13 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
       id: _challenges[index].data?.id,
       userId: _challenges[index].data?.userId,
       userName: _challenges[index].data?.userName,
-      opponentId: user.value?.id,
-      opponentName: user.value?.displayName,
+      opponentId: user.id,
+      opponentName: user.displayName,
       message: 'reject challenge',
     );
     final battleQueue = BattleQueue(
       action: BattleQueueAction.reject,
-      userId: user.value?.id,
+      userId: user.id,
       data: data,
       channel: BattleQueueChannel.lobby,
     );
@@ -107,18 +107,18 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
 
   void _getBattleStatuses() {
     final user = ref.read(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
     final data = BattleQueueData(
       action: BattleQueueDataAction.list,
-      userId: user.value?.id,
-      userName: user.value?.displayName,
+      userId: user.id,
+      userName: user.displayName,
       message: 'list lobby players',
     );
     final battleQueue = BattleQueue(
       action: BattleQueueAction.list,
-      userId: user.value?.id,
+      userId: user.id,
       data: data,
       channel: BattleQueueChannel.lobby,
     );
@@ -131,7 +131,7 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
     }
 
     final user = ref.read(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
 
@@ -139,12 +139,12 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
 
     switch (battleQueue.action) {
       case BattleQueueAction.joined:
-        if (battleQueue.data?.userId != user.value?.id) {
+        if (battleQueue.data?.userId != user.id) {
           _getBattleStatuses();
         }
         break;
       case BattleQueueAction.left:
-        if (battleQueue.data?.userId != user.value?.id) {
+        if (battleQueue.data?.userId != user.id) {
           _getBattleStatuses();
         }
         break;
@@ -156,7 +156,7 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
         List<BattleStatus> battleStatuses = [];
         for (var e in data) {
           final battleStatus = BattleStatus.fromJson(e);
-          if (battleStatus.userId == user.value?.id) {
+          if (battleStatus.userId == user.id) {
             continue;
           }
           battleStatuses.add(battleStatus);
@@ -166,12 +166,12 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
         });
         break;
       case BattleQueueAction.challenge:
-        if (battleQueue.data?.opponentId == user.value?.id) {
+        if (battleQueue.data?.opponentId == user.id) {
           Wiredash.trackEvent(
             'Battle Queue View Challenge Received',
             data: {
-              'displayName': user.value?.displayName,
-              'id': user.value?.id,
+              'displayName': user.displayName,
+              'id': user.id,
               'challengeId': battleQueue.data?.id,
               'userId': battleQueue.data?.userId,
               'userName': battleQueue.data?.userName,
@@ -186,12 +186,12 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
         }
         break;
       case BattleQueueAction.cancel:
-        if (battleQueue.data?.opponentId == user.value?.id) {
+        if (battleQueue.data?.opponentId == user.id) {
           Wiredash.trackEvent(
             'Battle Queue View Cancel Received',
             data: {
-              'displayName': user.value?.displayName,
-              'id': user.value?.id,
+              'displayName': user.displayName,
+              'id': user.id,
               'challengeId': battleQueue.data?.id,
               'userId': battleQueue.data?.userId,
               'userName': battleQueue.data?.userName,
@@ -210,12 +210,12 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
         }
         break;
       case BattleQueueAction.reject:
-        if (battleQueue.data?.userId == user.value?.id) {
+        if (battleQueue.data?.userId == user.id) {
           Wiredash.trackEvent(
             'Battle Queue View Reject Received',
             data: {
-              'displayName': user.value?.displayName,
-              'id': user.value?.id,
+              'displayName': user.displayName,
+              'id': user.id,
               'challengeId': battleQueue.data?.id,
               'userId': battleQueue.data?.userId,
               'userName': battleQueue.data?.userName,
@@ -233,12 +233,12 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
         }
         break;
       case BattleQueueAction.accept:
-        if (battleQueue.data?.userId == user.value?.id) {
+        if (battleQueue.data?.userId == user.id) {
           Wiredash.trackEvent(
             'Battle Queue View Accept Received',
             data: {
-              'displayName': user.value?.displayName,
-              'id': user.value?.id,
+              'displayName': user.displayName,
+              'id': user.id,
               'challengeId': battleQueue.data?.id,
               'userId': battleQueue.data?.userId,
               'userName': battleQueue.data?.userName,
@@ -271,8 +271,8 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
       Wiredash.trackEvent(
         'Battle Queue View',
         data: {
-          'displayName': user.value?.displayName,
-          'id': user.value?.id,
+          'displayName': user?.displayName,
+          'id': user?.id,
         },
       );
       _getBattleStatuses();
@@ -332,15 +332,15 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
 
   void _challenge() {
     final user = ref.read(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
 
     Wiredash.trackEvent(
       'Battle Status View Challenge',
       data: {
-        'displayName': user.value?.displayName,
-        'id': user.value?.id,
+        'displayName': user.displayName,
+        'id': user.id,
         'challengeId': _challengeMade?.data?.id,
         'opponentId': widget.battleStatus.userId,
         'opponentName': widget.battleStatus.displayName,
@@ -354,15 +354,15 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
     final data = BattleQueueData(
       action: BattleQueueDataAction.challenge,
       id: Uuid().v4(),
-      userId: user.value?.id,
-      userName: user.value?.displayName,
+      userId: user.id,
+      userName: user.displayName,
       opponentId: widget.battleStatus.userId,
       opponentName: widget.battleStatus.displayName,
       message: 'challenge ${widget.battleStatus.displayName}',
     );
     final battleQueue = BattleQueue(
       action: BattleQueueAction.challenge,
-      userId: user.value?.id,
+      userId: user.id,
       data: data,
       channel: BattleQueueChannel.lobby,
     );
@@ -376,15 +376,15 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
 
   void _cancel() {
     final user = ref.read(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
 
     Wiredash.trackEvent(
       'Battle Status View Cancel',
       data: {
-        'displayName': user.value?.displayName,
-        'id': user.value?.id,
+        'displayName': user.displayName,
+        'id': user.id,
         'challengeId': _challengeMade?.data?.id,
         'opponentId': widget.battleStatus.userId,
         'opponentName': widget.battleStatus.displayName,
@@ -396,15 +396,15 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
     final data = BattleQueueData(
       action: BattleQueueDataAction.cancel,
       id: _challengeMade?.data?.id,
-      userId: user.value?.id,
-      userName: user.value?.displayName,
+      userId: user.id,
+      userName: user.displayName,
       opponentId: widget.battleStatus.userId,
       opponentName: widget.battleStatus.displayName,
       message: 'cancel challenge ${widget.battleStatus.displayName}',
     );
     final battleQueue = BattleQueue(
       action: BattleQueueAction.cancel,
-      userId: user.value?.id,
+      userId: user.id,
       data: data,
       channel: BattleQueueChannel.lobby,
     );
@@ -430,8 +430,8 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
       Wiredash.trackEvent(
         'Battle Status View',
         data: {
-          'displayName': user.value?.displayName,
-          'id': user.value?.id,
+          'displayName': user?.displayName,
+          'id': user?.id,
         },
       );
     });
@@ -440,7 +440,7 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return const SizedBox.shrink();
     }
 

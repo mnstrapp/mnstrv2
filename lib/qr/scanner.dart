@@ -25,8 +25,8 @@ class ScannerView extends ConsumerWidget {
         Wiredash.trackEvent(
           'Scanner View Error',
           data: {
-            'displayName': user.value?.displayName,
-            'id': user.value?.id,
+            'displayName': user?.displayName,
+            'id': user?.id,
           },
         );
         layout.addError(error.toString());
@@ -37,8 +37,8 @@ class ScannerView extends ConsumerWidget {
         Wiredash.trackEvent(
           'Scanner View Detected',
           data: {
-            'displayName': user.value?.displayName,
-            'id': user.value?.id,
+            'displayName': user?.displayName,
+            'id': user?.id,
           },
         );
         onScan(capture.barcodes.single.rawBytes);

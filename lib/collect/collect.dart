@@ -7,7 +7,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wiredash/wiredash.dart';
 
 import '../manage/edit.dart';
-import '../home/home.dart';
 import '../providers/session_users.dart';
 import '../shared/sounds.dart';
 import '../shared/stars.dart';
@@ -51,24 +50,14 @@ class _CollectState extends ConsumerState<Collect> {
         data: {
           'error': error,
           'monster': _monster?.id,
-          'displayName': user.value?.displayName,
-          'id': user.value?.id,
+          'displayName': user?.displayName,
+          'id': user?.id,
         },
       );
       return MonsterModel.fromQRCode(qrCode);
     }
     final mnstr = ref.read(manageGetByQRProvider);
-    return mnstr.when(
-      data: (data) {
-        return data?.toMonsterModel();
-      },
-      error: (error, stackTrace) {
-        return null;
-      },
-      loading: () {
-        return null;
-      },
-    );
+    return mnstr?.toMonsterModel();
   }
 
   Future<void> _collectMonster() async {
@@ -81,8 +70,8 @@ class _CollectState extends ConsumerState<Collect> {
         data: {
           'error': 'Monster previously collected',
           'monster': _monster?.id,
-          'displayName': user.value?.displayName,
-          'id': user.value?.id,
+          'displayName': user?.displayName,
+          'id': user?.id,
         },
       );
       messenger.showSnackBar(
@@ -114,8 +103,8 @@ class _CollectState extends ConsumerState<Collect> {
         data: {
           'error': error,
           'monster': _monster?.id,
-          'displayName': user.value?.displayName,
-          'id': user.value?.id,
+          'displayName': user?.displayName,
+          'id': user?.id,
         },
       );
       messenger.showSnackBar(SnackBar(content: Text(error)));
@@ -126,8 +115,8 @@ class _CollectState extends ConsumerState<Collect> {
       'Collect Monster Success',
       data: {
         'monster': monster?.id,
-        'displayName': user.value?.displayName,
-        'id': user.value?.id,
+        'displayName': user?.displayName,
+        'id': user?.id,
       },
     );
     setState(() {

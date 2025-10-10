@@ -71,8 +71,8 @@ class _InplaceTextState extends State<InplaceText> {
                   label: widget.label,
                   hintText: widget.hintText,
                   suffixIcon: IconButton(
-                    onPressed: () {
-                      Wiredash.trackEvent(
+                    onPressed: () async {
+                      await Wiredash.trackEvent(
                         'InplaceText Editing Saved',
                         data: {
                           'text': _controller.text,
@@ -89,8 +89,8 @@ class _InplaceTextState extends State<InplaceText> {
                 controller: _controller,
                 minLines: widget.minLines,
                 maxLines: widget.maxLines,
-                onSubmitted: (value) {
-                  Wiredash.trackEvent(
+                onSubmitted: (value) async {
+                  await Wiredash.trackEvent(
                     'InplaceText Editing Submitted',
                     data: {
                       'text': value,
@@ -108,11 +108,13 @@ class _InplaceTextState extends State<InplaceText> {
               ),
             )
           : InkWell(
-              onTap: () {
-                Wiredash.trackEvent(
+              onTap: () async {
+                await Wiredash.trackEvent(
                   'InplaceText Editing Started',
                   data: {
-                    'text': _controller.text,
+                    'text': _controller.text.isEmpty
+                        ? 'Unknown'
+                        : _controller.text,
                   },
                 );
                 setState(() {

@@ -56,8 +56,8 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
     );
     final barWidth = size.width * 0.25;
     final barHeight = 20.0;
-    final barExperience = user.value?.experiencePoints ?? 1;
-    final barExperienceToNextLevel = user.value?.experienceToNextLevel ?? 1;
+    final barExperience = user?.experiencePoints ?? 1;
+    final barExperienceToNextLevel = user?.experienceToNextLevel ?? 1;
     final barExperiencePercentage = barExperience / barExperienceToNextLevel;
     final barExperienceWidth = barWidth * barExperiencePercentage;
     final borderRadius = BorderRadius.circular(20);
@@ -90,7 +90,7 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
                           children: [
                             const Text('LV: '),
                             Text(
-                              user.value?.experienceLevel.toString() ?? '0',
+                              user?.experienceLevel.toString() ?? '0',
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),
@@ -126,7 +126,7 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
                               height: 20,
                             ),
                             Text(
-                              user.value?.coins.toString() ?? '0',
+                              user?.coins.toString() ?? '0',
                               style: theme.textTheme.bodyLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
                               ),

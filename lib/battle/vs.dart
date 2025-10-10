@@ -56,13 +56,13 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
 
   Future<void> _initUser() async {
     final user = ref.read(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
     setState(() {
-      _userId = user.value?.id;
-      _userName = user.value?.displayName;
-      _isChallenger = _battleQueue?.data?.userId == user.value?.id;
+      _userId = user.id;
+      _userName = user.displayName;
+      _isChallenger = _battleQueue?.data?.userId == user.id;
     });
   }
 
@@ -313,7 +313,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
 
   void _handleMessage(String message) {
     final user = ref.watch(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
 
@@ -330,8 +330,8 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
         Wiredash.trackEvent(
           'Battle Vs In Game View Game Ended Received',
           data: {
-            'displayName': user.value?.displayName,
-            'id': user.value?.id,
+            'displayName': user.displayName,
+            'id': user.id,
             'battleId': widget.gameData.battleId,
             'winnerId': gameData.winnerId,
             'challengerId': widget.gameData.challengerMnstr?.userId,
@@ -352,8 +352,8 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
         Wiredash.trackEvent(
           'Battle Vs In Game View Attack Received',
           data: {
-            'displayName': user.value?.displayName,
-            'id': user.value?.id,
+            'displayName': user.displayName,
+            'id': user.id,
             'battleId': widget.gameData.battleId,
             'turnUserId': gameData.turnUserId,
             'challengerMnstr': widget.gameData.challengerMnstr?.id,
@@ -372,8 +372,8 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
         Wiredash.trackEvent(
           'Battle Vs In Game View Defend Received',
           data: {
-            'displayName': user.value?.displayName,
-            'id': user.value?.id,
+            'displayName': user.displayName,
+            'id': user.id,
             'battleId': widget.gameData.battleId,
             'turnUserId': gameData.turnUserId,
             'challengerMnstr': widget.gameData.challengerMnstr?.id,
@@ -392,8 +392,8 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
         Wiredash.trackEvent(
           'Battle Vs In Game View Magic Received',
           data: {
-            'displayName': user.value?.displayName,
-            'id': user.value?.id,
+            'displayName': user.displayName,
+            'id': user.id,
             'battleId': widget.gameData.battleId,
             'turnUserId': gameData.turnUserId,
             'challengerMnstr': widget.gameData.challengerMnstr?.id,
@@ -413,15 +413,15 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
 
   void _escape() {
     final user = ref.watch(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
 
     Wiredash.trackEvent(
       'Battle Vs In Game View Escape',
       data: {
-        'displayName': user.value?.displayName,
-        'id': user.value?.id,
+        'displayName': user.displayName,
+        'id': user.id,
         'battleId': widget.gameData.battleId,
         'turnUserId': _turnUserId,
         'challengerId': widget.gameData.challengerMnstr?.userId,
@@ -437,7 +437,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     });
 
     String? winnerId;
-    if (widget.gameData.opponentMnstr?.userId == user.value?.id) {
+    if (widget.gameData.opponentMnstr?.userId == user.id) {
       winnerId = widget.gameData.challengerMnstr?.userId;
     } else {
       winnerId = widget.gameData.opponentMnstr?.userId;
@@ -450,8 +450,8 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
       winnerId: winnerId,
     );
     final data = BattleQueueData(
-      userId: user.value?.id,
-      userName: user.value?.displayName,
+      userId: user.id,
+      userName: user.displayName,
       action: BattleQueueDataAction.escape,
       message: 'Escape from battle',
       data: jsonEncode(gameData.toJson()),
@@ -467,15 +467,15 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
 
   void _attack() {
     final user = ref.watch(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
 
     Wiredash.trackEvent(
       'Battle Vs In Game View Attack',
       data: {
-        'displayName': user.value?.displayName,
-        'id': user.value?.id,
+        'displayName': user.displayName,
+        'id': user.id,
         'battleId': widget.gameData.battleId,
         'turnUserId': _turnUserId,
         'challengerMnstr': widget.gameData.challengerMnstr?.id,
@@ -489,8 +489,8 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     });
 
     String? turnUserId;
-    if (_turnUserId != user.value?.id) {
-      turnUserId = user.value?.id;
+    if (_turnUserId != user.id) {
+      turnUserId = user.id;
     } else {
       if (_turnUserId == widget.opponentId) {
         turnUserId = widget.challengerId;
@@ -506,8 +506,8 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
       turnUserId: turnUserId,
     );
     final data = BattleQueueData(
-      userId: user.value?.id,
-      userName: user.value?.displayName,
+      userId: user.id,
+      userName: user.displayName,
       action: BattleQueueDataAction.attack,
       message: 'Attack',
       data: jsonEncode(gameData.toJson()),
@@ -523,15 +523,15 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
 
   void _defend() {
     final user = ref.watch(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
 
     Wiredash.trackEvent(
       'Battle Vs In Game View Defend',
       data: {
-        'displayName': user.value?.displayName,
-        'id': user.value?.id,
+        'displayName': user.displayName,
+        'id': user.id,
         'battleId': widget.gameData.battleId,
         'turnUserId': _turnUserId,
         'challengerMnstr': widget.gameData.challengerMnstr?.id,
@@ -545,8 +545,8 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     });
 
     String? turnUserId;
-    if (_turnUserId != user.value?.id) {
-      turnUserId = user.value?.id;
+    if (_turnUserId != user.id) {
+      turnUserId = user.id;
     } else {
       if (_turnUserId == widget.opponentId) {
         turnUserId = widget.challengerId;
@@ -562,8 +562,8 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
       turnUserId: turnUserId,
     );
     final data = BattleQueueData(
-      userId: user.value?.id,
-      userName: user.value?.displayName,
+      userId: user.id,
+      userName: user.displayName,
       action: BattleQueueDataAction.defend,
       message: 'Defend',
       data: jsonEncode(gameData.toJson()),
@@ -579,15 +579,15 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
 
   void _magic() {
     final user = ref.watch(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
 
     Wiredash.trackEvent(
       'Battle Vs In Game View Magic',
       data: {
-        'displayName': user.value?.displayName,
-        'id': user.value?.id,
+        'displayName': user.displayName,
+        'id': user.id,
         'battleId': widget.gameData.battleId,
         'turnUserId': _turnUserId,
         'challengerMnstr': widget.gameData.challengerMnstr?.id,
@@ -601,8 +601,8 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     });
 
     String? turnUserId;
-    if (_turnUserId != user.value?.id) {
-      turnUserId = user.value?.id;
+    if (_turnUserId != user.id) {
+      turnUserId = user.id;
     } else {
       if (_turnUserId == widget.opponentId) {
         turnUserId = widget.challengerId;
@@ -619,8 +619,8 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     );
 
     final data = BattleQueueData(
-      userId: user.value?.id,
-      userName: user.value?.displayName,
+      userId: user.id,
+      userName: user.displayName,
       action: BattleQueueDataAction.magic,
       message: 'Magic',
       data: jsonEncode(gameData.toJson()),
@@ -637,11 +637,11 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
 
   Future<void> _setBackgroundColor() async {
     final user = ref.watch(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return;
     }
 
-    final isChallenger = widget.challengerId == user.value?.id;
+    final isChallenger = widget.challengerId == user.id;
     final theme = Theme.of(context);
     final opponentMnstr = isChallenger
         ? _gameData!.opponentMnstr
@@ -673,8 +673,8 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
       Wiredash.trackEvent(
         'Battle Vs In Game View',
         data: {
-          'displayName': user.value?.displayName,
-          'id': user.value?.id,
+          'displayName': user?.displayName,
+          'id': user?.id,
           'battleId': widget.gameData.battleId,
           'turnUserId': _turnUserId,
           'challengerMnstr': widget.gameData.challengerMnstr?.id,
@@ -693,11 +693,11 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
   @override
   Widget build(BuildContext context) {
     final user = ref.watch(sessionUserProvider);
-    if (user.value == null) {
+    if (user == null) {
       return const SizedBox.shrink();
     }
 
-    final isChallenger = widget.challengerId == user.value?.id;
+    final isChallenger = widget.challengerId == user.id;
 
     final challengerMnstr = isChallenger
         ? _gameData!.challengerMnstr
@@ -728,19 +728,15 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     final statBarWidth =
         size.width - (statBarMargin.left + statBarMargin.right);
 
-    final winnerMnstr = _winnerId == user.value?.id
-        ? challengerMnstr
-        : opponentMnstr;
+    final winnerMnstr = _winnerId == user.id ? challengerMnstr : opponentMnstr;
 
-    final loserMnstr = _winnerId == user.value?.id
-        ? opponentMnstr
-        : challengerMnstr;
+    final loserMnstr = _winnerId == user.id ? opponentMnstr : challengerMnstr;
 
-    final xpAwarded = _winnerId == user.value?.id
+    final xpAwarded = _winnerId == user.id
         ? _gameData!.winnerXpAwarded
         : _gameData!.loserXpAwarded;
 
-    final coinsAwarded = _winnerId == user.value?.id
+    final coinsAwarded = _winnerId == user.id
         ? _gameData!.winnerCoinsAwarded
         : _gameData!.loserCoinsAwarded;
 
@@ -782,7 +778,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
           ),
         ),
 
-        if (_turnUserId == user.value?.id)
+        if (_turnUserId == user.id)
           Positioned(
             right: 16,
             bottom: 70,
@@ -864,7 +860,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                     mainAxisSize: MainAxisSize.min,
                     spacing: 16,
                     children: [
-                      if (_winnerId == user.value?.id) ...[
+                      if (_winnerId == user.id) ...[
                         Text(
                           'You defeated',
                           style: theme.textTheme.displaySmall?.copyWith(
@@ -878,7 +874,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                           ),
                         ),
                       ],
-                      if (_winnerId != user.value?.id) ...[
+                      if (_winnerId != user.id) ...[
                         Text(
                           'You were defeated by',
                           style: theme.textTheme.displaySmall?.copyWith(
