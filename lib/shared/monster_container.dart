@@ -58,7 +58,7 @@ class MonsterContainer extends StatelessWidget {
           Positioned(
             left: 0,
             right: 0,
-            bottom: 40,
+            bottom: -80,
             child: MonsterView(
               monster: mnstr,
               monsterScale: monsterScale,
@@ -76,26 +76,24 @@ class MonsterContainer extends StatelessWidget {
               child: Column(
                 spacing: 8,
                 children: [
-                  Center(
-                    child: Container(
-                      alignment: Alignment.center,
-                      width: width,
-                      margin: EdgeInsets.only(left: 16, right: 16),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: size.width * 0.05,
-                        vertical: size.height * 0.02,
-                      ),
-                      decoration: BoxDecoration(
-                        color: uiColor,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        monsterName,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          color: theme.colorScheme.surface,
-                          fontFamily: 'Silkscreen',
-                          overflow: TextOverflow.ellipsis,
-                        ),
+                  Container(
+                    alignment: Alignment.center,
+                    width: width,
+                    margin: EdgeInsets.only(left: 16, right: 16),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: size.width * 0.05,
+                      vertical: size.height * 0.02,
+                    ),
+                    decoration: BoxDecoration(
+                      color: uiColor,
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                    child: Text(
+                      monsterName,
+                      style: theme.textTheme.titleLarge?.copyWith(
+                        color: theme.colorScheme.surface,
+                        fontFamily: 'Silkscreen',
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ),
@@ -121,7 +119,7 @@ class MonsterContainer extends StatelessWidget {
                               children: [
                                 Text('Lv:', style: textSize),
                                 Text(
-                                  '${monster.currentLevel}',
+                                  '${monster.currentLevel ?? 0}',
                                   style: textSize,
                                 ),
                               ],
@@ -132,7 +130,7 @@ class MonsterContainer extends StatelessWidget {
                               children: [
                                 Text('XP:', style: textSize),
                                 Text(
-                                  '${monster.currentExperience}/${monster.experienceToNextLevel}',
+                                  '${monster.currentExperience ?? 0}/${monster.experienceToNextLevel ?? 0}',
                                   style: textSize,
                                 ),
                               ],
@@ -176,6 +174,26 @@ class MonsterContainer extends StatelessWidget {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
+                                  Symbols.magic_button_rounded,
+                                  color: uiColor,
+                                ),
+                                Text(
+                                  '${monster.maxMagic}',
+                                  style: textSize,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                        Row(
+                          spacing: 12,
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              spacing: 4,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
                                   Symbols.shield_moon_rounded,
                                   color: uiColor,
                                 ),
@@ -209,20 +227,6 @@ class MonsterContainer extends StatelessWidget {
                                 ),
                                 Text(
                                   '${monster.maxSpeed}',
-                                  style: textSize,
-                                ),
-                              ],
-                            ),
-                            Row(
-                              spacing: 4,
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Symbols.magic_button_rounded,
-                                  color: uiColor,
-                                ),
-                                Text(
-                                  '${monster.maxMagic}',
                                   style: textSize,
                                 ),
                               ],
