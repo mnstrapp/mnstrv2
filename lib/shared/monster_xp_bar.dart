@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:universal_platform/universal_platform.dart';
 
+import '../providers/auth.dart';
 import '../providers/session_users.dart';
 import '../utils/color.dart';
 
@@ -25,6 +26,10 @@ class _MonsterXpBarState extends ConsumerState<MonsterXpBar> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final messenger = ScaffoldMessenger.of(context);
+      final auth = ref.read(authProvider);
+      if (auth == null) {
+        return;
+      }
       final error = await ref.read(sessionUserProvider.notifier).refresh();
       if (error != null) {
         messenger.showSnackBar(SnackBar(content: Text(error)));

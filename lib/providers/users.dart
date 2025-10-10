@@ -1,5 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../config/endpoints.dart';
 import '../models/user.dart';
@@ -34,7 +35,7 @@ class UserNotifier extends AsyncNotifier<User?> {
   Future<String?> deleteAccount() async {
     final auth = ref.read(authProvider);
 
-    if (auth.value == null) {
+    if (auth == null) {
       return "There was an error deleting the account";
     }
 
@@ -47,7 +48,7 @@ class UserNotifier extends AsyncNotifier<User?> {
       ''';
 
     final headers = {
-      'Authorization': 'Bearer ${auth.value?.token}',
+      'Authorization': 'Bearer ${auth.token}',
     };
 
     try {
@@ -63,6 +64,7 @@ class UserNotifier extends AsyncNotifier<User?> {
         return "Failed to delete account";
       }
     } catch (e, stackTrace) {
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "Failed to delete account";
     }
   }

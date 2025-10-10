@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:riverpod/riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/auth.dart';
@@ -9,17 +10,17 @@ import '../utils/graphql.dart';
 import 'session_users.dart';
 import '../config/endpoints.dart' as endpoints;
 
-final authProvider = AsyncNotifierProvider<AuthNotifier, Auth?>(
+final authProvider = NotifierProvider<AuthNotifier, Auth?>(
   () => AuthNotifier(),
 );
 
-class AuthNotifier extends AsyncNotifier<Auth?> {
+class AuthNotifier extends Notifier<Auth?> {
   Auth? auth;
 
   AuthNotifier({this.auth});
 
   @override
-  Future<Auth?> build() async {
+  Auth? build() {
     return auth;
   }
 
@@ -51,6 +52,7 @@ class AuthNotifier extends AsyncNotifier<Auth?> {
       return null;
     } catch (e, stackTrace) {
       logout();
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error verifying the auth";
     }
   }
@@ -96,13 +98,14 @@ mutation login($email: String!, $password:String!) {
       final auth = Auth.fromJson(response['data']['session']['login']);
       final user = User.fromJson(response['data']['session']['login']['user']);
 
-      state = AsyncData(auth);
+      state = auth;
       ref.read(sessionUserProvider.notifier).setUser(user);
       await saveAuth(auth);
       await saveSessionUser(user);
 
       return null;
     } catch (e, stackTrace) {
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error logging in";
     }
   }
@@ -112,7 +115,7 @@ mutation login($email: String!, $password:String!) {
 
     await removeAuth();
     await removeSessionUser();
-    state = AsyncData(null);
+    state = null;
 
     if (auth == null) {
       return null;
@@ -139,6 +142,7 @@ mutation logout {
 
       return null;
     } catch (e, stackTrace) {
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error logging out";
     }
   }

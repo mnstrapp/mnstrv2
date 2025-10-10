@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../config/endpoints.dart' as endpoints;
 import '../providers/auth.dart';
@@ -18,7 +19,7 @@ class ManageNotifier extends Notifier<List<Monster>> {
   Future<String?> getMonsters() async {
     final auth = ref.read(authProvider);
 
-    if (auth.value == null) {
+    if (auth == null) {
       return "Invalid login";
     }
 
@@ -52,7 +53,7 @@ class ManageNotifier extends Notifier<List<Monster>> {
 
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${auth.value?.token}',
+      'Authorization': 'Bearer ${auth.token}',
     };
 
     try {
@@ -73,6 +74,7 @@ class ManageNotifier extends Notifier<List<Monster>> {
       state = monsters;
       return null;
     } catch (e, stackTrace) {
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error getting the monsters";
     }
   }
@@ -92,7 +94,7 @@ class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
   Future<String?> get(String qrCode) async {
     final auth = ref.read(authProvider);
 
-    if (auth.value == null) {
+    if (auth == null) {
       return "There was an error getting the monster by QR code";
     }
 
@@ -127,7 +129,7 @@ class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
 
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${auth.value?.token}',
+      'Authorization': 'Bearer ${auth.token}',
     };
 
     try {
@@ -152,6 +154,7 @@ class ManageGetByQRNotifier extends AsyncNotifier<Monster?> {
 
       return null;
     } catch (e, stackTrace) {
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error getting the monster by QR code";
     }
   }
@@ -174,7 +177,7 @@ class ManageEditNotifier extends Notifier<Monster?> {
   Future<String?> editMonster(Monster monster) async {
     final auth = ref.read(authProvider);
 
-    if (auth.value == null) {
+    if (auth == null) {
       return "There was an error editing the monster";
     }
 
@@ -260,7 +263,7 @@ class ManageEditNotifier extends Notifier<Monster?> {
 
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${auth.value?.token}',
+      'Authorization': 'Bearer ${auth.token}',
     };
 
     try {
@@ -282,6 +285,7 @@ class ManageEditNotifier extends Notifier<Monster?> {
 
       return null;
     } catch (e, stackTrace) {
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error editing the monster";
     }
   }

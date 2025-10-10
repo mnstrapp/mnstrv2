@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../providers/auth.dart';
 import '../models/monster.dart';
@@ -18,7 +19,7 @@ class CollectNotifier extends Notifier<Monster?> {
   Future<String?> createMonster(Monster monster) async {
     final auth = ref.read(authProvider);
 
-    if (auth.value == null) {
+    if (auth == null) {
       return "There was an error creating the monster";
     }
 
@@ -58,7 +59,7 @@ class CollectNotifier extends Notifier<Monster?> {
 
     final headers = {
       'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${auth.value?.token}',
+      'Authorization': 'Bearer ${auth.token}',
     };
 
     try {
@@ -77,6 +78,7 @@ class CollectNotifier extends Notifier<Monster?> {
       state = monster;
       return null;
     } catch (e, stackTrace) {
+      Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error creating the monster";
     }
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:wiredash/wiredash.dart';
 
+import '../auth/register.dart';
 import '../battle/layout.dart';
 import '../collect/collect.dart';
 import '../providers/session_users.dart';
@@ -24,74 +25,107 @@ class _HomeViewState extends ConsumerState<HomeView> {
   final GlobalKey<LayoutScaffoldState> layoutKey =
       GlobalKey<LayoutScaffoldState>();
 
+  Future<void> _buildButtons() async {
+    debugPrint('building buttons');
+    final auth = ref.watch(authProvider);
+    debugPrint('auth: $auth');
+    setState(() {
+      buttons = [
+        {
+          'icon': Icons.qr_code_rounded,
+          'text': 'Catch',
+          'description': 'Catch MNSTRs',
+          'onPressed': () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => Collect()),
+            );
+          },
+        },
+        {
+          'icon': Icons.view_carousel_rounded,
+          'text': 'MNSTRs',
+          'description': 'Manage your MNSTRs',
+          'onPressed': () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => ManageListView()),
+            );
+          },
+        },
+        {
+          'icon': Icons.map_rounded,
+          'text': 'Battle',
+          'description': 'Battle with other players',
+          'onPressed': () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => BattleLayoutView()),
+            );
+          },
+        },
+        {
+          'icon': Icons.settings,
+          'text': 'Settings',
+          'description': 'Manage your account settings',
+          'onPressed': () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => SettingsView()),
+            );
+          },
+        },
+        if (auth != null)
+          {
+            'icon': Icons.logout,
+            'text': 'Logout',
+            'description': 'Logout of your account',
+            'onPressed': () async {
+              final navigator = Navigator.of(context);
+
+              final error = await ref.read(authProvider.notifier).logout();
+              if (error != null) {
+                layoutKey.currentState?.addError(error);
+              }
+              navigator.pushReplacement(
+                MaterialPageRoute(builder: (context) => LoginView()),
+              );
+            },
+          },
+        if (auth == null)
+          {
+            'icon': Icons.login,
+            'text': 'Login',
+            'description': 'Login to your account',
+            'onPressed': () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LoginView()),
+              );
+            },
+          },
+        if (auth == null)
+          {
+            'icon': Icons.person_add,
+            'text': 'Register',
+            'description': 'Register for an account',
+            'onPressed': () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => RegisterView()),
+              );
+            },
+          },
+      ];
+    });
+  }
+
   @override
   void initState() {
     super.initState();
 
-    buttons.addAll([
-      {
-        'icon': Icons.qr_code_rounded,
-        'text': 'Catch',
-        'description': 'Catch MNSTRs',
-        'onPressed': () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => Collect()),
-          );
-        },
-      },
-      {
-        'icon': Icons.view_carousel_rounded,
-        'text': 'MNSTRs',
-        'description': 'Manage your MNSTRs',
-        'onPressed': () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => ManageListView()),
-          );
-        },
-      },
-      {
-        'icon': Icons.map_rounded,
-        'text': 'Battle',
-        'description': 'Battle with other players',
-        'onPressed': () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => BattleLayoutView()),
-          );
-        },
-      },
-      {
-        'icon': Icons.settings,
-        'text': 'Settings',
-        'description': 'Manage your account settings',
-        'onPressed': () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => SettingsView()),
-          );
-        },
-      },
-      {
-        'icon': Icons.logout,
-        'text': 'Logout',
-        'description': 'Logout of your account',
-        'onPressed': () async {
-          final navigator = Navigator.of(context);
-
-          final error = await ref.read(authProvider.notifier).logout();
-          if (error != null) {
-            layoutKey.currentState?.addError(error);
-          }
-          navigator.pushReplacement(
-            MaterialPageRoute(builder: (context) => LoginView()),
-          );
-        },
-      },
-    ]);
-
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+      _buildButtons();
       final user = ref.watch(sessionUserProvider);
       Wiredash.trackEvent(
         'Home View',
@@ -140,7 +174,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 ),
               ),
             ),
-            displayPortrait
+            (buttons.isNotEmpty && displayPortrait)
                 ? Padding(
                     padding: const EdgeInsets.only(
                       top: 64,
@@ -176,7 +210,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                       ],
                     ),
                   )
-                : Column(
+                : buttons.isNotEmpty
+                ? Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: buttons
                         .map(
@@ -195,7 +230,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                           ),
                         )
                         .toList(),
-                  ),
+                  )
+                : const Center(child: CircularProgressIndicator()),
           ],
         ),
       ),
