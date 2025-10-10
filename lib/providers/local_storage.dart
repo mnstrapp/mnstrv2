@@ -7,10 +7,9 @@ import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
 import 'package:sqflite/sqflite.dart';
 
 import '../models/monster.dart';
-import '../models/user.dart';
 
 class LocalStorage {
-  static Database? database;
+  static late Database database;
 
   LocalStorage();
 
@@ -26,39 +25,43 @@ class LocalStorage {
   }
 
   static Future<List<Monster>> getMnstrs() async {
-    final result = await database?.query('mnstrs');
-    return result?.map((e) => Monster.fromDb(e)).toList() ?? [];
+    final result = await database.query('mnstrs');
+
+    return result.map((e) => Monster.fromDb(e)).toList();
   }
 
   static Future<Monster?> getMnstr(String id) async {
-    final result = await database?.query(
+    final result = await database.query(
       'mnstrs',
       where: 'id = ?',
       whereArgs: [id],
       limit: 1,
     );
-    return result?.map((e) => Monster.fromDb(e)).toList().firstOrNull;
+    return result.map((e) => Monster.fromDb(e)).toList().firstOrNull;
   }
 
   static Future<Monster?> getMnstrByQrCode(String qrCode) async {
-    final result = await database?.query(
+    final result = await database.query(
       'mnstrs',
       where: 'mnstr_qr_code = ?',
       whereArgs: [qrCode],
       limit: 1,
     );
-    return result?.map((e) => Monster.fromDb(e)).toList().firstOrNull;
+    return result.map((e) => Monster.fromDb(e)).toList().firstOrNull;
   }
 
   static addMnstr(Monster mnstr) async {
     mnstr.id = Uuid().v4();
-    final result = await database?.insert(
+    final result = await database.insert(
       'mnstrs',
       mnstr.toDb(),
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     if (result == 0) {
-      Sentry.captureException(Exception('Failed to add monster'));
+      Sentry.captureException(
+        Exception('Failed to add monster'),
+        stackTrace: StackTrace.current,
+      );
       return;
     }
   }
