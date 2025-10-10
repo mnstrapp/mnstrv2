@@ -3,7 +3,8 @@ import 'package:uuid/uuid.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as path;
-import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart';
+import 'package:sqflite_common_ffi_web/sqflite_ffi_web.dart' as sqflite_ffi_web;
+import 'package:sqflite_common_ffi/sqflite_ffi.dart' as sqflite_ffi;
 import 'package:sqflite/sqflite.dart';
 
 import '../models/monster.dart';
@@ -14,11 +15,21 @@ class LocalStorage {
   LocalStorage();
 
   static init() async {
-    final directory = await getApplicationSupportDirectory();
-    final dbPath = path.join(directory.path, 'mnstr.db');
+    String directory = './';
     if (UniversalPlatform.isWeb) {
-      databaseFactory = databaseFactoryFfiWeb;
+      databaseFactory = sqflite_ffi_web.databaseFactoryFfiWeb;
     }
+    if (UniversalPlatform.isWindows ||
+        UniversalPlatform.isMacOS ||
+        UniversalPlatform.isLinux) {
+      databaseFactory = sqflite_ffi.databaseFactoryFfi;
+    }
+
+    if (!UniversalPlatform.isWeb) {
+      directory = (await getApplicationSupportDirectory()).path;
+    }
+
+    final dbPath = path.join(directory, 'mnstr.db');
     database = await openDatabase(dbPath);
     // await _dropTables(database);
     await _createTables(database);

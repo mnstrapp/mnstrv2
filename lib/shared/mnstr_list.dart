@@ -127,6 +127,11 @@ class _MnstrListState extends State<MnstrList> {
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     final isTablet = size.width > mobileBreakpoint;
+    final targetWidth = mobileBreakpoint;
+    final actualWidth = size.width ~/ targetWidth;
+    debugPrint('actualWidth: $actualWidth');
+    debugPrint('size.width: ${size.width}');
+    debugPrint('targetWidth: $targetWidth');
 
     final mnstrs = <Widget>[];
     final mnstrsTablet = <Widget>[];
@@ -153,9 +158,7 @@ class _MnstrListState extends State<MnstrList> {
               .entries) {
         final index = entry.key;
         final m = entry.value;
-        debugPrint('index: $index % 2 = ${index % 2}');
-        if ((index % 2) == 0) {
-          debugPrint('row: ${row.length}');
+        if ((index % actualWidth) == 0) {
           if (row.isNotEmpty) {
             mnstrsTablet.add(
               Row(
@@ -163,7 +166,7 @@ class _MnstrListState extends State<MnstrList> {
                 children: row
                     .map(
                       (m) => SizedBox(
-                        width: size.width / 2,
+                        width: size.width / actualWidth,
                         child: MnstrView(
                           monster: m,
                           onTap: _onTap,
@@ -171,7 +174,10 @@ class _MnstrListState extends State<MnstrList> {
                               widget.overlayBuilder?.call(m) ?? widget.overlay,
                           overlayPositioning: widget.overlayPositioning,
                           showName: widget.showName,
-                          size: Size(size.width / 2, size.height),
+                          size: Size(
+                            size.width / actualWidth,
+                            size.height,
+                          ),
                         ),
                       ),
                     )
@@ -189,14 +195,17 @@ class _MnstrListState extends State<MnstrList> {
             children: row
                 .map(
                   (m) => SizedBox(
-                    width: size.width / 2,
+                    width: size.width / actualWidth,
                     child: MnstrView(
                       monster: m,
                       onTap: _onTap,
                       overlay: widget.overlayBuilder?.call(m) ?? widget.overlay,
                       overlayPositioning: widget.overlayPositioning,
                       showName: widget.showName,
-                      size: Size(size.width / 2, size.height),
+                      size: Size(
+                        size.width / actualWidth,
+                        size.height,
+                      ),
                     ),
                   ),
                 )
