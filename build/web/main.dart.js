@@ -93345,7 +93345,7 @@ al(){this.aA()
 $.ab.k3$.push(new A.aC7(this))},
 L(a){var s,r,q=this,p=null,o=q.gba()
 if(o.bm(0,$.jq(),t.r3)==null){o=A.a2(a).ok.c
-o=A.av("Your challenges goes unheard!",p,p,p,p,o==null?p:o.bk(B.i),p,p)
+o=A.av("Your challenges go unheard!",p,p,p,p,o==null?p:o.bk(B.i),p,p)
 s=A.a2(a).ok.b
 return A.m6(p,A.l8(!0,A.eo(A.cI(A.b([o,A.av("Perhaps you should go where the other humans are...",p,p,p,p,s==null?p:s.bk(B.i),p,p),A.e8(p,p,p,p,p,B.hC,p,0,new A.aC2(a),p,0,"Login",p)],t.p),B.m,B.bo,B.H,16),p,p),!0,B.aD,!0,!0),!1,p,!0,!1)}s=A.be(a,B.av,t.w).w
 if(J.f9(o.cz($.Cm(),t.LF))&&!q.x)return B.ps

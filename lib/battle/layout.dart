@@ -374,7 +374,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
               spacing: 16,
               children: [
                 Text(
-                  'Your challenges goes unheard!',
+                  'Your challenges go unheard!',
                   style: Theme.of(context).textTheme.displaySmall?.copyWith(
                     color: Colors.white,
                   ),
