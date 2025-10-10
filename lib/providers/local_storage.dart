@@ -20,12 +20,12 @@ class LocalStorage {
       databaseFactory = databaseFactoryFfiWeb;
     }
     database = await openDatabase(dbPath);
-    // await _dropTables(database!);
-    await _createTables(database!);
+    // await _dropTables(database);
+    await _createTables(database);
   }
 
   static Future<List<Monster>> getMnstrs() async {
-    final result = await database.query('mnstrs');
+    final result = await database.query('mnstrs', orderBy: 'created_at DESC');
 
     return result.map((e) => Monster.fromDb(e)).toList();
   }
@@ -51,7 +51,10 @@ class LocalStorage {
   }
 
   static addMnstr(Monster mnstr) async {
-    mnstr.id = Uuid().v4();
+    final now = DateTime.now();
+    mnstr.id ??= Uuid().v4();
+    mnstr.createdAt ??= now;
+    mnstr.updatedAt = now;
     final result = await database.insert(
       'mnstrs',
       mnstr.toDb(),

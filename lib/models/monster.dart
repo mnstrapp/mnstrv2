@@ -89,58 +89,26 @@ class Monster {
 
   factory Monster.fromDb(Map<String, Object?> data) {
     return Monster(
-      id: data['id'] == null ? null : (data['id'] as String),
-      userId: data['user_id'] == null ? null : (data['user_id'] as String),
-      mnstrName: data['mnstr_name'] == null
-          ? null
-          : (data['mnstr_name'] as String),
-      mnstrDescription: data['mnstr_description'] == null
-          ? null
-          : (data['mnstr_description'] as String),
-      mnstrQrCode: data['mnstr_qr_code'] == null
-          ? null
-          : (data['mnstr_qr_code'] as String),
-      currentLevel: data['current_level'] == null
-          ? null
-          : (data['current_level'] as int),
-      currentExperience: data['current_experience'] == null
-          ? null
-          : (data['current_experience'] as int),
-      currentHealth: data['current_health'] == null
-          ? null
-          : (data['current_health'] as int),
-      maxHealth: data['max_health'] == null
-          ? null
-          : (data['max_health'] as int),
-      currentAttack: data['current_attack'] == null
-          ? null
-          : (data['current_attack'] as int),
-      maxAttack: data['max_attack'] == null
-          ? null
-          : (data['max_attack'] as int),
-      currentDefense: data['current_defense'] == null
-          ? null
-          : (data['current_defense'] as int),
-      maxDefense: data['max_defense'] == null
-          ? null
-          : (data['max_defense'] as int),
-      currentIntelligence: data['current_intelligence'] == null
-          ? null
-          : (data['current_intelligence'] as int),
-      maxIntelligence: data['max_intelligence'] == null
-          ? null
-          : (data['max_intelligence'] as int),
-      currentSpeed: data['current_speed'] == null
-          ? null
-          : (data['current_speed'] as int),
-      maxSpeed: data['max_speed'] == null ? null : (data['max_speed'] as int),
-      currentMagic: data['current_magic'] == null
-          ? null
-          : (data['current_magic'] as int),
-      maxMagic: data['max_magic'] == null ? null : (data['max_magic'] as int),
-      experienceToNextLevel: data['experience_to_next_level'] == null
-          ? null
-          : (data['experience_to_next_level'] as int),
+      id: data['id'] as String?,
+      userId: data['user_id'] as String?,
+      mnstrName: data['mnstr_name'] as String?,
+      mnstrDescription: data['mnstr_description'] as String?,
+      mnstrQrCode: data['mnstr_qr_code'] as String?,
+      currentLevel: data['current_level'] as int?,
+      currentExperience: data['current_experience'] as int?,
+      currentHealth: data['current_health'] as int?,
+      maxHealth: data['max_health'] as int?,
+      currentAttack: data['current_attack'] as int?,
+      maxAttack: data['max_attack'] as int?,
+      currentDefense: data['current_defense'] as int?,
+      maxDefense: data['max_defense'] as int?,
+      currentIntelligence: data['current_intelligence'] as int?,
+      maxIntelligence: data['max_intelligence'] as int?,
+      currentSpeed: data['current_speed'] as int?,
+      maxSpeed: data['max_speed'] as int?,
+      currentMagic: data['current_magic'] as int?,
+      maxMagic: data['max_magic'] as int?,
+      experienceToNextLevel: data['experience_to_next_level'] as int?,
       createdAt: data['created_at'] == null
           ? null
           : DateTime.parse(data['created_at'] as String),

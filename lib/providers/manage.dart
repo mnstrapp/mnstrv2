@@ -21,7 +21,9 @@ class ManageNotifier extends Notifier<List<Monster>> {
     final auth = ref.read(authProvider);
 
     if (auth == null) {
-      return "Invalid login";
+      final monsters = await LocalStorage.getMnstrs();
+      state = monsters;
+      return null;
     }
 
     final document = r'''
@@ -185,6 +187,7 @@ class ManageEditNotifier extends Notifier<Monster?> {
     if (auth == null) {
       await LocalStorage.addMnstr(monster);
       state = monster;
+      await ref.read(manageProvider.notifier).getMonsters();
       return null;
     }
 
@@ -288,7 +291,7 @@ class ManageEditNotifier extends Notifier<Monster?> {
       final monster = Monster.fromJson(response['data']['mnstrs']['update']);
       state = monster;
 
-      ref.read(manageProvider.notifier).getMonsters();
+      await ref.read(manageProvider.notifier).getMonsters();
 
       return null;
     } catch (e, stackTrace) {
