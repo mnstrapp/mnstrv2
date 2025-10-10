@@ -79,6 +79,10 @@ class LocalStorage {
       return;
     }
   }
+
+  static clearMnstrs() async {
+    database.execute('delete from mnstrs');
+  }
 }
 
 Future<void> _createTables(Database database) async {

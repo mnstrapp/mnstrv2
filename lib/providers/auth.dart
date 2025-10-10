@@ -9,6 +9,7 @@ import '../models/user.dart';
 import '../utils/graphql.dart';
 import 'session_users.dart';
 import '../config/endpoints.dart' as endpoints;
+import 'sync.dart';
 
 final authProvider = NotifierProvider<AuthNotifier, Auth?>(
   () => AuthNotifier(),
@@ -102,6 +103,7 @@ mutation login($email: String!, $password:String!) {
       ref.read(sessionUserProvider.notifier).setUser(user);
       await saveAuth(auth);
       await saveSessionUser(user);
+      await ref.read(syncProvider.notifier).sync();
 
       return null;
     } catch (e, stackTrace) {
