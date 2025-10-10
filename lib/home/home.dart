@@ -88,7 +88,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
                 layoutKey.currentState?.addError(error);
               }
               navigator.pushReplacement(
-                MaterialPageRoute(builder: (context) => LoginView()),
+                MaterialPageRoute(builder: (context) => HomeView()),
               );
             },
           },

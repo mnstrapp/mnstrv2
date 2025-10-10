@@ -8,6 +8,7 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:wiredash/wiredash.dart';
 
+import '../auth/login.dart';
 import '../config/endpoints.dart';
 import '../providers/manage.dart';
 import '../providers/session_users.dart';
@@ -342,12 +343,17 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
         _isLoading = true;
       });
       await ref.read(manageProvider.notifier).getMonsters();
+
       if (mounted) {
         setState(() {
           _isLoading = false;
         });
         final mnstrs = ref.read(manageProvider);
         if (mnstrs.isEmpty) {
+          return;
+        }
+        final auth = ref.read(authProvider);
+        if (auth == null) {
           return;
         }
         _connect();
@@ -357,6 +363,47 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = ref.read(authProvider);
+    if (auth == null) {
+      return LayoutScaffold(
+        child: SafeArea(
+          child: Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              spacing: 16,
+              children: [
+                Text(
+                  'Your challenges goes unheard!',
+                  style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
+                Text(
+                  'Perhaps you should go where the other humans are...',
+                  style: Theme.of(context).textTheme.displayMedium?.copyWith(
+                    color: Colors.white,
+                  ),
+                ),
+                UIButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const LoginView(),
+                      ),
+                    );
+                  },
+                  icon: Icons.login,
+                  text: 'Login',
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     final size = MediaQuery.sizeOf(context);
     final mnstrs = ref.watch(manageProvider);
 
