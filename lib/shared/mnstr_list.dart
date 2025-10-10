@@ -127,7 +127,7 @@ class _MnstrListState extends State<MnstrList> {
   Widget build(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     final isTablet = size.width > mobileBreakpoint;
-    final targetWidth = mobileBreakpoint;
+    final targetWidth = 500;
     final actualWidth = size.width ~/ targetWidth;
     debugPrint('actualWidth: $actualWidth');
     debugPrint('size.width: ${size.width}');
