@@ -153,7 +153,9 @@ class _MnstrListState extends State<MnstrList> {
               .entries) {
         final index = entry.key;
         final m = entry.value;
+        debugPrint('index: $index % 2 = ${index % 2}');
         if ((index % 2) == 0) {
+          debugPrint('row: ${row.length}');
           if (row.isNotEmpty) {
             mnstrsTablet.add(
               Row(
@@ -180,6 +182,27 @@ class _MnstrListState extends State<MnstrList> {
           row.clear();
         }
         row.add(m);
+      }
+      if (row.isNotEmpty) {
+        mnstrsTablet.add(
+          Row(
+            children: row
+                .map(
+                  (m) => SizedBox(
+                    width: size.width / 2,
+                    child: MnstrView(
+                      monster: m,
+                      onTap: _onTap,
+                      overlay: widget.overlayBuilder?.call(m) ?? widget.overlay,
+                      overlayPositioning: widget.overlayPositioning,
+                      showName: widget.showName,
+                      size: Size(size.width / 2, size.height),
+                    ),
+                  ),
+                )
+                .toList(),
+          ),
+        );
       }
     } else {
       mnstrs.addAll(
