@@ -6,6 +6,7 @@ import '../providers/auth.dart';
 import '../models/monster.dart';
 import '../utils/graphql.dart';
 import 'local_storage.dart';
+import 'sync.dart';
 
 final manageProvider = NotifierProvider<ManageNotifier, List<Monster>>(
   () => ManageNotifier(),
@@ -75,6 +76,10 @@ class ManageNotifier extends Notifier<List<Monster>> {
         monsters.add(Monster.fromJson(e as Map<String, dynamic>));
       }
       state = monsters;
+      for (var monster in monsters) {
+        await LocalStorage.addMnstr(monster);
+      }
+
       return null;
     } catch (e, stackTrace) {
       Sentry.captureException(e, stackTrace: stackTrace);
@@ -158,6 +163,7 @@ class ManageGetByQRNotifier extends Notifier<Monster?> {
       final monster = Monster.fromJson(response['data']['mnstrs']['qrCode']);
 
       state = monster;
+      LocalStorage.addMnstr(monster);
 
       return null;
     } catch (e, stackTrace) {
@@ -291,6 +297,7 @@ class ManageEditNotifier extends Notifier<Monster?> {
       final monster = Monster.fromJson(response['data']['mnstrs']['update']);
       state = monster;
 
+      await LocalStorage.addMnstr(monster);
       await ref.read(manageProvider.notifier).getMonsters();
 
       return null;

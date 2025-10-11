@@ -1,8 +1,5 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
 
-import '../theme.dart';
 import 'monster_model.dart';
 
 class MonsterView extends StatelessWidget {

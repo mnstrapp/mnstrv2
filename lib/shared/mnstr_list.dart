@@ -129,9 +129,6 @@ class _MnstrListState extends State<MnstrList> {
     final isTablet = size.width > mobileBreakpoint;
     final targetWidth = 500;
     final actualWidth = size.width ~/ targetWidth;
-    debugPrint('actualWidth: $actualWidth');
-    debugPrint('size.width: ${size.width}');
-    debugPrint('targetWidth: $targetWidth');
 
     final mnstrs = <Widget>[];
     final mnstrsTablet = <Widget>[];

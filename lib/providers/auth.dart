@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/material.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -93,6 +94,7 @@ mutation login($email: String!, $password:String!) {
       );
 
       if (response['errors'] != null) {
+        debugPrint('[login] Error: ${response['errors']}');
         return "There was an error logging in";
       }
 
@@ -103,10 +105,10 @@ mutation login($email: String!, $password:String!) {
       ref.read(sessionUserProvider.notifier).setUser(user);
       await saveAuth(auth);
       await saveSessionUser(user);
-      await ref.read(syncProvider.notifier).sync();
 
       return null;
     } catch (e, stackTrace) {
+      debugPrint('[login] Error: $e');
       Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error logging in";
     }

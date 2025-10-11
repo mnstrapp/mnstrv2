@@ -229,4 +229,105 @@ class Monster {
     mnstrName: model.name,
     mnstrQrCode: model.qrCode,
   );
+
+  static Monster fromSync(Monster sync, Monster local) => Monster(
+    id: sync.id,
+    userId: local.userId ?? sync.userId,
+    mnstrName: local.mnstrName ?? sync.mnstrName,
+    mnstrDescription: local.mnstrDescription ?? sync.mnstrDescription,
+    mnstrQrCode: local.mnstrQrCode ?? sync.mnstrQrCode,
+    currentLevel:
+        (local.currentLevel != null &&
+            sync.currentLevel != null &&
+            local.currentLevel! > sync.currentLevel!)
+        ? local.currentLevel
+        : sync.currentLevel,
+    currentExperience:
+        (local.currentExperience != null &&
+            sync.currentExperience != null &&
+            local.currentExperience! > sync.currentExperience!)
+        ? local.currentExperience
+        : sync.currentExperience,
+    currentHealth:
+        (local.currentHealth != null &&
+            sync.currentHealth != null &&
+            local.currentHealth! > sync.currentHealth!)
+        ? local.currentHealth
+        : sync.currentHealth,
+    maxHealth:
+        (local.maxHealth != null &&
+            sync.maxHealth != null &&
+            local.maxHealth! > sync.maxHealth!)
+        ? local.maxHealth
+        : sync.maxHealth,
+    currentAttack:
+        (local.currentAttack != null &&
+            sync.currentAttack != null &&
+            local.currentAttack! > sync.currentAttack!)
+        ? local.currentAttack
+        : sync.currentAttack,
+    maxAttack:
+        (local.maxAttack != null &&
+            sync.maxAttack != null &&
+            local.maxAttack! > sync.maxAttack!)
+        ? local.maxAttack
+        : sync.maxAttack,
+    currentDefense:
+        (local.currentDefense != null &&
+            sync.currentDefense != null &&
+            local.currentDefense! > sync.currentDefense!)
+        ? local.currentDefense
+        : sync.currentDefense,
+    maxDefense:
+        (local.maxDefense != null &&
+            sync.maxDefense != null &&
+            local.maxDefense! > sync.maxDefense!)
+        ? local.maxDefense
+        : sync.maxDefense,
+    currentIntelligence:
+        (local.currentIntelligence != null &&
+            sync.currentIntelligence != null &&
+            local.currentIntelligence! > sync.currentIntelligence!)
+        ? local.currentIntelligence
+        : sync.currentIntelligence,
+    maxIntelligence:
+        (local.maxIntelligence != null &&
+            sync.maxIntelligence != null &&
+            local.maxIntelligence! > sync.maxIntelligence!)
+        ? local.maxIntelligence
+        : sync.maxIntelligence,
+    currentSpeed:
+        (local.currentSpeed != null &&
+            sync.currentSpeed != null &&
+            local.currentSpeed! > sync.currentSpeed!)
+        ? local.currentSpeed
+        : sync.currentSpeed,
+    maxSpeed:
+        (local.maxSpeed != null &&
+            sync.maxSpeed != null &&
+            local.maxSpeed! > sync.maxSpeed!)
+        ? local.maxSpeed
+        : sync.maxSpeed,
+    currentMagic:
+        (local.currentMagic != null &&
+            sync.currentMagic != null &&
+            local.currentMagic! > sync.currentMagic!)
+        ? local.currentMagic
+        : sync.currentMagic,
+    maxMagic:
+        (local.maxMagic != null &&
+            sync.maxMagic != null &&
+            local.maxMagic! > sync.maxMagic!)
+        ? local.maxMagic
+        : sync.maxMagic,
+    experienceToNextLevel:
+        local.experienceToNextLevel ?? sync.experienceToNextLevel,
+    createdAt: local.createdAt!.isAfter(sync.createdAt!)
+        ? local.createdAt
+        : sync.createdAt,
+    updatedAt: local.updatedAt!.isAfter(sync.updatedAt!)
+        ? local.updatedAt
+        : sync.updatedAt,
+    archivedAt: local.archivedAt ?? sync.archivedAt,
+  );
 }

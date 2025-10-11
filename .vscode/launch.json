@@ -10,8 +10,8 @@
             "type": "dart",
             "flutterMode": "debug",
             "args": [
-                "--dart-define=API_HOST=http://localhost:8080",
-                "--dart-define=WS_HOST=ws://localhost:8080",
+                "--dart-define=API_HOST=http://192.168.1.24:8080",
+                "--dart-define=WS_HOST=ws://192.168.1.24:8080",
                 "--web-port=9000",
                 "--web-experimental-hot-reload"
             ],

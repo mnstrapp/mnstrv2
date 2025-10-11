@@ -38,9 +38,6 @@ class StatBar extends StatelessWidget {
     final borderRadius = BorderRadius.circular(20);
     final barValueWidth = barWidth * barValuePercentage;
 
-    log('barValuePercentage: $barValuePercentage');
-    log('barValueWidth: $barValueWidth / $barWidth');
-
     return Stack(
       children: [
         Container(

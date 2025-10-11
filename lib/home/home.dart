@@ -6,6 +6,7 @@ import '../auth/register.dart';
 import '../battle/layout.dart';
 import '../collect/collect.dart';
 import '../providers/session_users.dart';
+import '../providers/sync.dart';
 import '../settings/settings.dart';
 import '../ui/button.dart';
 import '../providers/auth.dart';
@@ -24,6 +25,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
   List<Map<String, dynamic>> buttons = [];
   final GlobalKey<LayoutScaffoldState> layoutKey =
       GlobalKey<LayoutScaffoldState>();
+  bool _syncing = false;
 
   Future<void> _buildButtons() async {
     debugPrint('building buttons');
@@ -120,6 +122,20 @@ class _HomeViewState extends ConsumerState<HomeView> {
     });
   }
 
+  Future<void> _sync() async {
+    setState(() {
+      _syncing = true;
+    });
+    final error = await ref.read(syncProvider.notifier).sync();
+    if (error != null) {
+      debugPrint('Error syncing: $error');
+    } else {
+      setState(() {
+        _syncing = false;
+      });
+    }
+  }
+
   @override
   void initState() {
     super.initState();
@@ -134,6 +150,10 @@ class _HomeViewState extends ConsumerState<HomeView> {
           'id': user?.id,
         },
       );
+      final auth = ref.watch(authProvider);
+      if (auth != null) {
+        _sync();
+      }
     });
   }
 
@@ -158,83 +178,98 @@ class _HomeViewState extends ConsumerState<HomeView> {
       child: SizedBox(
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
-        child: Stack(
-          children: [
-            Positioned(
-              bottom: displayPortrait
-                  ? (size.height / 2) - (loadingFigureSize / 2)
-                  : 0,
-              right: displayPortrait
-                  ? (size.width / 8) - (loadingFigureSize / 8)
-                  : (size.width / 2) - (loadingFigureSize / 2),
-              child: Center(
-                child: Image.asset(
-                  'assets/loading_figure.png',
-                  width: loadingFigureSize,
-                  height: loadingFigureSize,
+        child: _syncing
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 16,
+                  children: [
+                    Text('Syncing...'),
+                    CircularProgressIndicator(),
+                  ],
                 ),
-              ),
-            ),
-            (buttons.isNotEmpty && displayPortrait)
-                ? Padding(
-                    padding: const EdgeInsets.only(
-                      top: 64,
-                      bottom: 16,
-                      left: 16,
-                      right: 16,
+              )
+            : Stack(
+                children: [
+                  Positioned(
+                    bottom: displayPortrait
+                        ? (size.height / 2) - (loadingFigureSize / 2)
+                        : 0,
+                    right: displayPortrait
+                        ? (size.width / 8) - (loadingFigureSize / 8)
+                        : (size.width / 2) - (loadingFigureSize / 2),
+                    child: Center(
+                      child: Image.asset(
+                        'assets/loading_figure.png',
+                        width: loadingFigureSize,
+                        height: loadingFigureSize,
+                      ),
                     ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: GridView.builder(
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  childAspectRatio: 4,
-                                ),
-                            itemBuilder: (context, index) => UIButton(
-                              onPressed:
-                                  buttons[index]['onPressed'] as VoidCallback?,
-                              icon: buttons[index]['icon'] as IconData?,
-                              text: buttons[index]['text'] as String?,
-                              margin: buttonPadding,
-                              padding: buttonPadding,
-                              fontSize: buttonFontSize,
-                              width: buttonWidth,
-                              height: buttonHeight,
-                              foregroundColor: buttonColor,
-                            ),
-                            itemCount: buttons.length,
+                  ),
+                  (buttons.isNotEmpty && displayPortrait)
+                      ? Padding(
+                          padding: const EdgeInsets.only(
+                            top: 64,
+                            bottom: 16,
+                            left: 16,
+                            right: 16,
                           ),
-                        ),
-                        SizedBox(width: size.width * 0.33),
-                      ],
-                    ),
-                  )
-                : buttons.isNotEmpty
-                ? Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: buttons
-                        .map(
-                          (button) => Center(
-                            child: UIButton(
-                              onPressed: button['onPressed'] as VoidCallback?,
-                              icon: button['icon'] as IconData?,
-                              text: button['text'] as String?,
-                              margin: buttonPadding,
-                              padding: buttonPadding,
-                              fontSize: buttonFontSize,
-                              width: buttonWidth,
-                              height: buttonHeight,
-                              foregroundColor: buttonColor,
-                            ),
+                          child: Row(
+                            children: [
+                              Expanded(
+                                child: GridView.builder(
+                                  gridDelegate:
+                                      SliverGridDelegateWithFixedCrossAxisCount(
+                                        crossAxisCount: 2,
+                                        childAspectRatio: 4,
+                                      ),
+                                  itemBuilder: (context, index) => UIButton(
+                                    onPressed:
+                                        buttons[index]['onPressed']
+                                            as VoidCallback?,
+                                    icon: buttons[index]['icon'] as IconData?,
+                                    text: buttons[index]['text'] as String?,
+                                    margin: buttonPadding,
+                                    padding: buttonPadding,
+                                    fontSize: buttonFontSize,
+                                    width: buttonWidth,
+                                    height: buttonHeight,
+                                    foregroundColor: buttonColor,
+                                  ),
+                                  itemCount: buttons.length,
+                                ),
+                              ),
+                              SizedBox(width: size.width * 0.33),
+                            ],
                           ),
                         )
-                        .toList(),
-                  )
-                : const Center(child: CircularProgressIndicator()),
-          ],
-        ),
+                      : buttons.isNotEmpty
+                      ? Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: buttons
+                              .map(
+                                (button) => Center(
+                                  child: UIButton(
+                                    onPressed:
+                                        button['onPressed'] as VoidCallback?,
+                                    icon: button['icon'] as IconData?,
+                                    text: button['text'] as String?,
+                                    margin: buttonPadding,
+                                    padding: buttonPadding,
+                                    fontSize: buttonFontSize,
+                                    width: buttonWidth,
+                                    height: buttonHeight,
+                                    foregroundColor: buttonColor,
+                                  ),
+                                ),
+                              )
+                              .toList(),
+                        )
+                      : const Center(child: CircularProgressIndicator()),
+                ],
+              ),
       ),
     );
   }

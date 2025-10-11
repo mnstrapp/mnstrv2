@@ -36,7 +36,7 @@ class LocalStorage {
   }
 
   static Future<List<Monster>> getMnstrs() async {
-    final result = await database.query('mnstrs', orderBy: 'created_at DESC');
+    final result = await database.query('mnstrs', orderBy: 'updated_at DESC');
 
     return result.map((e) => Monster.fromDb(e)).toList();
   }

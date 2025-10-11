@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 
 //graphql - helper method that is used to submit any qraphql request (query, mutation) to the server
@@ -35,6 +36,7 @@ Future<Map<String, dynamic>> graphql({
       );
     }
   } catch (e, stackTrace) {
+    debugPrint('[graphql] Error: $e');
     throw Exception(
       'Failed to load data: $e $stackTrace',
     );
