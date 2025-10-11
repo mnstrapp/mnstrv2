@@ -27,7 +27,7 @@ class SyncNotifier extends Notifier<Map<String, SyncState>> {
     final mnstrs = await LocalStorage.getMnstrs();
     final futures = <Future<String?>>[];
     for (var mnstr in mnstrs) {
-      state[mnstr.id!] = SyncState.syncing;
+      state = {...state, mnstr.id!: SyncState.syncing};
       futures.add(_processMnstr(mnstr));
     }
     final errors = await Future.wait(futures);
