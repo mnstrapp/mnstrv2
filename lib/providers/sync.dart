@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart' show compute;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wiredash/wiredash.dart';
 
 import '../models/monster.dart';
@@ -161,6 +162,7 @@ class SyncNotifier extends Notifier<Map<String, SyncState>> {
 
   Future<String?> sync({bool onlyPush = true}) async {
     state = {};
+    ref.read(previouslySyncedProvider.notifier).setPreviouslySynced(false);
     final user = ref.read(sessionUserProvider);
     final error = await push();
     if (error != null) {
@@ -182,6 +184,7 @@ class SyncNotifier extends Notifier<Map<String, SyncState>> {
         return error;
       }
     }
+    ref.read(previouslySyncedProvider.notifier).setPreviouslySynced(true);
     return null;
   }
 }
@@ -189,3 +192,38 @@ class SyncNotifier extends Notifier<Map<String, SyncState>> {
 final syncProvider = NotifierProvider<SyncNotifier, Map<String, SyncState>>(
   () => SyncNotifier(),
 );
+
+class PreviouslySyncedNotifier extends Notifier<bool> {
+  bool previouslySynced;
+
+  PreviouslySyncedNotifier({this.previouslySynced = false});
+
+  @override
+  bool build() {
+    return previouslySynced;
+  }
+
+  void setPreviouslySynced(bool value) {
+    state = value;
+    savePreviouslySynced(value);
+  }
+
+  Future<bool> getPreviouslySynced() async {
+    return await getPreviouslySynced();
+  }
+}
+
+final previouslySyncedProvider =
+    NotifierProvider<PreviouslySyncedNotifier, bool>(
+      () => PreviouslySyncedNotifier(),
+    );
+
+Future<bool> getPreviouslySynced() async {
+  final sharedPreferences = await SharedPreferences.getInstance();
+  return sharedPreferences.getBool('previouslySynced') ?? false;
+}
+
+Future<void> savePreviouslySynced(bool value) async {
+  final sharedPreferences = await SharedPreferences.getInstance();
+  await sharedPreferences.setBool('previouslySynced', value);
+}

@@ -8,6 +8,7 @@ import 'providers/auth.dart';
 import 'providers/local_storage.dart';
 import 'providers/session_users.dart';
 import 'providers/sounds.dart';
+import 'providers/sync.dart';
 import 'shared/sounds.dart';
 
 void main() async {
@@ -17,12 +18,16 @@ void main() async {
 
   final auth = await getAuth();
   final user = await getSessionUser();
+  final previouslySynced = await getPreviouslySynced();
 
   await LocalStorage.init();
 
   final overrides = [
     authProvider.overrideWith(() => AuthNotifier(auth: auth)),
     sessionUserProvider.overrideWith(() => SessionUserNotifier(user: user)),
+    previouslySyncedProvider.overrideWith(
+      () => PreviouslySyncedNotifier(previouslySynced: previouslySynced),
+    ),
   ];
 
   if (!kIsWeb) {
