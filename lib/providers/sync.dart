@@ -28,12 +28,7 @@ class SyncNotifier extends Notifier<Map<String, SyncState>> {
     final futures = <Future<String?>>[];
     for (var mnstr in mnstrs) {
       state[mnstr.id!] = SyncState.syncing;
-      futures.add(
-        compute(
-          _processMnstr,
-          mnstr,
-        ),
-      );
+      futures.add(_processMnstr(mnstr));
     }
     final errors = await Future.wait(futures);
     return errors.firstOrNull;
@@ -111,7 +106,8 @@ class SyncNotifier extends Notifier<Map<String, SyncState>> {
     final mnstrs = ref.read(manageProvider);
     final futures = <Future<String?>>[];
     for (var mnstr in mnstrs) {
-      futures.add(compute(pullOne, mnstr));
+      // futures.add(compute(pullOne, mnstr));
+      futures.add(pullOne(mnstr));
     }
     final errors = await Future.wait(futures);
     return errors.firstOrNull;
