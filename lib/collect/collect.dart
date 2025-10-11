@@ -169,7 +169,7 @@ class _CollectState extends ConsumerState<Collect> {
                       child: StarsView(),
                     ),
                     Positioned(
-                      bottom: 40,
+                      bottom: 0,
                       left: 0,
                       right: 0,
                       child: Center(
