@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mnstrv2/shared/stat_bar_container.dart';
 import 'package:wiredash/wiredash.dart';
 
 import '../auth/register.dart';
@@ -126,14 +127,13 @@ class _HomeViewState extends ConsumerState<HomeView> {
     setState(() {
       _syncing = true;
     });
-    final error = await ref.read(syncProvider.notifier).sync();
+    String? error = await ref.read(syncProvider.notifier).sync(onlyPush: false);
     if (error != null) {
       debugPrint('Error syncing: $error');
-    } else {
-      setState(() {
-        _syncing = false;
-      });
     }
+    setState(() {
+      _syncing = false;
+    });
   }
 
   @override
@@ -171,6 +171,17 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final buttonFontSize = 24.0;
     final buttonColor = Theme.of(context).colorScheme.onPrimary;
 
+    final syncState = ref.watch(syncProvider);
+    final pushed = syncState.values
+        .where((state) => state == SyncState.pushed)
+        .length;
+    final pulled = syncState.values
+        .where((state) => state == SyncState.pulled)
+        .length;
+
+    final current = (pulled + pushed) > 0 ? (pulled + pushed) : 0;
+    final total = syncState.isNotEmpty ? syncState.length : 0;
+
     return LayoutScaffold(
       key: layoutKey,
       useSizedBox: true,
@@ -179,15 +190,31 @@ class _HomeViewState extends ConsumerState<HomeView> {
         width: MediaQuery.of(context).size.width,
         height: MediaQuery.of(context).size.height,
         child: _syncing
-            ? const Center(
+            ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
                   mainAxisSize: MainAxisSize.min,
                   spacing: 16,
                   children: [
-                    Text('Syncing...'),
-                    CircularProgressIndicator(),
+                    Text('Syncing your local and remote MNSTRs'),
+                    total > 0
+                        ? StatBarContainer(
+                            leading: Row(
+                              spacing: 4,
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(Icons.sync),
+                                Text('Syncing'),
+                              ],
+                            ),
+                            trailing: Text(
+                              '$current/$total',
+                            ),
+                            currentValue: current,
+                            totalValue: total,
+                          )
+                        : const CircularProgressIndicator(),
                   ],
                 ),
               )

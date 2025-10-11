@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wiredash/wiredash.dart';
 
 import '../auth/login.dart';
 import '../providers/auth.dart';
+import '../providers/local_storage.dart';
 import '../providers/session_users.dart';
 import '../providers/sounds.dart';
 import '../providers/users.dart';
 import '../shared/layout_scaffold.dart';
 import '../shared/sounds.dart';
+import '../ui/button.dart';
 import '../ui/switch.dart';
 
 class SettingsView extends ConsumerStatefulWidget {
@@ -50,6 +53,7 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                     child: Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
+                        spacing: 8,
                         children: [
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -124,10 +128,48 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                             ],
                           ),
                           Divider(),
-                          FilledButton(
-                            style: FilledButton.styleFrom(
-                              backgroundColor: Colors.red,
-                            ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Local MNSTRs'),
+                              UIButton(
+                                icon: Icons.delete_forever_rounded,
+                                text: 'Clear',
+                                onPressedAsync: () async {
+                                  Wiredash.trackEvent(
+                                    'Settings Local MNSTRs Clear Pressed',
+                                    data: {},
+                                  );
+                                  await LocalStorage.clearMnstrs();
+                                },
+                              ),
+                            ],
+                          ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text('Local Preferences'),
+                              UIButton(
+                                icon: Icons.delete_forever_rounded,
+                                text: 'Clear',
+                                onPressedAsync: () async {
+                                  Wiredash.trackEvent(
+                                    'Settings Local Preferences Clear Pressed',
+                                    data: {},
+                                  );
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  await prefs.clear();
+                                },
+                              ),
+                            ],
+                          ),
+                          Divider(),
+                          UIButton(
+                            icon: Icons.delete_forever_rounded,
+                            text: 'Delete Account',
+                            backgroundColor: Colors.red,
+                            foregroundColor: Colors.white,
                             onPressed: () async {
                               Wiredash.trackEvent(
                                 'Settings Delete Account Pressed',
@@ -135,12 +177,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                               );
                               _overlayPortalController.show();
                             },
-                            child: Text(
-                              "Delete Account",
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                color: Colors.white,
-                              ),
-                            ),
                           ),
                         ],
                       ),

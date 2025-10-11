@@ -81,7 +81,7 @@ class LocalStorage {
   }
 
   static clearMnstrs() async {
-    database.execute('delete from mnstrs');
+    await database.execute('delete from mnstrs');
   }
 }
 
