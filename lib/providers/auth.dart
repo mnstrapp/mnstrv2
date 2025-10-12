@@ -105,6 +105,7 @@ mutation login($email: String!, $password:String!) {
       ref.read(sessionUserProvider.notifier).setUser(user);
       await saveAuth(auth);
       await saveSessionUser(user);
+      this.auth = auth;
 
       return null;
     } catch (e, stackTrace) {
@@ -150,6 +151,18 @@ mutation logout {
     } catch (e, stackTrace) {
       Sentry.captureException(e, stackTrace: stackTrace);
       return "There was an error logging out";
+    }
+  }
+
+  void setAuth(Auth auth) {
+    state = auth;
+    this.auth = auth;
+  }
+
+  Future<void> ensureAuth() async {
+    final auth = await getAuth();
+    if (auth != null) {
+      setAuth(auth);
     }
   }
 }

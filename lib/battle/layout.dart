@@ -3,13 +3,14 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mnstrv2/providers/auth.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:wiredash/wiredash.dart';
 
 import '../auth/login.dart';
 import '../config/endpoints.dart';
+import '../models/auth.dart';
+import '../providers/auth.dart';
 import '../providers/manage.dart';
 import '../providers/session_users.dart';
 import '../shared/empty_message.dart';
@@ -343,27 +344,27 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
         _isLoading = true;
       });
       await ref.read(manageProvider.notifier).getMonsters();
+      await ref.read(authProvider.notifier).ensureAuth();
 
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        final mnstrs = ref.read(manageProvider);
-        if (mnstrs.isEmpty) {
-          return;
-        }
-        final auth = ref.read(authProvider);
-        if (auth == null) {
-          return;
-        }
-        _connect();
+      setState(() {
+        _isLoading = false;
+      });
+      final mnstrs = ref.watch(manageProvider);
+      if (mnstrs.isEmpty) {
+        return;
       }
+      final auth = ref.read(authProvider);
+      if (auth == null) {
+        return;
+      }
+      _connect();
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    final auth = ref.read(authProvider);
+    final auth = ref.watch(authProvider);
+    debugPrint('auth: $auth');
     if (auth == null) {
       return LayoutScaffold(
         child: SafeArea(

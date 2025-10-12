@@ -152,6 +152,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
       );
       final auth = ref.watch(authProvider);
       final previouslySynced = ref.watch(previouslySyncedProvider);
+      debugPrint('auth: $auth');
+      debugPrint('previouslySynced: $previouslySynced');
       if (auth != null && !previouslySynced) {
         _sync();
       } else {
