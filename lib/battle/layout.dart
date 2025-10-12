@@ -364,7 +364,6 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
-    debugPrint('auth: $auth');
     if (auth == null) {
       return LayoutScaffold(
         child: SafeArea(
