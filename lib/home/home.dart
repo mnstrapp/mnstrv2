@@ -154,6 +154,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
       final previouslySynced = ref.watch(previouslySyncedProvider);
       if (auth != null && !previouslySynced) {
         _sync();
+      } else {
+        ref.read(previouslySyncedProvider.notifier).setPreviouslySynced(false);
       }
     });
   }

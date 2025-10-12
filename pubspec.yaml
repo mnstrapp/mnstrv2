@@ -1,7 +1,7 @@
 name: mnstrv2
 description: "A new adventure awaits!"
 publish_to: "none"
-version: 2.14.6+44
+version: 2.14.7+45
 
 environment:
   sdk: ^3.8.0
