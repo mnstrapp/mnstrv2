@@ -131,6 +131,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
     }
     // _log(battleQueue);
     _broadcast(message);
+    debugPrint('battleQueue: ${battleQueue.toJson()}');
 
     switch (battleQueue.action) {
       case BattleQueueAction.joined:
