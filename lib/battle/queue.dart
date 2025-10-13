@@ -4,7 +4,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import '../shared/analytics.dart';
 
 import '../providers/session_users.dart';
 import '../shared/layout_scaffold.dart';
@@ -136,6 +135,11 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
 
     switch (battleQueue.action) {
       case BattleQueueAction.joined:
+        log('[handle message] joined');
+        log(
+          '[handle message] userId: ${battleQueue.data?.userId} != ${user.id}',
+        );
+        log('[handle message] battleQueue: ${battleQueue.toJson()}');
         if (battleQueue.data?.userId != user.id) {
           _getBattleStatuses();
         }
@@ -146,6 +150,11 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
         }
         break;
       case BattleQueueAction.list:
+        log('[handle message] list');
+        log(
+          '[handle message] userId: ${battleQueue.data?.userId} != ${user.id}',
+        );
+        log('[handle message] battleQueue: ${battleQueue.toJson()}');
         if (battleQueue.data?.data == null) {
           return;
         }
@@ -154,7 +163,7 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
         for (var e in data) {
           final battleStatus = BattleStatus.fromJson(e);
           if (battleStatus.userId == user.id) {
-            continue;
+            // continue;
           }
           battleStatuses.add(battleStatus);
         }
@@ -164,18 +173,6 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
         break;
       case BattleQueueAction.challenge:
         if (battleQueue.data?.opponentId == user.id) {
-          Wiredash.trackEvent(
-            'Battle Queue View Challenge Received',
-            data: {
-              'displayName': user.displayName,
-              'id': user.id,
-              'challengeId': battleQueue.data?.id,
-              'userId': battleQueue.data?.userId,
-              'userName': battleQueue.data?.userName,
-              'opponentId': battleQueue.data?.opponentId,
-              'opponentName': battleQueue.data?.opponentName,
-            },
-          );
           setState(() {
             _showChallenges = true;
             _challenges = [..._challenges, battleQueue];
@@ -184,18 +181,6 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
         break;
       case BattleQueueAction.cancel:
         if (battleQueue.data?.opponentId == user.id) {
-          Wiredash.trackEvent(
-            'Battle Queue View Cancel Received',
-            data: {
-              'displayName': user.displayName,
-              'id': user.id,
-              'challengeId': battleQueue.data?.id,
-              'userId': battleQueue.data?.userId,
-              'userName': battleQueue.data?.userName,
-              'opponentId': battleQueue.data?.opponentId,
-              'opponentName': battleQueue.data?.opponentName,
-            },
-          );
           setState(() {
             _challenges.removeWhere(
               (challenge) => challenge.data?.id == battleQueue.data?.id,
@@ -208,18 +193,6 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
         break;
       case BattleQueueAction.reject:
         if (battleQueue.data?.userId == user.id) {
-          Wiredash.trackEvent(
-            'Battle Queue View Reject Received',
-            data: {
-              'displayName': user.displayName,
-              'id': user.id,
-              'challengeId': battleQueue.data?.id,
-              'userId': battleQueue.data?.userId,
-              'userName': battleQueue.data?.userName,
-              'opponentId': battleQueue.data?.opponentId,
-              'opponentName': battleQueue.data?.opponentName,
-            },
-          );
           final callback = _sentChallenges[battleQueue.data?.id];
           if (callback != null) {
             callback.$2();
@@ -231,18 +204,6 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
         break;
       case BattleQueueAction.accept:
         if (battleQueue.data?.userId == user.id) {
-          Wiredash.trackEvent(
-            'Battle Queue View Accept Received',
-            data: {
-              'displayName': user.displayName,
-              'id': user.id,
-              'challengeId': battleQueue.data?.id,
-              'userId': battleQueue.data?.userId,
-              'userName': battleQueue.data?.userName,
-              'opponentId': battleQueue.data?.opponentId,
-              'opponentName': battleQueue.data?.opponentName,
-            },
-          );
           final callback = _sentChallenges[battleQueue.data?.id];
           if (callback != null) {
             callback.$2();
@@ -263,14 +224,6 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
     super.initState();
     widget.onListen(_handleMessage);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final user = ref.watch(sessionUserProvider);
-      Wiredash.trackEvent(
-        'Battle Queue View',
-        data: {
-          'displayName': user?.displayName,
-          'id': user?.id,
-        },
-      );
       _getBattleStatuses();
     });
   }
@@ -332,17 +285,6 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
       return;
     }
 
-    Wiredash.trackEvent(
-      'Battle Status View Challenge',
-      data: {
-        'displayName': user.displayName,
-        'id': user.id,
-        'challengeId': _challengeMade?.data?.id,
-        'opponentId': widget.battleStatus.userId,
-        'opponentName': widget.battleStatus.displayName,
-      },
-    );
-
     setState(() {
       _waiting = true;
     });
@@ -375,17 +317,6 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
     if (user == null) {
       return;
     }
-
-    Wiredash.trackEvent(
-      'Battle Status View Cancel',
-      data: {
-        'displayName': user.displayName,
-        'id': user.id,
-        'challengeId': _challengeMade?.data?.id,
-        'opponentId': widget.battleStatus.userId,
-        'opponentName': widget.battleStatus.displayName,
-      },
-    );
 
     log('[battle status cancel handler] id: ${_challengeMade?.data?.id}');
 
@@ -422,14 +353,6 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       setShowStatBar();
-      final user = ref.watch(sessionUserProvider);
-      Wiredash.trackEvent(
-        'Battle Status View',
-        data: {
-          'displayName': user?.displayName,
-          'id': user?.id,
-        },
-      );
     });
   }
 

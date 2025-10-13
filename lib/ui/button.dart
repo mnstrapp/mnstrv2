@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mnstrv2/utils/color.dart';
-import '../shared/analytics.dart';
 
 import '../shared/sounds.dart';
 
@@ -56,12 +55,6 @@ class _UIButtonState extends State<UIButton> {
     if (_isLoading) {
       return;
     }
-    Wiredash.trackEvent(
-      'UIButton Pressed',
-      data: {
-        'text': widget.text,
-      },
-    );
     if (widget.onPressedAsync != null) {
       setState(() {
         _isLoading = true;

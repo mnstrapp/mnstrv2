@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../shared/analytics.dart';
 
 class InplaceText extends StatefulWidget {
   final String? text;
@@ -39,12 +38,6 @@ class _InplaceTextState extends State<InplaceText> {
   void initState() {
     super.initState();
     _controller.text = widget.text ?? '';
-    Wiredash.trackEvent(
-      'InplaceText Init',
-      data: {
-        'text': widget.text,
-      },
-    );
   }
 
   @override
@@ -71,13 +64,7 @@ class _InplaceTextState extends State<InplaceText> {
                   label: widget.label,
                   hintText: widget.hintText,
                   suffixIcon: IconButton(
-                    onPressed: () async {
-                      await Wiredash.trackEvent(
-                        'InplaceText Editing Saved',
-                        data: {
-                          'text': _controller.text,
-                        },
-                      );
+                    onPressed: () {
                       setState(() {
                         _isEditing = false;
                       });
@@ -89,13 +76,7 @@ class _InplaceTextState extends State<InplaceText> {
                 controller: _controller,
                 minLines: widget.minLines,
                 maxLines: widget.maxLines,
-                onSubmitted: (value) async {
-                  await Wiredash.trackEvent(
-                    'InplaceText Editing Submitted',
-                    data: {
-                      'text': value,
-                    },
-                  );
+                onSubmitted: (value) {
                   widget.onSubmitted?.call(value);
                   setState(() {
                     _isEditing = false;
@@ -108,15 +89,7 @@ class _InplaceTextState extends State<InplaceText> {
               ),
             )
           : InkWell(
-              onTap: () async {
-                await Wiredash.trackEvent(
-                  'InplaceText Editing Started',
-                  data: {
-                    'text': _controller.text.isEmpty
-                        ? 'Unknown'
-                        : _controller.text,
-                  },
-                );
+              onTap: () {
                 setState(() {
                   _isEditing = true;
                 });

@@ -7,7 +7,6 @@ void main() {
   final yaml = loadYaml(file.readAsStringSync());
   final outputFile = File('lib/config/env.dart');
   outputFile.writeAsStringSync('''
-  const String wiredashApiKey = '${yaml['wiredash']['secret']}';
-  const String wiredashProjectId = '${yaml['wiredash']['id']}';
+  // Environment configuration
   ''');
 }

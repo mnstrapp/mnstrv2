@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../shared/analytics.dart';
 
 import '../models/monster.dart';
 import 'collect.dart';
@@ -93,14 +92,6 @@ class SyncNotifier extends Notifier<Map<String, SyncState>> {
     final error = await ref.read(manageProvider.notifier).getMonsters();
     if (error != null) {
       debugPrint('Error pulling: $error, ${StackTrace.current}');
-      Wiredash.trackEvent(
-        'Pull Error',
-        data: {
-          'error': error,
-          'displayName': user?.displayName,
-          'id': user?.id,
-        },
-      );
       return error;
     }
     final mnstrs = ref.read(manageProvider);
@@ -166,14 +157,6 @@ class SyncNotifier extends Notifier<Map<String, SyncState>> {
     final error = await push();
     if (error != null) {
       debugPrint('[sync] Error: $error, ${StackTrace.current}');
-      Wiredash.trackEvent(
-        'Sync Error',
-        data: {
-          'error': error,
-          'displayName': user?.displayName,
-          'id': user?.id,
-        },
-      );
       return error;
     }
     if (!onlyPush) {

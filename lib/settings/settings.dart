@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../shared/analytics.dart';
 
 import '../auth/login.dart';
 import '../providers/auth.dart';
 import '../providers/local_storage.dart';
-import '../providers/session_users.dart';
 import '../providers/sounds.dart';
 import '../providers/users.dart';
 import '../shared/layout_scaffold.dart';
@@ -62,15 +60,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                               UISwitch(
                                 value: !backgroundSoundMuted,
                                 onChanged: (value) async {
-                                  final user = ref.watch(sessionUserProvider);
-                                  Wiredash.trackEvent(
-                                    'Settings Background Sound Changed',
-                                    data: {
-                                      'value': value,
-                                      'displayName': user?.displayName,
-                                      'id': user?.id,
-                                    },
-                                  );
                                   await ref
                                       .read(backgroundSoundProvider.notifier)
                                       .setMuted(!value);
@@ -86,15 +75,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                               UISwitch(
                                 value: !buttonSoundMuted,
                                 onChanged: (value) async {
-                                  final user = ref.watch(sessionUserProvider);
-                                  Wiredash.trackEvent(
-                                    'Settings Button Sound Changed',
-                                    data: {
-                                      'value': value,
-                                      'displayName': user?.displayName,
-                                      'id': user?.id,
-                                    },
-                                  );
                                   await ref
                                       .read(buttonSoundProvider.notifier)
                                       .setMuted(!value);
@@ -110,15 +90,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                               UISwitch(
                                 value: !collectSoundMuted,
                                 onChanged: (value) async {
-                                  final user = ref.watch(sessionUserProvider);
-                                  Wiredash.trackEvent(
-                                    'Settings Collect Sound Changed',
-                                    data: {
-                                      'value': value,
-                                      'displayName': user?.displayName,
-                                      'id': user?.id,
-                                    },
-                                  );
                                   await ref
                                       .read(collectSoundProvider.notifier)
                                       .setMuted(!value);
@@ -136,10 +107,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                 icon: Icons.delete_forever_rounded,
                                 text: 'Clear',
                                 onPressedAsync: () async {
-                                  Wiredash.trackEvent(
-                                    'Settings Local MNSTRs Clear Pressed',
-                                    data: {},
-                                  );
                                   await LocalStorage.clearMnstrs();
                                 },
                               ),
@@ -153,10 +120,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                 icon: Icons.delete_forever_rounded,
                                 text: 'Clear',
                                 onPressedAsync: () async {
-                                  Wiredash.trackEvent(
-                                    'Settings Local Preferences Clear Pressed',
-                                    data: {},
-                                  );
                                   final prefs =
                                       await SharedPreferences.getInstance();
                                   await prefs.clear();
@@ -171,10 +134,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                             backgroundColor: Colors.red,
                             foregroundColor: Colors.white,
                             onPressed: () async {
-                              Wiredash.trackEvent(
-                                'Settings Delete Account Pressed',
-                                data: {},
-                              );
                               _overlayPortalController.show();
                             },
                           ),
@@ -225,10 +184,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                     if (_isLoading) {
                                       return;
                                     }
-                                    Wiredash.trackEvent(
-                                      'Settings Delete Account Cancel Pressed',
-                                      data: {},
-                                    );
                                     _overlayPortalController.hide();
                                   },
                                   child: Text('Cancel'),
@@ -238,10 +193,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                     if (_isLoading) {
                                       return;
                                     }
-                                    Wiredash.trackEvent(
-                                      'Settings Delete Account Delete Pressed',
-                                      data: {},
-                                    );
                                     final messenger = ScaffoldMessenger.of(
                                       context,
                                     );
@@ -253,12 +204,6 @@ class _SettingsViewState extends ConsumerState<SettingsView> {
                                         .read(userProvider.notifier)
                                         .deleteAccount();
                                     if (error != null) {
-                                      Wiredash.trackEvent(
-                                        'Settings Delete Account Delete Error',
-                                        data: {
-                                          'error': error,
-                                        },
-                                      );
                                       messenger.showSnackBar(
                                         SnackBar(content: Text(error)),
                                       );

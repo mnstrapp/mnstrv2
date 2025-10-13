@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mnstrv2/shared/stat_bar_container.dart';
-import '../shared/analytics.dart';
 
 import '../auth/register.dart';
 import '../battle/layout.dart';
 import '../collect/collect.dart';
-import '../providers/session_users.dart';
 import '../providers/sync.dart';
 import '../settings/settings.dart';
 import '../ui/button.dart';
@@ -142,14 +140,6 @@ class _HomeViewState extends ConsumerState<HomeView> {
 
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       _buildButtons();
-      final user = ref.watch(sessionUserProvider);
-      Wiredash.trackEvent(
-        'Home View',
-        data: {
-          'displayName': user?.displayName,
-          'id': user?.id,
-        },
-      );
       final auth = ref.watch(authProvider);
       final previouslySynced = ref.watch(previouslySyncedProvider);
       debugPrint('auth: $auth');

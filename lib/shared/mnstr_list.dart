@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'analytics.dart';
 
 import '../models/monster.dart';
 import 'layout_scaffold.dart';
@@ -114,12 +113,6 @@ class _MnstrListState extends State<MnstrList> {
   }
 
   void _onTap(Monster monster) {
-    Wiredash.trackEvent(
-      'MnstrList Tapped',
-      data: {
-        'monster': monster.id,
-      },
-    );
     widget.onTap?.call(monster);
   }
 

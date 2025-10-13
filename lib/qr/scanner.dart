@@ -3,7 +3,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import '../shared/analytics.dart';
 
 import '../providers/session_users.dart';
 import '../shared/layout_scaffold.dart';
@@ -21,24 +20,10 @@ class ScannerView extends ConsumerWidget {
     return MobileScanner(
       onDetectError: (error, stackTrace) {
         final user = ref.read(sessionUserProvider);
-        Wiredash.trackEvent(
-          'Scanner View Error',
-          data: {
-            'displayName': user?.displayName,
-            'id': user?.id,
-          },
-        );
         layout.addError(error.toString());
       },
       onDetect: (capture) {
         final user = ref.read(sessionUserProvider);
-        Wiredash.trackEvent(
-          'Scanner View Detected',
-          data: {
-            'displayName': user?.displayName,
-            'id': user?.id,
-          },
-        );
         onScan(capture.barcodes.single.rawBytes);
       },
       overlayBuilder: (context, constraints) => Stack(

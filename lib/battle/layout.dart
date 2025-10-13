@@ -4,7 +4,6 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import '../shared/analytics.dart';
 
 import '../auth/login.dart';
 import '../config/endpoints.dart';
@@ -189,13 +188,6 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
     try {
       if (mounted) {
         setState(() {
-          Wiredash.trackEvent(
-            'Battle Layout View Connecting',
-            data: {
-              'displayName': user?.displayName,
-              'id': user?.id,
-            },
-          );
           _messages = [
             ..._messages,
             BattleMessage(
@@ -209,13 +201,6 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
         );
       }
       if (mounted) {
-        Wiredash.trackEvent(
-          'Battle Layout View Connected',
-          data: {
-            'displayName': user?.displayName,
-            'id': user?.id,
-          },
-        );
         setState(() {
           _messages = [
             ..._messages,
@@ -228,25 +213,11 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
       }
       _socket?.stream.listen(
         (message) {
-          Wiredash.trackEvent(
-            'Battle Layout View Message',
-            data: {
-              'displayName': user?.displayName,
-              'id': user?.id,
-            },
-          );
           if (mounted) {
             _handleMessage(message);
           }
         },
         onDone: () {
-          Wiredash.trackEvent(
-            'Battle Layout View Done',
-            data: {
-              'displayName': user?.displayName,
-              'id': user?.id,
-            },
-          );
           layoutKey.currentState?.addError('Socket is disconnected');
           if (_socket?.closeCode == null) {
             return;
@@ -267,14 +238,6 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
           }
         },
         onError: (error) {
-          Wiredash.trackEvent(
-            'Battle Layout View Socket Error',
-            data: {
-              'error': error,
-              'displayName': user?.displayName,
-              'id': user?.id,
-            },
-          );
           layoutKey.currentState?.addError('Socket error: $error');
           if (mounted) {
             setState(() {
@@ -293,14 +256,6 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
         },
       );
     } catch (e, stackTrace) {
-      Wiredash.trackEvent(
-        'Battle Layout View Socket Error',
-        data: {
-          'error': e,
-          'displayName': user?.displayName,
-          'id': user?.id,
-        },
-      );
       debugPrint('Battle socket error: $e, $stackTrace');
       layoutKey.currentState?.addError('Socket error: $e');
       setState(() {
@@ -331,13 +286,6 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final user = ref.read(sessionUserProvider);
 
-      Wiredash.trackEvent(
-        'Battle Layout View',
-        data: {
-          'displayName': user?.displayName,
-          'id': user?.id,
-        },
-      );
 
       setState(() {
         _isLoading = true;

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../shared/analytics.dart';
 import '../shared/layout_scaffold.dart';
 import '../providers/auth.dart';
 import '../ui/button.dart';
@@ -43,23 +42,9 @@ class _LoginViewState extends ConsumerState<LoginView> {
         .login(_emailController.text, _passwordController.text);
 
     if (error != null) {
-      Wiredash.trackEvent(
-        'Login User Error',
-        data: {
-          'error': error,
-          'email': _emailController.text,
-        },
-      );
       layoutKey.currentState?.addError(error);
       return;
     }
-
-    Wiredash.trackEvent(
-      'Login User Success',
-      data: {
-        'email': _emailController.text,
-      },
-    );
 
     navigator.pushReplacement(
       MaterialPageRoute(builder: (context) => HomeView()),
@@ -73,12 +58,7 @@ class _LoginViewState extends ConsumerState<LoginView> {
     _emailController.clear();
     _passwordController.clear();
 
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      Wiredash.trackEvent(
-        'Login View',
-        data: {},
-      );
-    });
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {});
   }
 
   @override

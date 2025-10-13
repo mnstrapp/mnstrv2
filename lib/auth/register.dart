@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../shared/analytics.dart';
 
 import '../shared/layout_scaffold.dart';
 import '../providers/session_users.dart';
@@ -46,25 +45,9 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
           password: _passwordController.text,
         );
     if (error != null) {
-      Wiredash.trackEvent(
-        'Register User Error',
-        data: {
-          'error': error,
-          'displayName': _displayNameController.text,
-          'email': _emailController.text,
-        },
-      );
       layoutKey.currentState?.addError(error);
       return;
     }
-
-    Wiredash.trackEvent(
-      'Register User Success',
-      data: {
-        'displayName': _displayNameController.text,
-        'email': _emailController.text,
-      },
-    );
 
     setState(() {
       _isVerifying = true;
@@ -84,27 +67,9 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
         .verifyEmail(id: user.id!, code: _codeController.text);
 
     if (error != null) {
-      Wiredash.trackEvent(
-        'Register User Error',
-        data: {
-          'error': error,
-          'code': _codeController.text,
-          'email': user.email,
-          'displayName': user.displayName,
-          'id': user.id,
-        },
-      );
       layoutKey.currentState?.addError(error);
       return;
     }
-
-    Wiredash.trackEvent(
-      'Register User Success',
-      data: {
-        'displayName': _displayNameController.text,
-        'email': _emailController.text,
-      },
-    );
 
     navigator.pushReplacement(
       MaterialPageRoute(builder: (context) => LoginView()),
@@ -121,12 +86,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
     _confirmPasswordController.clear();
     _codeController.clear();
 
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      Wiredash.trackEvent(
-        'Register View',
-        data: {},
-      );
-    });
+    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {});
   }
 
   @override

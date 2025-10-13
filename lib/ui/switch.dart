@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../shared/analytics.dart';
 
 class UISwitch extends StatefulWidget {
   final bool value;
@@ -61,12 +60,6 @@ class _UISwitchState extends State<UISwitch> {
 
     return InkWell(
       onTap: () {
-        Wiredash.trackEvent(
-          'UISwitch Tapped',
-          data: {
-            'value': _value,
-          },
-        );
         setState(() {
           _value = !_value;
         });
