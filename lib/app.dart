@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wiredash/wiredash.dart';
+import 'shared/analytics.dart';
 
 import 'theme.dart';
 import 'home/home.dart';

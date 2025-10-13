@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wiredash/wiredash.dart';
+import 'analytics.dart';
 
 import '../models/monster.dart';
 import 'layout_scaffold.dart';

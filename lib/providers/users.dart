@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 import '../config/endpoints.dart';
 import '../models/user.dart';
@@ -64,7 +64,7 @@ class UserNotifier extends AsyncNotifier<User?> {
         return "Failed to delete account";
       }
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
+      debugPrint('deleteAccount error: $e, $stackTrace');
       return "Failed to delete account";
     }
   }

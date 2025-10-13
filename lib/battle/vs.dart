@@ -4,7 +4,7 @@ import 'dart:developer' show log;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:wiredash/wiredash.dart';
+import '../shared/analytics.dart';
 
 import '../providers/session_users.dart';
 import '../shared/layout_scaffold.dart';

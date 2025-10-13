@@ -1,12 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:flutter/foundation.dart';
 
 import '../config/endpoints.dart' as endpoints;
 import '../providers/auth.dart';
 import '../models/monster.dart';
 import '../utils/graphql.dart';
 import 'local_storage.dart';
-import 'sync.dart';
 
 final manageProvider = NotifierProvider<ManageNotifier, List<Monster>>(
   () => ManageNotifier(),
@@ -82,7 +81,7 @@ class ManageNotifier extends Notifier<List<Monster>> {
 
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
+      debugPrint('getMonsters error: $e, $stackTrace');
       return "There was an error getting the monsters";
     }
   }
@@ -167,7 +166,7 @@ class ManageGetByQRNotifier extends Notifier<Monster?> {
 
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
+      debugPrint('getByQR error: $e, $stackTrace');
       return "There was an error getting the monster by QR code";
     }
   }
@@ -302,7 +301,7 @@ class ManageEditNotifier extends Notifier<Monster?> {
 
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
+      debugPrint('editMonster error: $e, $stackTrace');
       return "There was an error editing the monster";
     }
   }

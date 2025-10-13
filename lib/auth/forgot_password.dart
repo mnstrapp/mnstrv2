@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wiredash/wiredash.dart';
+import '../shared/analytics.dart';
 import '../shared/layout_scaffold.dart';
 import '../providers/session_users.dart';
 import '../ui/button.dart';
@@ -51,7 +51,6 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
   }
 
   Future<void> _getUserId() async {
-    final messenger = ScaffoldMessenger.of(context);
     if (!_formKey.currentState!.validate()) {
       layoutKey.currentState?.addError('Email is required');
       return;
@@ -97,7 +96,6 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
   }
 
   Future<void> _verifyCode() async {
-    final messenger = ScaffoldMessenger.of(context);
     if (!_codeFormKey.currentState!.validate()) {
       layoutKey.currentState?.addError('Code is required');
       return;
@@ -141,7 +139,6 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
   }
 
   Future<void> _sendReset() async {
-    final messenger = ScaffoldMessenger.of(context);
     final navigator = Navigator.of(context);
     if (!_resetFormKey.currentState!.validate()) {
       layoutKey.currentState?.addError('Code is required');

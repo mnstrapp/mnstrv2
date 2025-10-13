@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:riverpod/riverpod.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/auth.dart';
@@ -54,7 +53,7 @@ class AuthNotifier extends Notifier<Auth?> {
       return null;
     } catch (e, stackTrace) {
       logout();
-      Sentry.captureException(e, stackTrace: stackTrace);
+      debugPrint('verify error: $e, $stackTrace');
       return "There was an error verifying the auth";
     }
   }
@@ -110,7 +109,7 @@ mutation login($email: String!, $password:String!) {
       return null;
     } catch (e, stackTrace) {
       debugPrint('[login] Error: $e');
-      Sentry.captureException(e, stackTrace: stackTrace);
+      debugPrint('[login] Stacktrace: $stackTrace');
       return "There was an error logging in";
     }
   }
@@ -149,7 +148,7 @@ mutation logout {
 
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
+      debugPrint('logout error: $e, $stackTrace');
       return "There was an error logging out";
     }
   }

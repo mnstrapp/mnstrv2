@@ -1,10 +1,9 @@
 import 'dart:convert';
-import 'dart:developer';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:wiredash/wiredash.dart';
+import '../shared/analytics.dart';
 
 import '../manage/edit.dart';
 import '../providers/session_users.dart';

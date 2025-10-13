@@ -3,8 +3,7 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:wiredash/wiredash.dart';
+import '../shared/analytics.dart';
 
 import '../providers/session_users.dart';
 import '../shared/layout_scaffold.dart';
@@ -30,7 +29,6 @@ class ScannerView extends ConsumerWidget {
           },
         );
         layout.addError(error.toString());
-        Sentry.captureException(error, stackTrace: stackTrace);
       },
       onDetect: (capture) {
         final user = ref.read(sessionUserProvider);

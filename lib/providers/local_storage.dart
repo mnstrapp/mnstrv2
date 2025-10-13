@@ -1,4 +1,4 @@
-import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import 'package:universal_platform/universal_platform.dart';
 import 'package:path_provider/path_provider.dart';
@@ -72,10 +72,7 @@ class LocalStorage {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     if (result == 0) {
-      Sentry.captureException(
-        Exception('Failed to add monster'),
-        stackTrace: StackTrace.current,
-      );
+      debugPrint('Failed to add monster');
       return;
     }
   }
@@ -115,6 +112,8 @@ Future<void> _createTables(Database database) async {
   ''');
 }
 
+// Intentionally kept for optional local DB resets during development.
+// ignore: unused_element
 Future<void> _dropTables(Database database) async {
   await database.execute('DROP TABLE IF EXISTS mnstrs');
 }

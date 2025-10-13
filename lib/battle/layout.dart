@@ -3,13 +3,11 @@ import 'dart:developer';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:wiredash/wiredash.dart';
+import '../shared/analytics.dart';
 
 import '../auth/login.dart';
 import '../config/endpoints.dart';
-import '../models/auth.dart';
 import '../providers/auth.dart';
 import '../providers/manage.dart';
 import '../providers/session_users.dart';
@@ -303,7 +301,7 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
           'id': user?.id,
         },
       );
-      Sentry.captureException(e, stackTrace: stackTrace);
+      debugPrint('Battle socket error: $e, $stackTrace');
       layoutKey.currentState?.addError('Socket error: $e');
       setState(() {
         _messages = [

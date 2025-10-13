@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:wiredash/wiredash.dart';
+import '../shared/analytics.dart';
 
 class InplaceText extends StatefulWidget {
   final String? text;

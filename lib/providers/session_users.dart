@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:mnstrv2/utils/graphql.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:flutter/foundation.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -73,7 +73,7 @@ mutation register(
       state = user;
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
+      debugPrint('register error: $e, $stackTrace');
       return "There was an error registering the user";
     }
   }
@@ -109,7 +109,7 @@ mutation verifyEmail($id: String!, $code: String!) {
 
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
+      debugPrint('verifyEmail error: $e, $stackTrace');
       return "There was an error verifying the email";
     }
   }
@@ -165,7 +165,7 @@ mutation verifyEmail($id: String!, $code: String!) {
 
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
+      debugPrint('refresh error: $e, $stackTrace');
       return "There was an error refreshing the user";
     }
   }
@@ -202,7 +202,7 @@ query forgotPassword($email: String!) {
       state = response['data']['users']['forgotPassword'];
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
+      debugPrint('forgotPassword error: $e, $stackTrace');
       return "There was an error resetting the password";
     }
   }
@@ -236,7 +236,7 @@ mutation verifyEmail($id: String!, $code: String!) {
 
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
+      debugPrint('verifyCode error: $e, $stackTrace');
       return "There was an error verifying the code";
     }
   }
@@ -267,7 +267,7 @@ mutation resetPassword($id: String!, $password: String!) {
       state = null;
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
+      debugPrint('resetPassword error: $e, $stackTrace');
       return "There was an error resetting the password";
     }
   }

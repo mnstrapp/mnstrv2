@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 import '../providers/auth.dart';
 import '../models/monster.dart';
@@ -131,7 +130,6 @@ class CollectNotifier extends Notifier<Monster?> {
 
       return null;
     } catch (e, stackTrace) {
-      Sentry.captureException(e, stackTrace: stackTrace);
       debugPrint('[createMonster] Error: $e, stackTrace: $stackTrace');
       return "There was an error creating the monster";
     }

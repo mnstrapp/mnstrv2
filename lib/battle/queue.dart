@@ -4,7 +4,7 @@ import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:uuid/uuid.dart';
-import 'package:wiredash/wiredash.dart';
+import '../shared/analytics.dart';
 
 import '../providers/session_users.dart';
 import '../shared/layout_scaffold.dart';
@@ -12,7 +12,6 @@ import '../ui/button.dart';
 import '../utils/color.dart';
 import 'data.dart';
 import 'battle_status.dart';
-import 'game_data.dart';
 
 class BattleQueueView extends ConsumerStatefulWidget {
   final Function(BattleQueue) onLog;
@@ -37,7 +36,6 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
   List<BattleQueue> _challenges = [];
   final Map<String, (BattleQueue, VoidCallback)> _sentChallenges = {};
   bool _showChallenges = false;
-  String? _opponentId;
 
   void _onChallenge(BattleQueue battleQueue, VoidCallback callback) {
     setState(() {
@@ -73,7 +71,6 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
 
     setState(() {
       _challenges.removeAt(index);
-      _opponentId = data.userId;
     });
   }
 
@@ -252,7 +249,6 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
           }
           setState(() {
             _sentChallenges.remove(battleQueue.data?.id);
-            _opponentId = battleQueue.data?.opponentId;
           });
         }
         _getBattleStatuses();
