@@ -14,6 +14,7 @@ class GameData {
   final int? loserXpAwarded;
   final int? loserCoinsAwarded;
   final String? turnUserId;
+  final BattleLogData? battleLogData;
 
   GameData({
     this.battleId,
@@ -27,6 +28,7 @@ class GameData {
     this.winnerCoinsAwarded,
     this.loserCoinsAwarded,
     this.turnUserId,
+    this.battleLogData,
   });
 
   factory GameData.fromJson(Map<String, dynamic> json) {
@@ -65,6 +67,9 @@ class GameData {
       winnerCoinsAwarded: winnerCoinsAwarded,
       loserCoinsAwarded: loserCoinsAwarded,
       turnUserId: json['turnUserId'] as String?,
+      battleLogData: json['battleLogData'] != null
+          ? BattleLogData.fromJson(json['battleLogData'])
+          : null,
     );
   }
 
@@ -80,5 +85,36 @@ class GameData {
     'winnerCoinsAwarded': winnerCoinsAwarded,
     'loserCoinsAwarded': loserCoinsAwarded,
     'turnUserId': turnUserId,
+    'battleLogData': battleLogData?.toJson(),
+  };
+}
+
+class BattleLogData {
+  final bool? missed;
+  final bool? hit;
+  final bool? defense;
+  final int? damage;
+
+  BattleLogData({
+    this.missed,
+    this.hit,
+    this.defense,
+    this.damage,
+  });
+
+  factory BattleLogData.fromJson(Map<String, dynamic> json) {
+    return BattleLogData(
+      missed: json['missed'] as bool?,
+      hit: json['hit'] as bool?,
+      defense: json['defense'] as bool?,
+      damage: json['damage'] as int?,
+    );
+  }
+
+  Map<String, dynamic> toJson() => {
+    'missed': missed,
+    'hit': hit,
+    'defense': defense,
+    'damage': damage,
   };
 }

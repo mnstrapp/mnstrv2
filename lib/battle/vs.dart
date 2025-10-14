@@ -309,6 +309,10 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
   bool _isLoading = false;
   String? _loadingAction;
   String? _turnUserId;
+  bool _attacked = false;
+  bool _defended = false;
+  bool _magicAttacked = false;
+  int _damage = 0;
 
   void _handleMessage(String message) {
     final user = ref.watch(sessionUserProvider);
@@ -338,33 +342,93 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
           _gameData = gameData;
           _winnerId = gameData.winnerId;
           _isLoading = false;
+          _attacked = false;
+          _defended = false;
+          _magicAttacked = false;
+          _damage = 0;
         });
         break;
       case BattleQueueAction.attack:
+        final user = ref.watch(sessionUserProvider);
+        if (user == null) {
+          return;
+        }
         final data = jsonDecode(battleQueue.data!.data!);
         final gameData = GameData.fromJson(data);
         setState(() {
           _gameData = gameData;
           _isLoading = false;
           _turnUserId = gameData.turnUserId;
+          log('[handle message] gameData: ${gameData.battleLogData?.toJson()}');
+          if (gameData.turnUserId == user.id) {
+            if (gameData.battleLogData?.hit != null &&
+                gameData.battleLogData!.hit!) {
+              _attacked = true;
+              _defended = false;
+              _magicAttacked = false;
+              _damage = gameData.battleLogData?.damage ?? 0;
+            } else {
+              _attacked = false;
+              _defended = true;
+              _magicAttacked = false;
+            }
+          } else {
+            _attacked = false;
+            _defended = false;
+            _magicAttacked = false;
+          }
         });
         break;
       case BattleQueueAction.defend:
+        final user = ref.watch(sessionUserProvider);
+        if (user == null) {
+          return;
+        }
         final data = jsonDecode(battleQueue.data!.data!);
         final gameData = GameData.fromJson(data);
         setState(() {
           _gameData = gameData;
           _isLoading = false;
           _turnUserId = gameData.turnUserId;
+          if (gameData.turnUserId == user.id) {
+            _defended = true;
+            _attacked = false;
+            _magicAttacked = false;
+          } else {
+            _attacked = false;
+            _defended = false;
+            _magicAttacked = false;
+          }
         });
         break;
       case BattleQueueAction.magic:
+        final user = ref.watch(sessionUserProvider);
+        if (user == null) {
+          return;
+        }
         final data = jsonDecode(battleQueue.data!.data!);
         final gameData = GameData.fromJson(data);
         setState(() {
           _gameData = gameData;
           _isLoading = false;
           _turnUserId = gameData.turnUserId;
+          if (gameData.turnUserId == user.id) {
+            if (gameData.battleLogData?.hit != null &&
+                gameData.battleLogData!.hit!) {
+              _attacked = false;
+              _defended = false;
+              _magicAttacked = true;
+              _damage = gameData.battleLogData?.damage ?? 0;
+            } else {
+              _attacked = false;
+              _defended = true;
+              _magicAttacked = false;
+            }
+          } else {
+            _attacked = false;
+            _defended = false;
+            _magicAttacked = false;
+          }
         });
         break;
       default:
@@ -822,6 +886,105 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                       ),
                     ],
                   ),
+                ),
+              ),
+            ),
+          ),
+        if (_attacked)
+          Positioned(
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: size.height,
+              width: size.width,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 16,
+                  children: [
+                    Image.asset(
+                      'assets/environment/slash.png',
+                      width: size.width * 0.8,
+                      height: size.width * 0.8,
+                    ),
+                    Text(
+                      '-$_damage',
+                      style: theme.textTheme.displayLarge?.copyWith(
+                        color: Colors.yellow,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        if (_defended)
+          Positioned(
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: size.height,
+              width: size.width,
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 16,
+                  children: [
+                    Image.asset(
+                      'assets/environment/shield.png',
+                      width: size.width * 0.8,
+                      height: size.width * 0.8,
+                    ),
+                    Text(
+                      'Defended',
+                      style: theme.textTheme.displaySmall?.copyWith(
+                        color: Colors.yellow,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        if (_magicAttacked)
+          Positioned(
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            child: Container(
+              height: size.height,
+              width: size.width,
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.5),
+              ),
+              child: Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 16,
+                  children: [
+                    Image.asset(
+                      'assets/environment/slash.png',
+                      width: 60,
+                      height: 60,
+                    ),
+                    Text(
+                      '-$_damage',
+                      style: theme.textTheme.displayLarge?.copyWith(
+                        color: Colors.yellow,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
