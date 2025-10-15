@@ -321,6 +321,8 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     }
 
     final battleQueue = BattleQueue.fromJson(jsonDecode(message));
+    final data = jsonDecode(battleQueue.data!.data!);
+    final gameData = GameData.fromJson(data);
     if (battleQueue.data?.userId != widget.challengerId &&
         battleQueue.data?.userId != widget.opponentId) {
       log('[handle message] not user or opponent');
@@ -331,13 +333,14 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
         '[handle message] opponentId: ${battleQueue.data?.opponentId} != ${widget.opponentId}',
       );
       log('[handle message] battleQueue: ${battleQueue.toJson()}');
-      return;
+      log('[handle message] game data: ${gameData.toJson()}');
+      if (gameData.turnUserId != user.id) {
+        return;
+      }
     }
 
     switch (battleQueue.action) {
       case BattleQueueAction.gameEnded:
-        final data = jsonDecode(battleQueue.data!.data!);
-        final gameData = GameData.fromJson(data);
         setState(() {
           _gameData = gameData;
           _winnerId = gameData.winnerId;
@@ -355,11 +358,14 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
         }
         final data = jsonDecode(battleQueue.data!.data!);
         final gameData = GameData.fromJson(data);
+        log('[handle attack] gameData: ${gameData.toJson()}');
+        log(
+          '[handle attack] gameData.turnUserId: ${gameData.turnUserId}, user.id: ${user.id}',
+        );
         setState(() {
           _gameData = gameData;
           _isLoading = false;
           _turnUserId = gameData.turnUserId;
-          log('[handle message] gameData: ${gameData.battleLogData?.toJson()}');
           if (gameData.turnUserId == user.id) {
             if (gameData.battleLogData?.hit != null &&
                 gameData.battleLogData!.hit!) {
