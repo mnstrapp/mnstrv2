@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../models/monster.dart';
-import '../theme.dart';
+import '../theme.dart' as thm;
 import '../utils/color.dart';
 import 'monster_view.dart';
 
@@ -38,19 +38,11 @@ class MonsterContainer extends StatelessWidget {
       Color.lerp(mnstr.color, Colors.black, 0.5) ?? Colors.black,
       0.1,
     );
-    final theme = Theme.of(context);
     final monsterName = monster.mnstrName?.isNotEmpty ?? false
         ? monster.mnstrName!
         : 'unnamed';
 
-    final detailSize = 16.0;
-    final textSize = theme.textTheme.bodyMedium?.copyWith(
-      fontSize: detailSize,
-      fontWeight: FontWeight.bold,
-      color: uiColor,
-    );
-
-    final isTablet = MediaQuery.sizeOf(context).width > tabletBreakpoint;
+    final isTablet = size.width > thm.tabletBreakpoint;
 
     return Container(
       width: width,
@@ -92,8 +84,8 @@ class MonsterContainer extends StatelessWidget {
                   ),
                   child: Text(
                     monsterName,
-                    style: theme.textTheme.titleLarge?.copyWith(
-                      color: theme.colorScheme.surface,
+                    style: thm.baseTextTheme.titleLarge?.copyWith(
+                      color: thm.baseTheme.colorScheme.surface,
                       fontFamily: 'Silkscreen',
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -123,7 +115,7 @@ class _PhoneStats extends StatelessWidget {
       0.1,
     );
     final detailSize = 16.0;
-    final textSize = theme.textTheme.bodyMedium?.copyWith(
+    final textSize = thm.baseTextTheme.bodyMedium?.copyWith(
       fontSize: detailSize,
       fontWeight: FontWeight.bold,
       color: uiColor,
@@ -285,7 +277,7 @@ class _TabletStats extends StatelessWidget {
     );
 
     final detailSize = 16.0;
-    final textSize = theme.textTheme.bodyMedium?.copyWith(
+    final textSize = thm.baseTextTheme.bodyMedium?.copyWith(
       fontSize: detailSize,
       fontWeight: FontWeight.bold,
       color: uiColor,

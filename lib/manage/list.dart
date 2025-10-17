@@ -81,10 +81,6 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
                       Colors.black,
                   0.1,
                 );
-                final container = MonsterContainer(
-                  monster: monster,
-                  size: size,
-                );
 
                 return Stack(
                   children: [
@@ -114,19 +110,26 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
                         onPressedAsync: () async {
                           final image = await _screenshotController
                               .captureFromWidget(
-                                container,
+                                SizedBox(
+                                  width: size.width,
+                                  height: size.height,
+                                  child: MonsterContainer(
+                                    monster: monster,
+                                    size: size,
+                                  ),
+                                ),
                               );
                           await SharePlus.instance.share(
                             ShareParams(
                               subject: 'Sharing my MNSTR!',
                               text:
-                                  '👋 Check out my MNSTR, ${monster.mnstrName}!',
+                                  '👋 Check out my MNSTR, ${monster.mnstrName ?? 'unnamed'}!',
                               downloadFallbackEnabled: true,
                               files: [
                                 XFile.fromData(
                                   image,
                                   mimeType: 'image/png',
-                                  name: '${monster.mnstrName}.png',
+                                  name: '${monster.mnstrName ?? 'unnamed'}.png',
                                 ),
                               ],
                             ),
