@@ -37,7 +37,6 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "release",
-            "deviceId": "chrome",
             "args": [
                 "--dart-define=API_HOST=http://localhost:8080",
                 "--dart-define=WS_HOST=ws://localhost:8080",
@@ -51,7 +50,6 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "debug",
-            "deviceId": "chrome",
             "args": [
                 "--web-port=9000",
                 "--web-experimental-hot-reload"
@@ -63,7 +61,6 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "profile",
-            "deviceId": "chrome",
             "args": [
                 "--web-port=9000",
                 "--web-experimental-hot-reload"
@@ -75,7 +72,6 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "release",
-            "deviceId": "chrome",
             "args": [
                 "--web-port=9000",
                 "--web-experimental-hot-reload"

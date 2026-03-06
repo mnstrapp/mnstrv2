@@ -58,24 +58,9 @@ flutter:
     - assets/audio/
     - assets/environment/
   fonts:
-    - family: Silkscreen
+    - family: Pixelify
       fonts:
-        - asset: assets/fonts/Silkscreen-Regular.ttf
-        - asset: assets/fonts/Silkscreen-Bold.ttf
-    - family: Roboto
-      fonts:
-        - asset: assets/fonts/Roboto-Regular.ttf
-        - asset: assets/fonts/Roboto-Bold.ttf
-        - asset: assets/fonts/Roboto-Medium.ttf
-        - asset: assets/fonts/Roboto-Light.ttf
-        - asset: assets/fonts/Roboto-Thin.ttf
-        - asset: assets/fonts/Roboto-Black.ttf
-        - asset: assets/fonts/Roboto-Italic.ttf
-        - asset: assets/fonts/Roboto-MediumItalic.ttf
-        - asset: assets/fonts/Roboto-BoldItalic.ttf
-        - asset: assets/fonts/Roboto-BlackItalic.ttf
-        - asset: assets/fonts/Roboto-ThinItalic.ttf
-        - asset: assets/fonts/Roboto-LightItalic.ttf
+        - asset: assets/fonts/PixelifySans-VariableFont_wght.ttf
 
 flutter_launcher_icons:
   android: true
