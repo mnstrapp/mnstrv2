@@ -350,6 +350,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.0.0"
+  flutter_driver:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   flutter_launcher_icons:
     dependency: "direct main"
     description:
@@ -380,6 +385,19 @@ packages:
     source: sdk
     version: "0.0.0"
   flutter_web_plugins:
+    dependency: transitive
+    description: flutter
+    source: sdk
+    version: "0.0.0"
+  freezed_annotation:
+    dependency: transitive
+    description:
+      name: freezed_annotation
+      sha256: c2e2d632dd9b8a2b7751117abcfc2b4888ecfe181bd9fca7170d9ef02e595fe2
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.4.4"
+  fuchsia_remote_debug_protocol:
     dependency: transitive
     description: flutter
     source: sdk
@@ -416,6 +434,30 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.0.2"
+  hrk_batteries:
+    dependency: transitive
+    description:
+      name: hrk_batteries
+      sha256: "392dbcfc81a68f1a1190ad0a1281793d50b4e95d83937b8185a3181c64aaa032"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.3.0"
+  hrk_flutter_test_batteries:
+    dependency: "direct dev"
+    description:
+      name: hrk_flutter_test_batteries
+      sha256: d7a8206f4cdc0f2554e0dded2b1f718ea72ef731034fb7974ca37d3477a382ea
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.2.0"
+  hrk_logging:
+    dependency: transitive
+    description:
+      name: hrk_logging
+      sha256: "2e6501f4b78439bec4c367a94b14f792fd17fe1c94f18d903086c7b8a48402f5"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   http:
     dependency: "direct main"
     description:
@@ -448,6 +490,11 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "4.8.0"
+  integration_test:
+    dependency: "direct dev"
+    description: flutter
+    source: sdk
+    version: "0.0.0"
   io:
     dependency: transitive
     description:
@@ -720,6 +767,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.5.0"
+  process:
+    dependency: transitive
+    description:
+      name: process
+      sha256: c6248e4526673988586e8c00bb22a49210c258dc91df5227d5da9748ecf79744
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.0.5"
   process_run:
     dependency: transitive
     description:
@@ -989,6 +1044,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.1"
+  sync_http:
+    dependency: transitive
+    description:
+      name: sync_http
+      sha256: "7f0cd72eca000d2e026bcd6f990b81d0ca06022ef4e32fb257b30d3d1014a961"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.3.1"
   synchronized:
     dependency: transitive
     description:
@@ -1117,6 +1180,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.0.3"
+  webdriver:
+    dependency: transitive
+    description:
+      name: webdriver
+      sha256: "2f3a14ca026957870cfd9c635b83507e0e51d8091568e90129fbf805aba7cade"
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.1.0"
   win32:
     dependency: transitive
     description:
