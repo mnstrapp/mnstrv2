@@ -1,10 +1,13 @@
+import 'package:change_case/change_case.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/endpoints.dart' as endpoints;
 import '../providers/auth.dart';
 import '../models/monster.dart';
 import '../utils/graphql.dart';
+import '../manage/list.dart';
 import 'local_storage.dart';
 
 final manageProvider = NotifierProvider<ManageNotifier, List<Monster>>(
@@ -18,6 +21,7 @@ class ManageNotifier extends Notifier<List<Monster>> {
   }
 
   Future<String?> getMonsters() async {
+    debugPrint('getMonsters');
     final auth = ref.read(authProvider);
 
     if (auth == null) {
@@ -26,10 +30,18 @@ class ManageNotifier extends Notifier<List<Monster>> {
       return null;
     }
 
+    final order = ref.read(manageOrderProvider);
+    final orderBy = order.orderBy.name.toSnakeCase().toUpperCase();
+    final orderDirection = order.orderDirection.name
+        .toSnakeCase()
+        .toUpperCase();
+
+    debugPrint('orderBy: $orderBy, orderDirection: $orderDirection');
+
     final document = r'''
-    query getMonsters {
+    query getMonsters($orderBy: MnstrOrderByInput, $orderDirection: MnstrOrderDirectionInput) {
       mnstrs {
-        list {
+        list(orderBy: $orderBy, orderDirection: $orderDirection) {
           id
           mnstrName
           mnstrDescription
@@ -59,11 +71,17 @@ class ManageNotifier extends Notifier<List<Monster>> {
       'Authorization': 'Bearer ${auth.token}',
     };
 
+    final variables = {
+      'orderBy': orderBy,
+      'orderDirection': orderDirection,
+    };
+
     try {
       final response = await graphql(
         url: endpoints.baseUrl,
         query: document,
         headers: headers,
+        variables: variables,
       );
 
       if (response['errors'] != null) {
@@ -305,4 +323,68 @@ class ManageEditNotifier extends Notifier<Monster?> {
       return "There was an error editing the monster";
     }
   }
+}
+
+class ManageOrder {
+  final ManageOrderBy orderBy;
+  final ManageOrderDirection orderDirection;
+
+  const ManageOrder({
+    this.orderBy = ManageOrderBy.updatedAt,
+    this.orderDirection = ManageOrderDirection.desc,
+  });
+}
+
+final manageOrderProvider = NotifierProvider<ManageOrderNotifier, ManageOrder>(
+  () => ManageOrderNotifier(),
+);
+
+class ManageOrderNotifier extends Notifier<ManageOrder> {
+  @override
+  ManageOrder build() {
+    return ManageOrder();
+  }
+
+  void set({
+    ManageOrderBy orderBy = ManageOrderBy.updatedAt,
+    ManageOrderDirection orderDirection = ManageOrderDirection.desc,
+  }) {
+    state = ManageOrder(orderBy: orderBy, orderDirection: orderDirection);
+    setManageOrder(orderBy, orderDirection);
+  }
+
+  Future<void> init() async {
+    final (orderBy, orderDirection) = await getManageOrderBy();
+    set(orderBy: orderBy, orderDirection: orderDirection);
+  }
+}
+
+enum ManageOrderByKey { manageOrderBy }
+
+enum ManageOrderDirectionKey { manageOrderDirection }
+
+Future<void> setManageOrder(
+  ManageOrderBy by,
+  ManageOrderDirection direction,
+) async {
+  final prefs = await SharedPreferences.getInstance();
+  prefs.setString(ManageOrderByKey.manageOrderBy.name, by.name);
+  prefs.setString(
+    ManageOrderDirectionKey.manageOrderDirection.name,
+    direction.name,
+  );
+}
+
+Future<(ManageOrderBy, ManageOrderDirection)> getManageOrderBy() async {
+  final prefs = await SharedPreferences.getInstance();
+  return (
+    ManageOrderBy.values.byName(
+      prefs.getString(ManageOrderByKey.manageOrderBy.name) ??
+          ManageOrderBy.updatedAt.name,
+    ),
+    ManageOrderDirection.values.byName(
+      prefs.getString(ManageOrderDirectionKey.manageOrderDirection.name) ??
+          ManageOrderDirection.asc.name,
+    ),
+  );
 }
