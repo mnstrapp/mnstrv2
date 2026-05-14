@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
+import '../manage/list.dart';
+import '../providers/manage.dart';
 import '../providers/session_users.dart';
 import '../shared/layout_scaffold.dart';
 import '../shared/mnstr_list.dart';
@@ -52,6 +54,8 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
   bool _choosingMnstr = true;
   bool _inBattle = false;
   bool _isChallenger = false;
+  bool _isLoading = false;
+  ManageOrder? _order;
 
   Future<void> _initUser() async {
     final user = ref.read(sessionUserProvider);
@@ -199,6 +203,33 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
     });
   }
 
+  Future<void> _setOrder({
+    required ManageOrderBy orderBy,
+    required ManageOrderDirection orderDirection,
+  }) async {
+    setState(() {
+      _isLoading = true;
+    });
+    ref
+        .read(manageOrderProvider.notifier)
+        .set(
+          orderBy: orderBy,
+          orderDirection: orderDirection,
+        );
+    setState(() {
+      _order = ref.read(manageOrderProvider);
+    });
+    await ref.read(manageProvider.notifier).getMonsters();
+    final monsters = ref.read(manageProvider);
+    if (mounted) {
+      setState(() {
+        _challengerMnstrs = monsters;
+        _opponentMnstrs = monsters;
+        _isLoading = false;
+      });
+    }
+  }
+
   @override
   void dispose() {
     widget.onDispose(_handleMessage);
@@ -224,43 +255,135 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
 
     final size = MediaQuery.sizeOf(context);
 
+    final inputDecorationTheme = InputDecorationTheme(
+      fillColor: Colors.white.withValues(alpha: 0.5),
+      filled: true,
+      contentPadding: const EdgeInsets.only(left: 16, right: 16),
+      border: OutlineInputBorder(
+        borderSide: BorderSide(color: Colors.transparent),
+      ),
+    );
+
     return choosingMnstr && mnstrs.isNotEmpty
         ? SizedBox(
             height: size.height,
             width: size.width,
-            child: MnstrList(
-              // showName: false,
-              monsters: mnstrs,
-              onTap: _chooseMnstr,
-              filter: (mnstr) {
-                return mnstr.currentHealth != null && mnstr.currentHealth! > 0;
-              },
-              overlayBuilder: (mnstr) {
-                final m = mnstr.toMonsterModel();
-                final color = darkenColor(
-                  Color.lerp(m.color, Colors.black, 0.1) ?? Colors.black,
-                  0.3,
-                );
-                return Stack(
-                  children: [
-                    Positioned(
-                      bottom: 16,
-                      left: 16,
-                      right: 16,
-                      child: UIButton(
-                        height: 48,
-                        onPressed: () {
-                          _chooseMnstr(mnstr);
-                        },
-                        icon: Icons.play_arrow_rounded,
-                        backgroundColor: color,
-                        text: 'Choose',
-                      ),
-                    ),
-                  ],
-                );
-              },
-            ),
+            child: _isLoading
+                ? const Center(child: CircularProgressIndicator())
+                : MnstrList(
+                    // showName: false,
+                    monsters: mnstrs,
+                    onTap: _chooseMnstr,
+                    filter: (mnstr) {
+                      return mnstr.currentHealth != null &&
+                          mnstr.currentHealth! > 0;
+                    },
+                    overlayBuilder: (mnstr) {
+                      final m = mnstr.toMonsterModel();
+                      final color = darkenColor(
+                        Color.lerp(m.color, Colors.black, 0.1) ?? Colors.black,
+                        0.3,
+                      );
+                      return Stack(
+                        children: [
+                          Positioned(
+                            bottom: 16,
+                            left: 16,
+                            right: 16,
+                            child: UIButton(
+                              height: 48,
+                              onPressed: () {
+                                _chooseMnstr(mnstr);
+                              },
+                              icon: Icons.play_arrow_rounded,
+                              backgroundColor: color,
+                              text: 'Choose',
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 80,
+                            left: 0,
+                            right: 0,
+                            child: SafeArea(
+                              child: Center(
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.5),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  padding: const EdgeInsets.all(8),
+                                  margin: const EdgeInsets.only(
+                                    left: 32,
+                                    right: 32,
+                                  ),
+                                  child: Row(
+                                    spacing: 16,
+                                    children: [
+                                      Icon(Icons.sort_rounded),
+                                      DropdownMenu(
+                                        inputDecorationTheme:
+                                            inputDecorationTheme,
+                                        dropdownMenuEntries: ManageOrderBy
+                                            .values
+                                            .map(
+                                              (e) => DropdownMenuEntry(
+                                                value: e,
+                                                label: e.name,
+                                              ),
+                                            )
+                                            .toList(),
+                                        enableFilter: true,
+                                        initialSelection:
+                                            _order?.orderBy ??
+                                            ManageOrderBy.updatedAt,
+                                        onSelected: (value) {
+                                          _setOrder(
+                                            orderBy:
+                                                value ??
+                                                ManageOrderBy.updatedAt,
+                                            orderDirection:
+                                                _order?.orderDirection ??
+                                                ManageOrderDirection.desc,
+                                          );
+                                        },
+                                      ),
+                                      DropdownMenu(
+                                        inputDecorationTheme:
+                                            inputDecorationTheme,
+                                        dropdownMenuEntries:
+                                            ManageOrderDirection.values
+                                                .map(
+                                                  (e) => DropdownMenuEntry(
+                                                    value: e,
+                                                    label: e.name,
+                                                  ),
+                                                )
+                                                .toList(),
+                                        enableFilter: true,
+                                        initialSelection:
+                                            _order?.orderDirection ??
+                                            ManageOrderDirection.desc,
+                                        onSelected: (value) {
+                                          _setOrder(
+                                            orderBy:
+                                                _order?.orderBy ??
+                                                ManageOrderBy.updatedAt,
+                                            orderDirection:
+                                                value ??
+                                                ManageOrderDirection.desc,
+                                          );
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
           )
         : inBattle
         ? BattleVsInGameView(

@@ -183,8 +183,6 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
       return;
     }
 
-    final user = ref.read(sessionUserProvider);
-
     try {
       if (mounted) {
         setState(() {
@@ -285,7 +283,6 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final user = ref.read(sessionUserProvider);
-
 
       setState(() {
         _isLoading = true;
