@@ -86,7 +86,6 @@ class MonsterContainer extends StatelessWidget {
                     monsterName,
                     style: thm.baseTextTheme.titleLarge?.copyWith(
                       color: thm.baseTheme.colorScheme.surface,
-                      fontFamily: 'Silkscreen',
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),

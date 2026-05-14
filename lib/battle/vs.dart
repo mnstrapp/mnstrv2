@@ -270,119 +270,119 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
             width: size.width,
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : MnstrList(
-                    // showName: false,
-                    monsters: mnstrs,
-                    onTap: _chooseMnstr,
-                    filter: (mnstr) {
-                      return mnstr.currentHealth != null &&
-                          mnstr.currentHealth! > 0;
-                    },
-                    overlayBuilder: (mnstr) {
-                      final m = mnstr.toMonsterModel();
-                      final color = darkenColor(
-                        Color.lerp(m.color, Colors.black, 0.1) ?? Colors.black,
-                        0.3,
-                      );
-                      return Stack(
-                        children: [
-                          Positioned(
-                            bottom: 16,
-                            left: 16,
-                            right: 16,
-                            child: UIButton(
-                              height: 48,
-                              onPressed: () {
-                                _chooseMnstr(mnstr);
-                              },
-                              icon: Icons.play_arrow_rounded,
-                              backgroundColor: color,
-                              text: 'Choose',
-                            ),
-                          ),
-                          Positioned(
-                            bottom: 80,
-                            left: 0,
-                            right: 0,
-                            child: SafeArea(
-                              child: Center(
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: Colors.white.withValues(alpha: 0.5),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  padding: const EdgeInsets.all(8),
-                                  margin: const EdgeInsets.only(
-                                    left: 32,
-                                    right: 32,
-                                  ),
-                                  child: Row(
-                                    spacing: 16,
-                                    children: [
-                                      Icon(Icons.sort_rounded),
-                                      DropdownMenu(
-                                        inputDecorationTheme:
-                                            inputDecorationTheme,
-                                        dropdownMenuEntries: ManageOrderBy
-                                            .values
-                                            .map(
-                                              (e) => DropdownMenuEntry(
-                                                value: e,
-                                                label: e.name,
-                                              ),
-                                            )
-                                            .toList(),
-                                        enableFilter: true,
-                                        initialSelection:
-                                            _order?.orderBy ??
-                                            ManageOrderBy.updatedAt,
-                                        onSelected: (value) {
-                                          _setOrder(
-                                            orderBy:
-                                                value ??
-                                                ManageOrderBy.updatedAt,
-                                            orderDirection:
-                                                _order?.orderDirection ??
-                                                ManageOrderDirection.desc,
-                                          );
-                                        },
-                                      ),
-                                      DropdownMenu(
-                                        inputDecorationTheme:
-                                            inputDecorationTheme,
-                                        dropdownMenuEntries:
-                                            ManageOrderDirection.values
-                                                .map(
-                                                  (e) => DropdownMenuEntry(
-                                                    value: e,
-                                                    label: e.name,
-                                                  ),
-                                                )
-                                                .toList(),
-                                        enableFilter: true,
-                                        initialSelection:
+                : Stack(
+                    children: [
+                      MnstrList(
+                        // showName: false,
+                        monsters: mnstrs,
+                        onTap: _chooseMnstr,
+                        filter: (mnstr) {
+                          return mnstr.currentHealth != null &&
+                              mnstr.currentHealth! > 0;
+                        },
+                        overlayBuilder: (mnstr) {
+                          final m = mnstr.toMonsterModel();
+                          final color = darkenColor(
+                            Color.lerp(m.color, Colors.black, 0.1) ??
+                                Colors.black,
+                            0.3,
+                          );
+                          return Stack(
+                            children: [
+                              Positioned(
+                                bottom: 16,
+                                left: 16,
+                                right: 16,
+                                child: UIButton(
+                                  height: 48,
+                                  onPressed: () {
+                                    _chooseMnstr(mnstr);
+                                  },
+                                  icon: Icons.play_arrow_rounded,
+                                  backgroundColor: color,
+                                  text: 'Choose',
+                                ),
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      Positioned(
+                        bottom: 80,
+                        left: 0,
+                        right: 0,
+                        child: SafeArea(
+                          child: Center(
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.5),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              padding: const EdgeInsets.all(8),
+                              margin: const EdgeInsets.only(
+                                left: 32,
+                                right: 32,
+                              ),
+                              child: Row(
+                                spacing: 16,
+                                children: [
+                                  Icon(Icons.sort_rounded),
+                                  DropdownMenu(
+                                    inputDecorationTheme: inputDecorationTheme,
+                                    dropdownMenuEntries: ManageOrderBy.values
+                                        .map(
+                                          (e) => DropdownMenuEntry(
+                                            value: e,
+                                            label: e.name,
+                                          ),
+                                        )
+                                        .toList(),
+                                    enableFilter: true,
+                                    initialSelection:
+                                        _order?.orderBy ??
+                                        ManageOrderBy.updatedAt,
+                                    onSelected: (value) {
+                                      _setOrder(
+                                        orderBy:
+                                            value ?? ManageOrderBy.updatedAt,
+                                        orderDirection:
                                             _order?.orderDirection ??
                                             ManageOrderDirection.desc,
-                                        onSelected: (value) {
-                                          _setOrder(
-                                            orderBy:
-                                                _order?.orderBy ??
-                                                ManageOrderBy.updatedAt,
-                                            orderDirection:
-                                                value ??
-                                                ManageOrderDirection.desc,
-                                          );
-                                        },
-                                      ),
-                                    ],
+                                      );
+                                    },
                                   ),
-                                ),
+                                  DropdownMenu(
+                                    inputDecorationTheme: inputDecorationTheme,
+                                    dropdownMenuEntries: ManageOrderDirection
+                                        .values
+                                        .map(
+                                          (e) => DropdownMenuEntry(
+                                            value: e,
+                                            label: e.name,
+                                          ),
+                                        )
+                                        .toList(),
+                                    enableFilter: true,
+                                    initialSelection:
+                                        _order?.orderDirection ??
+                                        ManageOrderDirection.desc,
+                                    onSelected: (value) {
+                                      _setOrder(
+                                        orderBy:
+                                            _order?.orderBy ??
+                                            ManageOrderBy.updatedAt,
+                                        orderDirection:
+                                            value ?? ManageOrderDirection.desc,
+                                      );
+                                    },
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                        ],
-                      );
-                    },
+                        ),
+                      ),
+                    ],
                   ),
           )
         : inBattle

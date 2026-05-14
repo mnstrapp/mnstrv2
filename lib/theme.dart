@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 final baseTheme = ThemeData(useMaterial3: true);
-final baseTextTheme = baseTheme.textTheme.apply(fontFamily: 'Silkscreen');
+final baseTextTheme = baseTheme.textTheme.apply(fontFamily: 'Pixelify');
 
 const primaryColor = Color(0xff00f0ff);
 
