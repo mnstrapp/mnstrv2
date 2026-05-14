@@ -19,6 +19,7 @@
 				"build",
 				"web",
 				"--release",
+				"--wasm"
 			],
 			"group": "build",
 			"problemMatcher": [],
