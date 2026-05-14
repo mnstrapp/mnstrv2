@@ -18,8 +18,7 @@
 			"args": [
 				"build",
 				"web",
-				"--release",
-				"--wasm"
+				"--release"
 			],
 			"group": "build",
 			"problemMatcher": [],
