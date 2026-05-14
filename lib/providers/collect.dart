@@ -80,6 +80,7 @@ class CollectNotifier extends Notifier<Monster?> {
           maxSpeed
           currentMagic
           maxMagic
+          experienceToNextLevel
         }
       }
     }

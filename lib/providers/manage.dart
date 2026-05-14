@@ -149,6 +149,7 @@ class ManageGetByQRNotifier extends Notifier<Monster?> {
           maxSpeed
           currentMagic
           maxMagic
+          experienceToNextLevel
         }
       }
     }

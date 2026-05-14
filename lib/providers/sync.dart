@@ -1,17 +1,22 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'auth.dart';
+import '../config/endpoints.dart' as endpoints;
 import '../models/monster.dart';
-import 'collect.dart';
+import '../utils/graphql.dart';
 import 'local_storage.dart';
 import 'manage.dart';
 import 'session_users.dart';
 
 enum SyncState {
-  syncing,
+  pushing,
   pushed,
+  pulling,
   pulled,
   done,
 }
@@ -23,137 +28,150 @@ class SyncNotifier extends Notifier<Map<String, SyncState>> {
   }
 
   Future<String?> push() async {
+    final user = ref.read(sessionUserProvider);
+    if (user == null) {
+      return 'User not found';
+    }
+
     final mnstrs = await LocalStorage.getMnstrs();
-    final futures = <Future<String?>>[];
     for (var mnstr in mnstrs) {
-      state = {...state, mnstr.id!: SyncState.syncing};
-      futures.add(_processMnstr(mnstr));
+      state = {...state, mnstr.mnstrQrCode!: SyncState.pushing};
     }
-    final errors = await Future.wait(futures);
-    return errors.firstOrNull;
-  }
-
-  Future<String?> _processMnstr(Monster mnstr) async {
-    final error = await ref
-        .read(manageGetByQRProvider.notifier)
-        .get(mnstr.mnstrQrCode ?? '');
-    if (error != null) {
-      // expected if the monster is not in the database
-      final createError = await create(mnstr);
-      state = {...state, mnstr.id!: SyncState.pushed};
-      if (createError != null) {
-        debugPrint('Error creating mnstr: $createError, ${StackTrace.current}');
-        return createError;
-      }
-      return null;
-    }
-    final mnstrFound = ref.read(manageGetByQRProvider);
-    debugPrint('mnstr found: ${mnstrFound?.mnstrName} ${mnstrFound?.id}');
-    if (mnstrFound != null) {
-      mnstr = Monster.fromSync(mnstrFound, mnstr);
-      final error = await update(mnstr);
-      state = {...state, mnstr.id!: SyncState.pushed};
-      if (error != null) {
-        debugPrint('Error updating mnstr: $error, ${StackTrace.current}');
-        return error;
-      }
+    final updateError = await _updateMnstrs(mnstrs);
+    if (updateError != null) {
+      debugPrint('Error updating mnstrs: $updateError, ${StackTrace.current}');
+      return updateError;
     }
     return null;
   }
 
-  Future<String?> create(Monster mnstr) async {
-    debugPrint('Creating mnstr: ${mnstr.mnstrName}');
-    String? error = await ref
-        .read(collectProvider.notifier)
-        .createMonster(mnstr);
-    if (error != null) {
-      debugPrint('Error creating: ${mnstr.mnstrName}');
-      debugPrint('Error: $error, ${StackTrace.current}');
-      return error;
+  Future<String?> _updateMnstrs(List<Monster> mnstrs) async {
+    final auth = ref.read(authProvider);
+    if (auth == null) {
+      return 'User not logged in';
     }
-    return null;
-  }
 
-  Future<String?> update(Monster mnstr) async {
-    debugPrint('Updating mnstr: ${mnstr.mnstrName}');
-    final error = await ref
-        .read(manageEditProvider.notifier)
-        .editMonster(mnstr);
-    if (error != null) {
-      debugPrint('Error updating: ${mnstr.mnstrName}');
-      debugPrint('Error: $error, ${StackTrace.current}');
-      return error;
+    final user = ref.read(sessionUserProvider);
+    if (user == null) {
+      return 'User not found';
     }
+
+    final userId = user.id;
+
+    final batchMnstrs = mnstrs
+        .map(
+          (mnstr) => {
+            'id': mnstr.id ?? '',
+            'userId': userId,
+            'mnstrQrCode': mnstr.mnstrQrCode ?? '',
+            'mnstrName': mnstr.mnstrName ?? '',
+            'mnstrDescription': mnstr.mnstrDescription ?? '',
+            'currentLevel': mnstr.currentLevel ?? 0,
+            'currentExperience': mnstr.currentExperience ?? 0,
+            'experienceToNextLevel': mnstr.experienceToNextLevel ?? 0,
+            'currentHealth': mnstr.currentHealth ?? 0,
+            'maxHealth': mnstr.maxHealth ?? 0,
+            'currentAttack': mnstr.currentAttack ?? 0,
+            'maxAttack': mnstr.maxAttack ?? 0,
+            'currentDefense': mnstr.currentDefense ?? 0,
+            'maxDefense': mnstr.maxDefense ?? 0,
+            'currentIntelligence': mnstr.currentIntelligence ?? 0,
+            'maxIntelligence': mnstr.maxIntelligence ?? 0,
+            'currentSpeed': mnstr.currentSpeed ?? 0,
+            'maxSpeed': mnstr.maxSpeed ?? 0,
+            'currentMagic': mnstr.currentMagic ?? 0,
+            'maxMagic': mnstr.maxMagic ?? 0,
+          },
+        )
+        .toList();
+
+    final document = r'''
+    mutation updateMnstrs($mnstrs: BatchMnstrInput!) {
+      mnstrs {
+        updateBatch(mnstrs: $mnstrs) {
+          id
+          mnstrName
+          mnstrDescription
+          mnstrQrCode
+          currentLevel
+          currentExperience
+          currentHealth
+          maxHealth
+          currentAttack
+          maxAttack
+          currentDefense
+          maxDefense
+          currentIntelligence
+          maxIntelligence
+          currentSpeed
+          maxSpeed
+          currentMagic
+          maxMagic
+          experienceToNextLevel
+        }
+      }
+    }
+    ''';
+
+    final variables = {
+      'mnstrs': {
+        'mnstrs': batchMnstrs,
+      },
+    };
+
+    // final jsonVariables = jsonEncode(variables);
+
+    // debugPrint(jsonVariables);
+
+    final headers = {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${auth.token}',
+    };
+
+    final response = await graphql(
+      url: endpoints.baseUrl,
+      query: document,
+      variables: variables,
+      headers: headers,
+    );
+
+    if (response['errors'] != null) {
+      debugPrint('Error updating mnstrs: ${response['errors']}');
+      return "There was an error updating the monsters";
+    }
+
+    final updatedMnstrs = response['data']['mnstrs']['updateBatch'];
+    for (var mnstr in updatedMnstrs) {
+      final updatedMnstr = Monster.fromJson(mnstr);
+      await LocalStorage.addMnstr(updatedMnstr);
+      state = {...state, updatedMnstr.mnstrQrCode!: SyncState.pushed};
+    }
+
     return null;
   }
 
   Future<String?> pull() async {
-    final user = ref.read(sessionUserProvider);
+    for (var mnstr in state.keys) {
+      state = {...state, mnstr: SyncState.pulling};
+    }
     final error = await ref.read(manageProvider.notifier).getMonsters();
     if (error != null) {
       debugPrint('Error pulling: $error, ${StackTrace.current}');
       return error;
     }
+
     final mnstrs = ref.read(manageProvider);
-    final futures = <Future<String?>>[];
     for (var mnstr in mnstrs) {
-      // futures.add(compute(pullOne, mnstr));
-      futures.add(pullOne(mnstr));
-    }
-    final errors = await Future.wait(futures);
-    return errors.firstOrNull;
-  }
-
-  Future<String?> pushOne(Monster mnstr) async {
-    String? error = await ref
-        .read(manageGetByQRProvider.notifier)
-        .get(mnstr.mnstrQrCode!);
-    if (error != null) {
-      debugPrint('[pushOne] Error: $error, ${StackTrace.current}');
-      return error;
-    }
-    final mnstrFound = ref.read(manageGetByQRProvider);
-    if (mnstrFound != null) {
-      mnstr = Monster.fromSync(mnstrFound, mnstr);
-      error = await ref.read(manageEditProvider.notifier).editMonster(mnstr);
-      if (error != null) {
-        debugPrint('[pushOne] Error: $error, ${StackTrace.current}');
-        return error;
-      }
-      return null;
-    }
-    error = await ref.read(collectProvider.notifier).createMonster(mnstr);
-    if (error != null) {
-      debugPrint('[pushOne] Error: $error, ${StackTrace.current}');
-      return error;
-    }
-    return null;
-  }
-
-  Future<String?> pullOne(Monster mnstr) async {
-    state = {...state, mnstr.id!: SyncState.syncing};
-    String? error = await ref
-        .read(manageGetByQRProvider.notifier)
-        .get(mnstr.mnstrQrCode!);
-    if (error != null) {
-      state = {...state, mnstr.id!: SyncState.pulled};
-      debugPrint('[pullOne] Error: $error, ${StackTrace.current}');
-      return error;
-    }
-    final mnstrFound = ref.read(manageGetByQRProvider);
-    if (mnstrFound != null) {
-      mnstr = Monster.fromSync(mnstrFound, mnstr);
       await LocalStorage.addMnstr(mnstr);
-      state = {...state, mnstr.id!: SyncState.pulled};
-      return null;
+      state = {...state, mnstr.mnstrQrCode!: SyncState.pulled};
     }
+
     return null;
   }
 
   Future<String?> sync({bool onlyPush = true}) async {
     state = {};
     ref.read(previouslySyncedProvider.notifier).setPreviouslySynced(false);
-    final user = ref.read(sessionUserProvider);
     final error = await push();
     if (error != null) {
       debugPrint('[sync] Error: $error, ${StackTrace.current}');

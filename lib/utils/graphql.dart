@@ -25,7 +25,7 @@ Future<Map<String, dynamic>> graphql({
     if (response.statusCode == HttpStatus.ok) {
       try {
         return jsonDecode(response.body);
-      } catch (e, stackTrace) {
+      } catch (e) {
         throw Exception(
           'Failed to parse response: ${response.statusCode}, ${response.body}, $e',
         );
@@ -36,9 +36,9 @@ Future<Map<String, dynamic>> graphql({
       );
     }
   } catch (e, stackTrace) {
-    debugPrint('[graphql] Error: $e');
+    debugPrint('[graphql] Error: $e, StackTrace: $stackTrace');
     throw Exception(
-      'Failed to load data: $e $stackTrace',
+      'Failed to load data: $e',
     );
   }
 }

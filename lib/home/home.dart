@@ -167,15 +167,24 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final buttonColor = Theme.of(context).colorScheme.onPrimary;
 
     final syncState = ref.watch(syncProvider);
+    final pushing = syncState.values
+        .where((state) => state == SyncState.pushing)
+        .length;
     final pushed = syncState.values
         .where((state) => state == SyncState.pushed)
         .length;
     final pulled = syncState.values
         .where((state) => state == SyncState.pulled)
         .length;
+    final pulling = syncState.values
+        .where((state) => state == SyncState.pulling)
+        .length;
 
     final current = (pulled + pushed) > 0 ? (pulled + pushed) : 0;
-    final total = syncState.isNotEmpty ? syncState.length : 0;
+    final syncing = (pulling + pushing) > 0 ? (pulling + pushing) : 0;
+    final total = (syncing + current) > 0 ? (syncing + current) : 0;
+
+    final isPushing = (pushing + pushed) > (pulling + pulled);
 
     return LayoutScaffold(
       key: layoutKey,
@@ -192,7 +201,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   mainAxisSize: MainAxisSize.min,
                   spacing: 16,
                   children: [
-                    Text('Syncing your local and remote MNSTRs'),
+                    if (isPushing) Text('Pushing your local MNSTRs'),
+                    if (!isPushing) Text('Pulling your remote MNSTRs'),
                     total > 0
                         ? StatBarContainer(
                             leading: Row(

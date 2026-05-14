@@ -61,7 +61,7 @@ class LocalStorage {
     return result.map((e) => Monster.fromDb(e)).toList().firstOrNull;
   }
 
-  static addMnstr(Monster mnstr) async {
+  static Future<void> addMnstr(Monster mnstr) async {
     final now = DateTime.now();
     mnstr.id ??= Uuid().v4();
     mnstr.createdAt ??= now;
@@ -77,7 +77,7 @@ class LocalStorage {
     }
   }
 
-  static clearMnstrs() async {
+  static Future<void> clearMnstrs() async {
     await database.execute('delete from mnstrs');
   }
 }
