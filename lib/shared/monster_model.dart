@@ -144,6 +144,7 @@ class MonsterParts {
       _ => AssetImage('assets/mnstr_parts/horns_short.png'),
     };
     return Image(
+      key: UniqueKey(),
       image: hornsImage,
       width: width,
       height: height,
@@ -160,6 +161,7 @@ class MonsterParts {
         ? AssetImage('assets/mnstr_parts/arms_two.png')
         : AssetImage('assets/mnstr_parts/arms_four.png');
     return Image(
+      key: UniqueKey(),
       image: armsImage,
       width: width,
       height: height,
@@ -176,6 +178,7 @@ class MonsterParts {
         ? AssetImage('assets/mnstr_parts/legs_long.png')
         : AssetImage('assets/mnstr_parts/legs_short.png');
     return Image(
+      key: UniqueKey(),
       image: legsImage,
       width: width,
       height: height,
@@ -194,6 +197,7 @@ class MonsterParts {
         ? AssetImage('assets/mnstr_parts/tail_twins.png')
         : AssetImage('assets/mnstr_parts/tail_stripes.png');
     return Image(
+      key: UniqueKey(),
       image: tailImage,
       width: width,
       height: height,
@@ -208,6 +212,7 @@ class MonsterParts {
     final height = size.height * factor;
     final bodyImage = AssetImage('assets/mnstr_parts/body_base.png');
     return Image(
+      key: UniqueKey(),
       image: bodyImage,
       width: width,
       height: height,
