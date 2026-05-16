@@ -2,9 +2,9 @@ import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart';
 
 import '../models/monster.dart';
+import '../main.dart';
 
 class MonsterModel {
   String? id;
@@ -116,21 +116,16 @@ class MonsterParts {
     final factor = scale / 2;
     final width = size.width * factor;
     final height = size.height * factor;
-    if (monster.head == 0) {
-      return Image.asset(
-        backside
-            ? 'assets/mnstr_parts/head_1-back.png'
-            : 'assets/mnstr_parts/head_1.png',
-        width: width,
-        height: height,
-        color: monster.color,
-        colorBlendMode: BlendMode.srcATop,
-      );
-    }
-    return Image.asset(
-      backside
-          ? 'assets/mnstr_parts/head_2-back.png'
-          : 'assets/mnstr_parts/head_2.png',
+    final headImage = monster.head == 0
+        ? (backside
+              ? AssetImage('assets/mnstr_parts/head_1-back.png')
+              : AssetImage('assets/mnstr_parts/head_1.png'))
+        : (backside
+              ? AssetImage('assets/mnstr_parts/head_2-back.png')
+              : AssetImage('assets/mnstr_parts/head_2.png'));
+    return Image(
+      key: UniqueKey(),
+      image: headImage,
       width: width,
       height: height,
       color: monster.color,
@@ -142,50 +137,30 @@ class MonsterParts {
     final factor = scale / 2;
     final width = size.width * factor;
     final height = size.height * factor;
-    switch (monster.horns) {
-      case 0:
-        return Image.asset(
-          'assets/mnstr_parts/horns_short.png',
-          width: width,
-          height: height,
-          color: monster.color,
-          colorBlendMode: BlendMode.srcATop,
-        );
-      case 1:
-        return Image.asset(
-          'assets/mnstr_parts/horns_spiraled.png',
-          width: width,
-          height: height,
-          color: monster.color,
-          colorBlendMode: BlendMode.srcATop,
-        );
-      case 2:
-        return Image.asset(
-          'assets/mnstr_parts/horns_striped.png',
-          width: width,
-          height: height,
-          color: monster.color,
-          colorBlendMode: BlendMode.srcATop,
-        );
-    }
-    return null;
+    final hornsImage = switch (monster.horns) {
+      0 => AssetImage('assets/mnstr_parts/horns_short.png'),
+      1 => AssetImage('assets/mnstr_parts/horns_spiraled.png'),
+      2 => AssetImage('assets/mnstr_parts/horns_striped.png'),
+      _ => AssetImage('assets/mnstr_parts/horns_short.png'),
+    };
+    return Image(
+      image: hornsImage,
+      width: width,
+      height: height,
+      color: monster.color,
+      colorBlendMode: BlendMode.srcATop,
+    );
   }
 
   Widget get arms {
     final factor = scale / 2;
     final width = size.width * factor;
     final height = size.height * factor;
-    if (monster.arms == 0) {
-      return Image.asset(
-        'assets/mnstr_parts/arms_two.png',
-        width: width,
-        height: height,
-        color: monster.color,
-        colorBlendMode: BlendMode.srcATop,
-      );
-    }
-    return Image.asset(
-      'assets/mnstr_parts/arms_four.png',
+    final armsImage = monster.arms == 0
+        ? AssetImage('assets/mnstr_parts/arms_two.png')
+        : AssetImage('assets/mnstr_parts/arms_four.png');
+    return Image(
+      image: armsImage,
       width: width,
       height: height,
       color: monster.color,
@@ -197,17 +172,11 @@ class MonsterParts {
     final factor = scale / 2;
     final width = size.width * factor;
     final height = size.height * factor;
-    if (monster.legs == 0) {
-      return Image.asset(
-        'assets/mnstr_parts/legs_long.png',
-        width: width,
-        height: height,
-        color: monster.color,
-        colorBlendMode: BlendMode.srcATop,
-      );
-    }
-    return Image.asset(
-      'assets/mnstr_parts/legs_short.png',
+    final legsImage = monster.legs == 0
+        ? AssetImage('assets/mnstr_parts/legs_long.png')
+        : AssetImage('assets/mnstr_parts/legs_short.png');
+    return Image(
+      image: legsImage,
       width: width,
       height: height,
       color: monster.color,
@@ -219,41 +188,27 @@ class MonsterParts {
     final factor = scale / 2;
     final width = size.width * factor;
     final height = size.height * factor;
-    switch (monster.horns) {
-      case 0:
-        return Image.asset(
-          'assets/mnstr_parts/tail_long.png',
-          width: width,
-          height: height,
-          color: monster.color,
-          colorBlendMode: BlendMode.srcATop,
-        );
-      case 1:
-        return Image.asset(
-          'assets/mnstr_parts/tail_twins.png',
-          width: width,
-          height: height,
-          color: monster.color,
-          colorBlendMode: BlendMode.srcATop,
-        );
-      case 2:
-        return Image.asset(
-          'assets/mnstr_parts/tail_stripes.png',
-          width: width,
-          height: height,
-          color: monster.color,
-          colorBlendMode: BlendMode.srcATop,
-        );
-    }
-    return null;
+    final tailImage = monster.tail == 0
+        ? AssetImage('assets/mnstr_parts/tail_long.png')
+        : monster.tail == 1
+        ? AssetImage('assets/mnstr_parts/tail_twins.png')
+        : AssetImage('assets/mnstr_parts/tail_stripes.png');
+    return Image(
+      image: tailImage,
+      width: width,
+      height: height,
+      color: monster.color,
+      colorBlendMode: BlendMode.srcATop,
+    );
   }
 
-  Image get body {
+  Widget get body {
     final factor = scale / 2;
     final width = size.width * factor;
     final height = size.height * factor;
-    return Image.asset(
-      'assets/mnstr_parts/body_base.png',
+    final bodyImage = AssetImage('assets/mnstr_parts/body_base.png');
+    return Image(
+      image: bodyImage,
       width: width,
       height: height,
       color: monster.color,
