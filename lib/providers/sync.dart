@@ -46,6 +46,10 @@ class SyncNotifier extends Notifier<Map<String, SyncState>> {
   }
 
   Future<String?> _updateMnstrs(List<Monster> mnstrs) async {
+    if (mnstrs.isEmpty) {
+      return null;
+    }
+
     final auth = ref.read(authProvider);
     if (auth == null) {
       return 'User not logged in';
