@@ -382,6 +382,19 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
                 );
                 _socket?.sink.add(jsonEncode(battleQueue.toJson()));
               },
+              reconnect: () {
+                _connect();
+                setState(() {
+                  _reconnect = false;
+                  _messages = [
+                    ..._messages,
+                    BattleMessage(
+                      type: BattleMessageType.message,
+                      message: 'Reconnecting to battle queue',
+                    ),
+                  ];
+                });
+              },
             )
           : SafeArea(
               child: _isLoading

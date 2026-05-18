@@ -21,7 +21,12 @@ class CollectNotifier extends Notifier<Monster?> {
     final auth = ref.read(authProvider);
 
     if (auth == null) {
-      await LocalStorage.addMnstr(monster);
+      final error = await LocalStorage.addMnstr(monster);
+      if (error != null) {
+        debugPrint('[createMonster] Error: $error, ${StackTrace.current}');
+        return error;
+      }
+
       state = monster;
       return null;
     }
@@ -127,7 +132,6 @@ class CollectNotifier extends Notifier<Monster?> {
 
       final monster = Monster.fromJson(response['data']['mnstrs']['create']);
       state = monster;
-      LocalStorage.addMnstr(monster);
 
       return null;
     } catch (e, stackTrace) {

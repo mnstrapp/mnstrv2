@@ -93,9 +93,7 @@ class ManageNotifier extends Notifier<List<Monster>> {
         monsters.add(Monster.fromJson(e as Map<String, dynamic>));
       }
       state = monsters;
-      for (var monster in monsters) {
-        await LocalStorage.addMnstr(monster);
-      }
+      debugPrint('monsters: ${monsters.length}');
 
       return null;
     } catch (e, stackTrace) {
@@ -181,7 +179,6 @@ class ManageGetByQRNotifier extends Notifier<Monster?> {
       final monster = Monster.fromJson(response['data']['mnstrs']['qrCode']);
 
       state = monster;
-      LocalStorage.addMnstr(monster);
 
       return null;
     } catch (e, stackTrace) {
@@ -209,9 +206,12 @@ class ManageEditNotifier extends Notifier<Monster?> {
     final auth = ref.read(authProvider);
 
     if (auth == null) {
-      await LocalStorage.addMnstr(monster);
+      final error = await LocalStorage.addMnstr(monster);
+      if (error != null) {
+        debugPrint('[editMonster] Error: $error, ${StackTrace.current}');
+        return error;
+      }
       state = monster;
-      await ref.read(manageProvider.notifier).getMonsters();
       return null;
     }
 
@@ -314,9 +314,6 @@ class ManageEditNotifier extends Notifier<Monster?> {
 
       final monster = Monster.fromJson(response['data']['mnstrs']['update']);
       state = monster;
-
-      await LocalStorage.addMnstr(monster);
-      await ref.read(manageProvider.notifier).getMonsters();
 
       return null;
     } catch (e, stackTrace) {

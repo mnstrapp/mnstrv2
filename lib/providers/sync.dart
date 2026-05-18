@@ -14,10 +14,10 @@ import 'manage.dart';
 import 'session_users.dart';
 
 enum SyncState {
+  merging,
+  merged,
   pushing,
   pushed,
-  pulling,
-  pulled,
   done,
 }
 
@@ -147,47 +147,101 @@ class SyncNotifier extends Notifier<Map<String, SyncState>> {
     final updatedMnstrs = response['data']['mnstrs']['updateBatch'];
     for (var mnstr in updatedMnstrs) {
       final updatedMnstr = Monster.fromJson(mnstr);
-      await LocalStorage.addMnstr(updatedMnstr);
       state = {...state, updatedMnstr.mnstrQrCode!: SyncState.pushed};
     }
 
     return null;
   }
 
-  Future<String?> pull() async {
-    for (var mnstr in state.keys) {
-      state = {...state, mnstr: SyncState.pulling};
+  Future<String?> merge() async {
+    final localMnstrs = await LocalStorage.getMnstrs();
+    if (localMnstrs.isEmpty) {
+      return null;
     }
+
     final error = await ref.read(manageProvider.notifier).getMonsters();
     if (error != null) {
-      debugPrint('Error pulling: $error, ${StackTrace.current}');
+      debugPrint('[merge] Error: $error, ${StackTrace.current}');
       return error;
     }
 
-    final mnstrs = ref.read(manageProvider);
-    for (var mnstr in mnstrs) {
-      await LocalStorage.addMnstr(mnstr);
-      state = {...state, mnstr.mnstrQrCode!: SyncState.pulled};
-    }
+    final syncMnstrs = ref.read(manageProvider);
+    debugPrint(
+      '[merge] syncMnstrs: ${syncMnstrs.map((e) => e.mnstrName).join(', ')}',
+    );
 
+    if (syncMnstrs.isNotEmpty) {
+      for (Monster mnstr in localMnstrs) {
+        state = {...state, mnstr.mnstrQrCode!: SyncState.merging};
+        for (var syncMnstr in syncMnstrs) {
+          if (mnstr.mnstrQrCode == syncMnstr.mnstrQrCode) {
+            mnstr.archivedAt = syncMnstr.archivedAt;
+            mnstr.createdAt = syncMnstr.createdAt;
+            mnstr.updatedAt = syncMnstr.updatedAt;
+            mnstr.currentLevel = syncMnstr.currentLevel;
+            mnstr.currentExperience = syncMnstr.currentExperience;
+            mnstr.currentHealth = syncMnstr.currentHealth;
+            mnstr.maxHealth = syncMnstr.maxHealth;
+            mnstr.currentAttack = syncMnstr.currentAttack;
+            mnstr.maxAttack = syncMnstr.maxAttack;
+            mnstr.currentDefense = syncMnstr.currentDefense;
+            mnstr.maxDefense = syncMnstr.maxDefense;
+            mnstr.currentIntelligence = syncMnstr.currentIntelligence;
+            mnstr.maxIntelligence = syncMnstr.maxIntelligence;
+            mnstr.currentSpeed = syncMnstr.currentSpeed;
+            mnstr.maxSpeed = syncMnstr.maxSpeed;
+            mnstr.currentMagic = syncMnstr.currentMagic;
+            mnstr.maxMagic = syncMnstr.maxMagic;
+            mnstr.experienceToNextLevel = syncMnstr.experienceToNextLevel;
+            mnstr.id = syncMnstr.id;
+            mnstr.userId = syncMnstr.userId;
+            mnstr.mnstrName = syncMnstr.mnstrName;
+            mnstr.mnstrDescription = syncMnstr.mnstrDescription;
+            mnstr.mnstrQrCode = syncMnstr.mnstrQrCode;
+            break;
+          }
+        }
+        final updateError = await LocalStorage.updateMnstr(mnstr);
+        if (updateError != null) {
+          debugPrint('[merge] Error: $updateError, ${StackTrace.current}');
+          return updateError;
+        }
+        state = {...state, mnstr.mnstrQrCode!: SyncState.merged};
+      }
+    }
     return null;
   }
 
-  Future<String?> sync({bool onlyPush = true}) async {
+  Future<String?> sync() async {
     state = {};
     ref.read(previouslySyncedProvider.notifier).setPreviouslySynced(false);
-    final error = await push();
-    if (error != null) {
-      debugPrint('[sync] Error: $error, ${StackTrace.current}');
-      return error;
+
+    List<Monster> localMnstrs = await LocalStorage.getMnstrs();
+    debugPrint(
+      '[sync] before merge localMnstrs: ${localMnstrs.map((e) => e.mnstrName).join(', ')}',
+    );
+    final mergeError = await merge();
+    if (mergeError != null) {
+      debugPrint('[sync] Error: $mergeError, ${StackTrace.current}');
+      return mergeError;
     }
-    if (!onlyPush) {
-      final error = await pull();
-      if (error != null) {
-        debugPrint('[sync] Error: $error, ${StackTrace.current}');
-        return error;
-      }
+
+    localMnstrs = await LocalStorage.getMnstrs();
+    debugPrint(
+      '[sync] after merge localMnstrs: ${localMnstrs.map((e) => e.mnstrName).join(', ')}',
+    );
+
+    final pushError = await push();
+    if (pushError != null) {
+      debugPrint('[sync] Error: $pushError, ${StackTrace.current}');
+      return pushError;
     }
+
+    localMnstrs = await LocalStorage.getMnstrs();
+    debugPrint(
+      '[sync] after push localMnstrs: ${localMnstrs.map((e) => e.mnstrName).join(', ')}',
+    );
+
     ref.read(previouslySyncedProvider.notifier).setPreviouslySynced(true);
     return null;
   }

@@ -125,7 +125,7 @@ class _HomeViewState extends ConsumerState<HomeView> {
     setState(() {
       _syncing = true;
     });
-    String? error = await ref.read(syncProvider.notifier).sync(onlyPush: false);
+    String? error = await ref.read(syncProvider.notifier).sync();
     if (error != null) {
       debugPrint('Error syncing: $error');
     }
@@ -173,18 +173,18 @@ class _HomeViewState extends ConsumerState<HomeView> {
     final pushed = syncState.values
         .where((state) => state == SyncState.pushed)
         .length;
-    final pulled = syncState.values
-        .where((state) => state == SyncState.pulled)
+    final merging = syncState.values
+        .where((state) => state == SyncState.merging)
         .length;
-    final pulling = syncState.values
-        .where((state) => state == SyncState.pulling)
+    final merged = syncState.values
+        .where((state) => state == SyncState.merged)
         .length;
 
-    final current = (pulled + pushed) > 0 ? (pulled + pushed) : 0;
-    final syncing = (pulling + pushing) > 0 ? (pulling + pushing) : 0;
+    final current = (merged + pushed) > 0 ? (merged + pushed) : 0;
+    final syncing = (merging + pushing) > 0 ? (merging + pushing) : 0;
     final total = (syncing + current) > 0 ? (syncing + current) : 0;
 
-    final isPushing = (pushing + pushed) > (pulling + pulled);
+    final isMerging = (merging + merged) > (pushing + pushed);
 
     return LayoutScaffold(
       key: layoutKey,
@@ -201,8 +201,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                   mainAxisSize: MainAxisSize.min,
                   spacing: 16,
                   children: [
-                    if (isPushing) Text('Pushing your local MNSTRs'),
-                    if (!isPushing) Text('Pulling your remote MNSTRs'),
+                    if (isMerging) Text('Merging your remote MNSTRs'),
+                    if (!isMerging) Text('Pushing your local MNSTRs'),
                     total > 0
                         ? StatBarContainer(
                             leading: Row(
@@ -210,7 +210,8 @@ class _HomeViewState extends ConsumerState<HomeView> {
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(Icons.sync),
-                                Text('Syncing'),
+                                if (isMerging) Text('Merging'),
+                                if (!isMerging) Text('Pushing'),
                               ],
                             ),
                             trailing: Text(

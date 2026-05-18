@@ -61,7 +61,7 @@ class LocalStorage {
     return result.map((e) => Monster.fromDb(e)).toList().firstOrNull;
   }
 
-  static Future<void> addMnstr(Monster mnstr) async {
+  static Future<String?> addMnstr(Monster mnstr) async {
     final now = DateTime.now();
     mnstr.id ??= Uuid().v4();
     mnstr.createdAt ??= now;
@@ -72,9 +72,23 @@ class LocalStorage {
       conflictAlgorithm: ConflictAlgorithm.replace,
     );
     if (result == 0) {
-      debugPrint('Failed to add monster');
-      return;
+      return 'Failed to add monster';
     }
+    return null;
+  }
+
+  static Future<String?> updateMnstr(Monster mnstr) async {
+    final result = await database.update(
+      'mnstrs',
+      mnstr.toDb(),
+      where: 'mnstr_qr_code = ?',
+      whereArgs: [mnstr.mnstrQrCode],
+    );
+    if (result == 0) {
+      debugPrint('Failed to update monster');
+      return 'Failed to update monster';
+    }
+    return null;
   }
 
   static Future<void> clearMnstrs() async {

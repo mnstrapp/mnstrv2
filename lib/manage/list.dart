@@ -239,7 +239,7 @@ class _ManageListViewState extends ConsumerState<ManageListView> {
                         padding: const EdgeInsets.all(8),
                         margin: const EdgeInsets.only(left: 32, right: 32),
                         child: Row(
-                          spacing: 16,
+                          spacing: 8,
                           children: [
                             Icon(Icons.sort_rounded),
                             DropdownMenu(

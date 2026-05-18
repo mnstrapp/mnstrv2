@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth.dart';
 import '../models/user.dart';
 import '../utils/graphql.dart';
+import 'local_storage.dart';
 import 'session_users.dart';
 import '../config/endpoints.dart' as endpoints;
 import 'sync.dart';

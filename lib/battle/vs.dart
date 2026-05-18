@@ -24,6 +24,7 @@ class BattleVsView extends ConsumerStatefulWidget {
   final Function(BattleQueue) onLog;
   final Function(Function(String)) onDispose;
   final Function(GameData) onGameEnded;
+  final Function() reconnect;
   final BattleQueue? battleQueue;
 
   const BattleVsView({
@@ -32,6 +33,7 @@ class BattleVsView extends ConsumerStatefulWidget {
     required this.onSend,
     required this.onLog,
     required this.onDispose,
+    required this.reconnect,
     required this.battleQueue,
     required this.onGameEnded,
   });
@@ -228,6 +230,7 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
         _isLoading = false;
       });
     }
+    widget.reconnect();
   }
 
   @override
@@ -324,7 +327,7 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
                                 right: 32,
                               ),
                               child: Row(
-                                spacing: 16,
+                                spacing: 8,
                                 children: [
                                   Icon(Icons.sort_rounded),
                                   DropdownMenu(
