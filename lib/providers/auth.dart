@@ -121,6 +121,7 @@ mutation login($email: String!, $password:String!) {
     await removeAuth();
     await removeSessionUser();
     await savePreviouslySynced(false);
+    await LocalStorage.clearMnstrs();
 
     state = null;
 
