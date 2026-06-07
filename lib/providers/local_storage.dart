@@ -78,9 +78,11 @@ class LocalStorage {
   }
 
   static Future<String?> updateMnstr(Monster mnstr) async {
+    final mnstrDb = mnstr.toDb();
+    mnstrDb.remove('id');
     final result = await database.update(
       'mnstrs',
-      mnstr.toDb(),
+      mnstrDb,
       where: 'mnstr_qr_code = ?',
       whereArgs: [mnstr.mnstrQrCode],
     );

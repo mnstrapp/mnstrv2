@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
-import '../providers/session_users.dart';
 import '../shared/layout_scaffold.dart';
 import '../theme.dart';
 
@@ -19,12 +18,14 @@ class ScannerView extends ConsumerWidget {
 
     return MobileScanner(
       onDetectError: (error, stackTrace) {
-        final user = ref.read(sessionUserProvider);
         layout.addError(error.toString());
       },
       onDetect: (capture) {
-        final user = ref.read(sessionUserProvider);
-        onScan(capture.barcodes.single.rawBytes);
+        if (capture.barcodes.isEmpty) {
+          return;
+        }
+        final bytes = capture.barcodes.first.rawValue;
+        onScan(bytes != null ? Uint8List.fromList(bytes.codeUnits) : null);
       },
       overlayBuilder: (context, constraints) => Stack(
         children: [

@@ -2,15 +2,29 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "flutter: get dependencies",
+			"type": "flutter",
+			"command": "dart",
+			"args": [
+				"pub",
+				"get"
+			],
+		},
+		{
 			"type": "flutter",
 			"command": "dart",
 			"args": [
 				"bin/create_env.dart"
 			],
 			"group": "build",
-			"problemMatcher": [],
+			"problemMatcher": [
+				"$dart-build_runner"
+			],
 			"label": "flutter: create env",
-			"detail": "Create env"
+			"detail": "Create env",
+			"dependsOn": [
+				"flutter: get dependencies"
+			]
 		},
 		{
 			"type": "flutter",
@@ -21,7 +35,9 @@
 				"--release"
 			],
 			"group": "build",
-			"problemMatcher": [],
+			"problemMatcher": [
+				"$dart-build_runner"
+			],
 			"label": "flutter: flutter build web",
 			"detail": "Build web release",
 			"dependsOn": [
@@ -34,10 +50,12 @@
 			"args": [
 				"build",
 				"appbundle",
-				"--release",
+				"--release"
 			],
 			"group": "build",
-			"problemMatcher": [],
+			"problemMatcher": [
+				"$dart-build_runner"
+			],
 			"label": "flutter: flutter build appbundle",
 			"detail": "Build appbundle release",
 			"dependsOn": [
@@ -50,10 +68,12 @@
 			"args": [
 				"build",
 				"ipa",
-				"--release",
+				"--release"
 			],
 			"group": "build",
-			"problemMatcher": [],
+			"problemMatcher": [
+				"$dart-build_runner"
+			],
 			"label": "flutter: flutter build ipa",
 			"detail": "Build ipa release",
 			"dependsOn": [

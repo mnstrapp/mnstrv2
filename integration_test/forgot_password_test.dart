@@ -31,25 +31,25 @@ class _SuccessForgotPasswordNotifier extends ForgotPasswordNotifier {
   Future<String?> resetPassword({required String password}) async => null;
 }
 
-/// Step 1 fails; steps 2 and 3 are never reached.
-class _ForgotPasswordFailureNotifier extends ForgotPasswordNotifier {
-  @override
-  Future<String?> forgotPassword({required String email}) async =>
-      'There was an error resetting the password';
-}
+// /// Step 1 fails; steps 2 and 3 are never reached.
+// class _ForgotPasswordFailureNotifier extends ForgotPasswordNotifier {
+//   @override
+//   Future<String?> forgotPassword({required String email}) async =>
+//       'There was an error resetting the password';
+// }
 
-/// Step 1 succeeds; step 2 fails.
-class _VerifyCodeFailureNotifier extends ForgotPasswordNotifier {
-  @override
-  Future<String?> forgotPassword({required String email}) async {
-    state = 'test-user-id';
-    return null;
-  }
+// /// Step 1 succeeds; step 2 fails.
+// class _VerifyCodeFailureNotifier extends ForgotPasswordNotifier {
+//   @override
+//   Future<String?> forgotPassword({required String email}) async {
+//     state = 'test-user-id';
+//     return null;
+//   }
 
-  @override
-  Future<String?> verifyCode({required String code}) async =>
-      'There was an error verifying the code';
-}
+//   @override
+//   Future<String?> verifyCode({required String code}) async =>
+//       'There was an error verifying the code';
+// }
 
 /// Steps 1 and 2 succeed; step 3 fails.
 class _ResetPasswordFailureNotifier extends ForgotPasswordNotifier {

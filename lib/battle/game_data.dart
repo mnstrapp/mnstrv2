@@ -1,5 +1,3 @@
-import 'dart:developer';
-
 import '../models/monster.dart';
 
 class GameData {

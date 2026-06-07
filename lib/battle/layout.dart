@@ -282,8 +282,6 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final user = ref.read(sessionUserProvider);
-
       setState(() {
         _isLoading = true;
       });

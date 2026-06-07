@@ -9,7 +9,7 @@ class BackgroundMusic {
   static bool _muted = false;
   static bool _paused = false;
   static bool _playing = false;
-  static double _volume = 0.75;
+  static double volume = 0.75;
 
   BackgroundMusic() {
     backgroundSoundMuted ? mute() : unmute();
@@ -19,7 +19,7 @@ class BackgroundMusic {
     Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (_muted) return;
       if (!FlameAudio.bgm.isPlaying) {
-        FlameAudio.bgm.play(_backgroundMusic, volume: _volume);
+        FlameAudio.bgm.play(_backgroundMusic, volume: volume);
       }
     });
   }
@@ -34,7 +34,7 @@ class BackgroundMusic {
     if (_playing) return;
     _playing = true;
     FlameAudio.bgm.initialize();
-    FlameAudio.bgm.play(_backgroundMusic, volume: _volume);
+    FlameAudio.bgm.play(_backgroundMusic, volume: volume);
     loop();
   }
 
@@ -63,18 +63,13 @@ class BackgroundMusic {
     play();
   }
 
-  static double get volume => _volume;
-  static set volume(double value) {
-    _volume = value;
-  }
-
   static bool get isMuted => _muted;
 }
 
 class ButtonSound {
   static const String _buttonSound = 'accept-2.mp3';
   static bool _muted = false;
-  static double _volume = 1.0;
+  static double volume = 1.0;
 
   ButtonSound() {
     buttonSoundMuted ? mute() : unmute();
@@ -82,7 +77,7 @@ class ButtonSound {
 
   Future<void> play() async {
     if (_muted) return;
-    FlameAudio.play(_buttonSound, volume: _volume);
+    FlameAudio.play(_buttonSound, volume: volume);
   }
 
   Future<void> mute() async {
@@ -98,11 +93,6 @@ class ButtonSound {
     await saveSoundPreferences();
   }
 
-  static double get volume => _volume;
-  static set volume(double value) {
-    _volume = value;
-  }
-
   static bool get isMuted => _muted;
 }
 
@@ -110,7 +100,7 @@ class CollectSound {
   static const String _collectSound = 'collect-2.mp3';
   static AudioPlayer? _collectSoundPlayer;
   static bool _muted = false;
-  static double _volume = 0.15;
+  static double volume = 0.15;
 
   CollectSound() {
     collectSoundMuted ? mute() : unmute();
@@ -118,7 +108,7 @@ class CollectSound {
 
   Future<void> play() async {
     if (_muted) return;
-    _collectSoundPlayer = await FlameAudio.play(_collectSound, volume: _volume);
+    _collectSoundPlayer = await FlameAudio.play(_collectSound, volume: volume);
   }
 
   Future<void> stop() async {
@@ -136,11 +126,6 @@ class CollectSound {
     _muted = false;
     collectSoundMuted = false;
     await saveSoundPreferences();
-  }
-
-  static double get volume => _volume;
-  static set volume(double value) {
-    _volume = value;
   }
 
   static bool get isMuted => _muted;

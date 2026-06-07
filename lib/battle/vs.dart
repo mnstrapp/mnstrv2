@@ -1028,7 +1028,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
             bottom: 0,
             left: 0,
             right: 0,
-            child: Container(
+            child: SizedBox(
               height: size.height,
               width: size.width,
               child: Center(
@@ -1060,7 +1060,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
             bottom: 0,
             left: 0,
             right: 0,
-            child: Container(
+            child: SizedBox(
               height: size.height,
               width: size.width,
               child: Center(
