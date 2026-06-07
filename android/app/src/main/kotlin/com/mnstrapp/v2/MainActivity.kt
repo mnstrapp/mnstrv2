@@ -1,4 +1,4 @@
-package com.appmnstr.mnstrv2
+package com.mnstrapp.v2
 
 import io.flutter.embedding.android.FlutterActivity
 

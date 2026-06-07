@@ -59,7 +59,7 @@ class StatBarContainer extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         spacing: spacing,
         children: [
-          if (leading != null) leading!,
+          ?leading,
           Expanded(
             child: StatBar(
               currentValue: currentValue,
@@ -73,7 +73,7 @@ class StatBarContainer extends StatelessWidget {
                   (trailing != null ? spacing : 0),
             ),
           ),
-          if (trailing != null) trailing!,
+          ?trailing,
         ],
       ),
     );

@@ -23,13 +23,13 @@ Future<void> saveSoundPreferences() async {
   prefs.setBool(SoundType.collect.name, collectSoundMuted);
 }
 
-final backgroundSoundProvider =
-    StateNotifierProvider<BackgroundSoundNotifier, bool>(
-      (ref) => BackgroundSoundNotifier(),
-    );
+final backgroundSoundProvider = NotifierProvider<BackgroundSoundNotifier, bool>(
+  BackgroundSoundNotifier.new,
+);
 
-class BackgroundSoundNotifier extends StateNotifier<bool> {
-  BackgroundSoundNotifier() : super(backgroundSoundMuted);
+class BackgroundSoundNotifier extends Notifier<bool> {
+  @override
+  bool build() => backgroundSoundMuted;
 
   void toggleMute() {
     setMuted(!state);
@@ -43,12 +43,13 @@ class BackgroundSoundNotifier extends StateNotifier<bool> {
   }
 }
 
-final buttonSoundProvider = StateNotifierProvider<ButtonSoundNotifier, bool>(
-  (ref) => ButtonSoundNotifier(),
+final buttonSoundProvider = NotifierProvider<ButtonSoundNotifier, bool>(
+  ButtonSoundNotifier.new,
 );
 
-class ButtonSoundNotifier extends StateNotifier<bool> {
-  ButtonSoundNotifier() : super(buttonSoundMuted);
+class ButtonSoundNotifier extends Notifier<bool> {
+  @override
+  bool build() => buttonSoundMuted;
 
   void toggleMute() {
     setMuted(!state);
@@ -62,12 +63,13 @@ class ButtonSoundNotifier extends StateNotifier<bool> {
   }
 }
 
-final collectSoundProvider = StateNotifierProvider<CollectSoundNotifier, bool>(
-  (ref) => CollectSoundNotifier(),
+final collectSoundProvider = NotifierProvider<CollectSoundNotifier, bool>(
+  CollectSoundNotifier.new,
 );
 
-class CollectSoundNotifier extends StateNotifier<bool> {
-  CollectSoundNotifier() : super(collectSoundMuted);
+class CollectSoundNotifier extends Notifier<bool> {
+  @override
+  bool build() => collectSoundMuted;
 
   void toggleMute() {
     setMuted(!state);

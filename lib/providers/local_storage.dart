@@ -14,7 +14,7 @@ class LocalStorage {
 
   LocalStorage();
 
-  static init() async {
+  static Future<void> init() async {
     String directory = './';
     if (UniversalPlatform.isWeb) {
       databaseFactory = sqflite_ffi_web.databaseFactoryFfiWeb;
