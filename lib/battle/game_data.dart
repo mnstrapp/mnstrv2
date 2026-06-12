@@ -90,7 +90,7 @@ class GameData {
 class BattleLogData {
   final bool? missed;
   final bool? hit;
-  final bool? defense;
+  final int? defense;
   final int? damage;
 
   BattleLogData({
@@ -104,7 +104,7 @@ class BattleLogData {
     return BattleLogData(
       missed: json['missed'] as bool?,
       hit: json['hit'] as bool?,
-      defense: json['defense'] as bool?,
+      defense: json['defense'] as int?,
       damage: json['damage'] as int?,
     );
   }
