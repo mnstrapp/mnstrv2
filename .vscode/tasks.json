@@ -9,6 +9,89 @@
 				"pub",
 				"get"
 			],
+			"presentation": {
+				"reveal": "silent",
+				"revealProblems": "onProblem",
+				"close": true
+			}
+		},
+		{
+			"label": "flutter: install protoc cli",
+			"type": "flutter",
+			"command": "dart",
+			"args": [
+				"pub",
+				"global",
+				"activate",
+				"protoc_plugin"
+			],
+			"presentation": {
+				"reveal": "silent",
+				"revealProblems": "onProblem",
+				"close": true
+			}
+		},
+		{
+			"label": "flutter: install pubcache",
+			"type": "flutter",
+			"command": "dart",
+			"detail": "Install pubcache",
+			"args": [
+				"run",
+				"bin/install_pubcache.dart"
+			],
+			"presentation": {
+				"reveal": "silent",
+				"revealProblems": "onProblem",
+				"close": true
+			}
+		},
+		{
+			"label": "flutter: generate protobuf",
+			"type": "shell",
+			"command": "protoc",
+			"detail": "Generate protobuf",
+			"args": [
+				"--dart_out=grpc:lib/proto",
+				"-I",
+				"proto/",
+				"proto/*.proto"
+			],
+			"options": {
+				"env": {
+					"PATH": "${env:HOME}/.pub-cache/bin:${env:PATH}"
+				}
+			},
+			"dependsOn": [
+				"flutter: get dependencies",
+				"flutter: install protoc cli",
+				"flutter: install pubcache"
+			],
+			"presentation": {
+				"reveal": "silent",
+				"revealProblems": "onProblem",
+				"close": true
+			}
+		},
+		{
+			"label": "flutter: generate models",
+			"type": "flutter",
+			"command": "dart",
+			"args": [
+				"run",
+				"build_runner",
+				"build",
+				"--delete-conflicting-outputs"
+			],
+			"dependsOn": [
+				"flutter: get dependencies",
+				"flutter: generate protobuf"
+			],
+			"presentation": {
+				"reveal": "silent",
+				"revealProblems": "onProblem",
+				"close": true
+			}
 		},
 		{
 			"type": "flutter",
@@ -24,7 +107,12 @@
 			"detail": "Create env",
 			"dependsOn": [
 				"flutter: get dependencies"
-			]
+			],
+			"presentation": {
+				"reveal": "silent",
+				"revealProblems": "onProblem",
+				"close": true
+			}
 		},
 		{
 			"type": "flutter",
@@ -41,8 +129,13 @@
 			"label": "flutter: flutter build web",
 			"detail": "Build web release",
 			"dependsOn": [
+				"flutter: generate models",
 				"flutter: create env"
-			]
+			],
+			"presentation": {
+				"revealProblems": "onProblem",
+				"close": true
+			}
 		},
 		{
 			"type": "flutter",
@@ -59,8 +152,13 @@
 			"label": "flutter: flutter build appbundle",
 			"detail": "Build appbundle release",
 			"dependsOn": [
+				"flutter: generate models",
 				"flutter: create env"
-			]
+			],
+			"presentation": {
+				"revealProblems": "onProblem",
+				"close": true
+			}
 		},
 		{
 			"type": "flutter",
@@ -77,8 +175,13 @@
 			"label": "flutter: flutter build ipa",
 			"detail": "Build ipa release",
 			"dependsOn": [
+				"flutter: generate models",
 				"flutter: create env"
-			]
+			],
+			"presentation": {
+				"revealProblems": "onProblem",
+				"close": true
+			}
 		}
 	]
 }
