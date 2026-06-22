@@ -10,12 +10,12 @@
             "type": "dart",
             "flutterMode": "debug",
             "args": [
-                "--dart-define=API_HOST=http://localhost:8080",
+                "--dart-define=API_HOST=localhost",
+                "--dart-define=API_PORT=50051",
                 "--dart-define=WS_HOST=ws://localhost:8080",
                 "--web-port=9000",
                 "--web-experimental-hot-reload"
-            ],
-            "preLaunchTask": "flutter: create env"
+            ]
         },
         {
             "name": "local (profile mode)",
@@ -23,12 +23,12 @@
             "type": "dart",
             "flutterMode": "profile",
             "args": [
-                "--dart-define=API_HOST=http://localhost:8080",
+                "--dart-define=API_HOST=localhost",
+                "--dart-define=API_PORT=50051",
                 "--dart-define=WS_HOST=ws://localhost:8080",
                 "--web-port=9000",
                 "--web-experimental-hot-reload"
-            ],
-            "preLaunchTask": "flutter: create env"
+            ]
         },
         {
             "name": "local (release mode)",
@@ -36,12 +36,12 @@
             "type": "dart",
             "flutterMode": "release",
             "args": [
-                "--dart-define=API_HOST=http://localhost:8080",
+                "--dart-define=API_HOST=localhost",
+                "--dart-define=API_PORT=50051",
                 "--dart-define=WS_HOST=ws://localhost:8080",
                 "--web-port=9000",
                 "--web-experimental-hot-reload"
-            ],
-            "preLaunchTask": "flutter: create env"
+            ]
         },
         {
             "name": "prod",
@@ -52,7 +52,9 @@
                 "--web-port=9000",
                 "--web-experimental-hot-reload"
             ],
-            "preLaunchTask": "flutter: create env"
+            "env": {
+                "ENV": "production"
+            }
         },
         {
             "name": "prod (profile mode)",
@@ -63,7 +65,9 @@
                 "--web-port=9000",
                 "--web-experimental-hot-reload"
             ],
-            "preLaunchTask": "flutter: create env"
+            "env": {
+                "ENV": "production"
+            }
         },
         {
             "name": "prod (release mode)",
@@ -74,7 +78,9 @@
                 "--web-port=9000",
                 "--web-experimental-hot-reload"
             ],
-            "preLaunchTask": "flutter: create env"
+            "env": {
+                "ENV": "production"
+            }
         }
     ]
 }

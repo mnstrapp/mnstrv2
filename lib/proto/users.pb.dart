@@ -14,8 +14,8 @@ import 'dart:core' as $core;
 
 import 'package:protobuf/protobuf.dart' as $pb;
 
-import 'mnstr.pb.dart' as $0;
-import 'wallets.pb.dart' as $1;
+import 'mnstr.pb.dart' as $1;
+import 'wallets.pb.dart' as $2;
 
 export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
 
@@ -29,8 +29,8 @@ class User extends $pb.GeneratedMessage {
     $core.int? experiencePoints,
     $core.int? experienceToNextLevel,
     $core.int? coins,
-    $core.Iterable<$0.Mnstr>? mnstrs,
-    $1.Wallet? wallet,
+    $core.Iterable<$1.Mnstr>? mnstrs,
+    $2.Wallet? wallet,
   }) {
     final result = create();
     if (id != null) result.id = id;
@@ -68,10 +68,10 @@ class User extends $pb.GeneratedMessage {
     ..aI(6, _omitFieldNames ? '' : 'experiencePoints')
     ..aI(7, _omitFieldNames ? '' : 'experienceToNextLevel')
     ..aI(8, _omitFieldNames ? '' : 'coins')
-    ..pPM<$0.Mnstr>(9, _omitFieldNames ? '' : 'mnstrs',
-        subBuilder: $0.Mnstr.create)
-    ..aOM<$1.Wallet>(10, _omitFieldNames ? '' : 'wallet',
-        subBuilder: $1.Wallet.create)
+    ..pPM<$1.Mnstr>(9, _omitFieldNames ? '' : 'mnstrs',
+        subBuilder: $1.Mnstr.create)
+    ..aOM<$2.Wallet>(10, _omitFieldNames ? '' : 'wallet',
+        subBuilder: $2.Wallet.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -165,18 +165,128 @@ class User extends $pb.GeneratedMessage {
   void clearCoins() => $_clearField(8);
 
   @$pb.TagNumber(9)
-  $pb.PbList<$0.Mnstr> get mnstrs => $_getList(8);
+  $pb.PbList<$1.Mnstr> get mnstrs => $_getList(8);
 
   @$pb.TagNumber(10)
-  $1.Wallet get wallet => $_getN(9);
+  $2.Wallet get wallet => $_getN(9);
   @$pb.TagNumber(10)
-  set wallet($1.Wallet value) => $_setField(10, value);
+  set wallet($2.Wallet value) => $_setField(10, value);
   @$pb.TagNumber(10)
   $core.bool hasWallet() => $_has(9);
   @$pb.TagNumber(10)
   void clearWallet() => $_clearField(10);
   @$pb.TagNumber(10)
-  $1.Wallet ensureWallet() => $_ensure(9);
+  $2.Wallet ensureWallet() => $_ensure(9);
+}
+
+class MyUserRequest extends $pb.GeneratedMessage {
+  factory MyUserRequest({
+    $core.String? token,
+  }) {
+    final result = create();
+    if (token != null) result.token = token;
+    return result;
+  }
+
+  MyUserRequest._();
+
+  factory MyUserRequest.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory MyUserRequest.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'MyUserRequest',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'token')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MyUserRequest clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MyUserRequest copyWith(void Function(MyUserRequest) updates) =>
+      super.copyWith((message) => updates(message as MyUserRequest))
+          as MyUserRequest;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static MyUserRequest create() => MyUserRequest._();
+  @$core.override
+  MyUserRequest createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static MyUserRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<MyUserRequest>(create);
+  static MyUserRequest? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get token => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set token($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasToken() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearToken() => $_clearField(1);
+}
+
+class MyUserResponse extends $pb.GeneratedMessage {
+  factory MyUserResponse({
+    User? user,
+  }) {
+    final result = create();
+    if (user != null) result.user = user;
+    return result;
+  }
+
+  MyUserResponse._();
+
+  factory MyUserResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory MyUserResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'MyUserResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
+      createEmptyInstance: create)
+    ..aOM<User>(1, _omitFieldNames ? '' : 'user', subBuilder: User.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MyUserResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  MyUserResponse copyWith(void Function(MyUserResponse) updates) =>
+      super.copyWith((message) => updates(message as MyUserResponse))
+          as MyUserResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static MyUserResponse create() => MyUserResponse._();
+  @$core.override
+  MyUserResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static MyUserResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<MyUserResponse>(create);
+  static MyUserResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  User get user => $_getN(0);
+  @$pb.TagNumber(1)
+  set user(User value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasUser() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearUser() => $_clearField(1);
+  @$pb.TagNumber(1)
+  User ensureUser() => $_ensure(0);
 }
 
 const $core.bool _omitFieldNames =

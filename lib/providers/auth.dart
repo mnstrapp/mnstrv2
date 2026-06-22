@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:grpc/grpc.dart';
+import 'package:mnstrv2/proto/session.pbgrpc.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../models/auth.dart';
-import '../models/user.dart';
-import '../utils/graphql.dart';
 import 'local_storage.dart';
 import 'session_users.dart';
 import '../config/endpoints.dart' as endpoints;
@@ -26,91 +26,28 @@ class AuthNotifier extends Notifier<Auth?> {
     return auth;
   }
 
-  Future<String?> verify(Auth auth) async {
-    final document = r'''
-{
-  session {
-    verify {
-      id
-    }
-  }
-}
-''';
-
-    final variables = {'token': auth.token};
-
-    try {
-      final response = await graphql(
-        url: endpoints.baseUrl,
-        query: document,
-        variables: variables,
-      );
-
-      if (response['errors'] != null) {
-        logout();
-        return "There was an error verifying the auth";
-      }
-
-      return null;
-    } catch (e, stackTrace) {
-      logout();
-      debugPrint('verify error: $e, $stackTrace');
-      return "There was an error verifying the auth";
-    }
-  }
-
   Future<String?> login(String email, String password) async {
-    final document = r'''
-mutation login($email: String!, $password:String!) {
-  session {
-    login(email: $email, password: $password) {
-      id
-      userId
-      sessionToken
-      expiresAt
-      user {
-        id
-        email
-        displayName
-        email
-        phone
-        experienceLevel
-        experiencePoints
-        experienceToNextLevel
-        coins
-      }
-    }
-  }
-}
-''';
-
-    final variables = {'email': email, 'password': password};
-
+    final request = LoginRequest(email: email, password: password);
+    final channel = ClientChannel(
+      endpoints.apiHost,
+      port: endpoints.apiPort,
+      options: const ChannelOptions(
+        credentials: ChannelCredentials.insecure(),
+      ),
+    );
     try {
-      final response = await graphql(
-        url: endpoints.baseUrl,
-        query: document,
-        variables: variables,
+      final response = await SessionServiceClient(channel).login(request);
+      debugPrint(response.toString());
+      final auth = Auth(
+        id: response.session.id,
+        token: response.session.token,
+        userID: response.session.user.id,
       );
-
-      if (response['errors'] != null) {
-        debugPrint('[login] Error: ${response['errors']}');
-        return "There was an error logging in";
-      }
-
-      final auth = Auth.fromJson(response['data']['session']['login']);
-      final user = User.fromJson(response['data']['session']['login']['user']);
-
-      state = auth;
-      ref.read(sessionUserProvider.notifier).setUser(user);
+      setAuth(auth);
       await saveAuth(auth);
-      await saveSessionUser(user);
-      this.auth = auth;
-
       return null;
-    } catch (e, stackTrace) {
-      debugPrint('[login] Error: $e');
-      debugPrint('[login] Stacktrace: $stackTrace');
+    } catch (e) {
+      debugPrint('login error: $e');
       return "There was an error logging in";
     }
   }
@@ -129,30 +66,24 @@ mutation login($email: String!, $password:String!) {
       return null;
     }
 
-    final document = r'''
-mutation logout {
-  session {
-    logout
-  }
-}
-''';
-
-    try {
-      final response = await graphql(
-        url: endpoints.baseUrl,
-        query: document,
-        headers: {'Authorization': 'Bearer ${auth.token}'},
-      );
-
-      if (response['errors'] != null) {
-        return "There was an error logging out";
-      }
-
+    final request = LogoutRequest(token: auth.token);
+    final channel = ClientChannel(
+      endpoints.apiHost,
+      port: endpoints.apiPort,
+      options: const ChannelOptions(
+        credentials: ChannelCredentials.insecure(),
+      ),
+    );
+    final response = await SessionServiceClient(channel).logout(request);
+    if (response.success) {
+      await removeAuth();
+      await removeSessionUser();
+      await savePreviouslySynced(false);
+      await LocalStorage.clearMnstrs();
+      state = null;
       return null;
-    } catch (e, stackTrace) {
-      debugPrint('logout error: $e, $stackTrace');
-      return "There was an error logging out";
     }
+    return "There was an error logging out";
   }
 
   void setAuth(Auth auth) {

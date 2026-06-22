@@ -64,7 +64,7 @@ class _RegisterViewState extends ConsumerState<RegisterView> {
 
     final error = await ref
         .read(sessionUserProvider.notifier)
-        .verifyEmail(id: user.id!, code: _codeController.text);
+        .verifyEmail(code: _codeController.text);
 
     if (error != null) {
       layoutKey.currentState?.addError(error);

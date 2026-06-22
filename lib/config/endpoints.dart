@@ -4,7 +4,11 @@ const String wsHost = String.fromEnvironment(
 );
 const String apiHost = String.fromEnvironment(
   'API_HOST',
-  defaultValue: 'https://api.mnstrapp.com',
+  defaultValue: 'api.mnstrapp.com',
 );
-const String baseUrl = '$apiHost/graphql';
+const int apiPort = int.fromEnvironment(
+  'API_PORT',
+  defaultValue: 50051,
+);
+const String baseUrl = apiHost;
 const String wsUrl = '$wsHost/ws';

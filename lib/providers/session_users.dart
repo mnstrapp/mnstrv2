@@ -1,12 +1,14 @@
 import 'dart:convert';
 
-import 'package:mnstrv2/utils/graphql.dart';
+import 'package:grpc/grpc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/endpoints.dart' as endpoints;
 import '../models/user.dart';
+import '../proto/users.pbgrpc.dart' as proto_user;
+import '../proto/session.pbgrpc.dart' as proto_session;
 import 'auth.dart';
 
 final sessionUserProvider = NotifierProvider<SessionUserNotifier, User?>(
@@ -28,88 +30,55 @@ class SessionUserNotifier extends Notifier<User?> {
     required String password,
     required String displayName,
   }) async {
-    final document = r'''
-mutation register(
-  $email: String!,
-  $password: String!,
-  $displayName: String!,
-) {
-  users {
-    register(
-      email: $email,
-      password: $password,
-      displayName: $displayName,
-    ) {
-      id
-      displayName
-      email
-      experienceLevel
-      experiencePoints
-      experienceToNextLevel
-      coins
-    }
-  }
-}
-''';
-
-    final variables = {
-      'email': email,
-      'password': password,
-      'displayName': displayName,
-    };
-
+    final request = proto_session.RegisterRequest(
+      email: email,
+      password: password,
+      displayName: displayName,
+    );
+    final channel = ClientChannel(
+      endpoints.apiHost,
+      port: endpoints.apiPort,
+      options: const ChannelOptions(
+        credentials: ChannelCredentials.insecure(),
+      ),
+    );
     try {
-      final response = await graphql(
-        url: endpoints.baseUrl,
-        query: document,
-        variables: variables,
-      );
-
-      if (response['errors'] != null) {
-        return "There was an error registering the user";
+      final response = await proto_session.SessionServiceClient(
+        channel,
+      ).register(request);
+      if (response.success) {
+        return null;
       }
-      final user = User.fromJson(response['data']['users']['register']);
-
-      state = user;
-      return null;
-    } catch (e, stackTrace) {
-      debugPrint('register error: $e, $stackTrace');
+      return "There was an error registering the user";
+    } catch (e) {
+      debugPrint('register error: $e');
       return "There was an error registering the user";
     }
   }
 
   Future<String?> verifyEmail({
-    required String id,
     required String code,
   }) async {
-    final document = r'''
-mutation verifyEmail($id: String!, $code: String!) {
-  users {
-    verifyEmail(id: $id, code: $code)
-  }
-}
-''';
-
-    final variables = {'id': id, 'code': code};
-
+    final request = proto_session.VerifyEmailRequest(
+      code: code,
+    );
+    final channel = ClientChannel(
+      endpoints.apiHost,
+      port: endpoints.apiPort,
+      options: const ChannelOptions(
+        credentials: ChannelCredentials.insecure(),
+      ),
+    );
     try {
-      final response = await graphql(
-        url: endpoints.baseUrl,
-        query: document,
-        variables: variables,
-      );
-
-      if (response['errors'] != null) {
-        return "There was an error verifying the email";
+      final response = await proto_session.SessionServiceClient(
+        channel,
+      ).verifyEmail(request);
+      if (response.success) {
+        return null;
       }
-
-      if (response['data']['users']['verifyEmail'] != true) {
-        return "There was an error verifying the email";
-      }
-
-      return null;
-    } catch (e, stackTrace) {
-      debugPrint('verifyEmail error: $e, $stackTrace');
+      return "There was an error verifying the email";
+    } catch (e) {
+      debugPrint('verifyEmail error: $e');
       return "There was an error verifying the email";
     }
   }
@@ -130,44 +99,21 @@ mutation verifyEmail($id: String!, $code: String!) {
       return "There was an error refreshing the user";
     }
 
-    final document = r'''
-{
-  users {
-    my {
-      id
-      email
-      displayName
-      experienceLevel
-      experiencePoints
-      experienceToNextLevel
-      coins
-    }
-  }
-}
-''';
-
-    final headers = {'Authorization': 'Bearer ${auth.token}'};
-
-    try {
-      final response = await graphql(
-        url: endpoints.baseUrl,
-        query: document,
-        headers: headers,
-      );
-
-      if (response['errors'] != null) {
-        return "There was an error refreshing the user";
-      }
-
-      final user = User.fromJson(response['data']['users']['my']);
-      state = user;
-      await saveSessionUser(user);
-
-      return null;
-    } catch (e, stackTrace) {
-      debugPrint('refresh error: $e, $stackTrace');
-      return "There was an error refreshing the user";
-    }
+    final request = proto_user.MyUserRequest(token: auth.token);
+    final channel = ClientChannel(
+      endpoints.apiHost,
+      port: endpoints.apiPort,
+      options: const ChannelOptions(
+        credentials: ChannelCredentials.insecure(),
+      ),
+    );
+    final response = await proto_user.UserServiceClient(
+      channel,
+    ).myUser(request);
+    final user = User.fromProto(response.user);
+    state = user;
+    await saveSessionUser(user);
+    return null;
   }
 }
 
@@ -178,97 +124,86 @@ class ForgotPasswordNotifier extends Notifier<String?> {
   }
 
   Future<String?> forgotPassword({required String email}) async {
-    final document = r'''
-query forgotPassword($email: String!) {
-  users {
-    forgotPassword(email: $email)
-    }
-}
-''';
-
-    final variables = {'email': email};
-
+    final request = proto_session.ForgotPasswordRequest(email: email);
+    final channel = ClientChannel(
+      endpoints.apiHost,
+      port: endpoints.apiPort,
+      options: const ChannelOptions(
+        credentials: ChannelCredentials.insecure(),
+      ),
+    );
     try {
-      final response = await graphql(
-        url: endpoints.baseUrl,
-        query: document,
-        variables: variables,
-      );
-
-      if (response['errors'] != null) {
-        return "There was an error resetting the password";
+      final response = await proto_session.SessionServiceClient(
+        channel,
+      ).forgotPassword(request);
+      if (response.success) {
+        return null;
       }
+      return "There was an error resetting the password";
+    } catch (e) {
+      debugPrint('forgotPassword error: $e');
+      return "There was an error resetting the password";
+    }
+  }
+}
 
-      state = response['data']['users']['forgotPassword'];
-      return null;
-    } catch (e, stackTrace) {
-      debugPrint('forgotPassword error: $e, $stackTrace');
+class ResetPasswordNotifier extends Notifier<String?> {
+  @override
+  String? build() {
+    return null;
+  }
+
+  Future<String?> resetPassword({required String password}) async {
+    if (state == null) {
+      return "There was an error resetting the password";
+    }
+
+    final request = proto_session.ResetPasswordRequest(
+      code: state,
+      password: password,
+    );
+    final channel = ClientChannel(
+      endpoints.apiHost,
+      port: endpoints.apiPort,
+      options: const ChannelOptions(
+        credentials: ChannelCredentials.insecure(),
+      ),
+    );
+    try {
+      final response = await proto_session.SessionServiceClient(
+        channel,
+      ).resetPassword(request);
+      if (response.success) {
+        return null;
+      }
+      return "There was an error resetting the password";
+    } catch (e) {
+      debugPrint('resetPassword error: $e');
       return "There was an error resetting the password";
     }
   }
 
   Future<String?> verifyCode({required String code}) async {
-    final userId = state;
-    if (userId == null) {
-      return "There was an error verifying the code";
-    }
-
-    final document = r'''
-mutation verifyEmail($id: String!, $code: String!) {
-  users {
-    verifyEmail(id: $id, code: $code)
-    }
-}
-''';
-
-    final variables = {'id': userId, 'code': code};
-
+    final request = proto_session.VerifyEmailRequest(code: code);
+    final channel = ClientChannel(
+      endpoints.apiHost,
+      port: endpoints.apiPort,
+      options: const ChannelOptions(
+        credentials: ChannelCredentials.insecure(),
+      ),
+    );
     try {
-      final response = await graphql(
-        url: endpoints.baseUrl,
-        query: document,
-        variables: variables,
-      );
-
-      if (response['errors'] != null) {
-        return "There was an error verifying the code";
+      final response = await proto_session.SessionServiceClient(
+        channel,
+      ).verifyEmail(request);
+      if (response.success) {
+        state = code;
+        return null;
       }
-
-      return null;
-    } catch (e, stackTrace) {
-      debugPrint('verifyCode error: $e, $stackTrace');
       return "There was an error verifying the code";
-    }
-  }
-
-  Future<String?> resetPassword({required String password}) async {
-    final id = state;
-    final document = r'''
-mutation resetPassword($id: String!, $password: String!) {
-  users {
-    resetPassword(id: $id, password: $password)
-    }
-}
-''';
-
-    final variables = {'id': id, 'password': password};
-
-    try {
-      final response = await graphql(
-        url: endpoints.baseUrl,
-        query: document,
-        variables: variables,
-      );
-
-      if (response['errors'] != null) {
-        return "There was an error resetting the password";
-      }
-
-      state = null;
-      return null;
-    } catch (e, stackTrace) {
-      debugPrint('resetPassword error: $e, $stackTrace');
-      return "There was an error resetting the password";
+    } catch (e) {
+      debugPrint('verifyCode error: $e');
+      return "There was an error verifying the code";
     }
   }
 }
@@ -277,6 +212,10 @@ final forgotPasswordProvider =
     NotifierProvider<ForgotPasswordNotifier, String?>(
       () => ForgotPasswordNotifier(),
     );
+
+final resetPasswordProvider = NotifierProvider<ResetPasswordNotifier, String?>(
+  () => ResetPasswordNotifier(),
+);
 
 enum UserKey { user }
 

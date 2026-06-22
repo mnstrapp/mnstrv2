@@ -8,9 +8,8 @@ class Auth {
   @JsonKey(name: 'sessionToken')
   String? token;
   String? userID;
-  DateTime? expiresAt;
 
-  Auth({this.id, this.token, this.userID, this.expiresAt});
+  Auth({this.id, this.token, this.userID});
 
   factory Auth.fromJson(Map<String, dynamic> json) => _$AuthFromJson(json);
   Map<String, dynamic> toJson() => _$AuthToJson(this);

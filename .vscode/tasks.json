@@ -10,7 +10,6 @@
 				"get"
 			],
 			"presentation": {
-				"reveal": "silent",
 				"revealProblems": "onProblem",
 				"close": true
 			}
@@ -26,7 +25,6 @@
 				"protoc_plugin"
 			],
 			"presentation": {
-				"reveal": "silent",
 				"revealProblems": "onProblem",
 				"close": true
 			}
@@ -41,7 +39,6 @@
 				"bin/install_pubcache.dart"
 			],
 			"presentation": {
-				"reveal": "silent",
 				"revealProblems": "onProblem",
 				"close": true
 			}
@@ -68,7 +65,6 @@
 				"flutter: install pubcache"
 			],
 			"presentation": {
-				"reveal": "silent",
 				"revealProblems": "onProblem",
 				"close": true
 			}
@@ -88,28 +84,6 @@
 				"flutter: generate protobuf"
 			],
 			"presentation": {
-				"reveal": "silent",
-				"revealProblems": "onProblem",
-				"close": true
-			}
-		},
-		{
-			"type": "flutter",
-			"command": "dart",
-			"args": [
-				"bin/create_env.dart"
-			],
-			"group": "build",
-			"problemMatcher": [
-				"$dart-build_runner"
-			],
-			"label": "flutter: create env",
-			"detail": "Create env",
-			"dependsOn": [
-				"flutter: get dependencies"
-			],
-			"presentation": {
-				"reveal": "silent",
 				"revealProblems": "onProblem",
 				"close": true
 			}
@@ -129,8 +103,7 @@
 			"label": "flutter: flutter build web",
 			"detail": "Build web release",
 			"dependsOn": [
-				"flutter: generate models",
-				"flutter: create env"
+				"flutter: generate models"
 			],
 			"presentation": {
 				"revealProblems": "onProblem",
@@ -152,8 +125,7 @@
 			"label": "flutter: flutter build appbundle",
 			"detail": "Build appbundle release",
 			"dependsOn": [
-				"flutter: generate models",
-				"flutter: create env"
+				"flutter: generate models"
 			],
 			"presentation": {
 				"revealProblems": "onProblem",
@@ -175,8 +147,7 @@
 			"label": "flutter: flutter build ipa",
 			"detail": "Build ipa release",
 			"dependsOn": [
-				"flutter: generate models",
-				"flutter: create env"
+				"flutter: generate models"
 			],
 			"presentation": {
 				"revealProblems": "onProblem",

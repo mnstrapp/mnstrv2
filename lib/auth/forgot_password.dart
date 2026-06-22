@@ -86,7 +86,7 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
     });
 
     final error = await ref
-        .read(forgotPasswordProvider.notifier)
+        .read(resetPasswordProvider.notifier)
         .verifyCode(code: _codeController.text);
 
     if (error != null) {
@@ -116,7 +116,7 @@ class _ForgotPasswordViewState extends ConsumerState<ForgotPasswordView> {
     });
 
     final error = await ref
-        .read(forgotPasswordProvider.notifier)
+        .read(resetPasswordProvider.notifier)
         .resetPassword(password: _passwordController.text);
 
     if (error != null) {

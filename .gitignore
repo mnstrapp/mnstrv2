@@ -35,9 +35,6 @@ build/*
 
 /coverage/
 
-.env.yaml
-lib/config/env.dart
-
 # Symbolication related
 app.*.symbols
 
