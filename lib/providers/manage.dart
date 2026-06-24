@@ -1,14 +1,16 @@
-import 'package:change_case/change_case.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter/foundation.dart';
+import 'package:grpc/grpc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../config/endpoints.dart' as endpoints;
 import '../providers/auth.dart';
 import '../models/monster.dart';
-import '../utils/graphql.dart';
 import '../manage/list.dart';
 import 'local_storage.dart';
+
+import '../proto/mnstr.pb.dart' as proto_mnstr;
+import '../proto/mnstr.pbgrpc.dart' as proto_mnstr_grpc;
 
 final manageProvider = NotifierProvider<ManageNotifier, List<Monster>>(
   () => ManageNotifier(),
@@ -21,7 +23,6 @@ class ManageNotifier extends Notifier<List<Monster>> {
   }
 
   Future<String?> getMonsters() async {
-    debugPrint('getMonsters');
     final auth = ref.read(authProvider);
 
     if (auth == null) {
@@ -31,75 +32,52 @@ class ManageNotifier extends Notifier<List<Monster>> {
     }
 
     final order = ref.read(manageOrderProvider);
-    final orderBy = order.orderBy.name.toSnakeCase().toUpperCase();
-    final orderDirection = order.orderDirection.name
-        .toSnakeCase()
-        .toUpperCase();
 
-    debugPrint('orderBy: $orderBy, orderDirection: $orderDirection');
+    debugPrint('order.orderBy: ${order.orderBy.name}');
+    debugPrint('order.orderDirection: ${order.orderDirection.name}');
 
-    final document = r'''
-    query getMonsters($orderBy: MnstrOrderByInput, $orderDirection: MnstrOrderDirectionInput) {
-      mnstrs {
-        list(orderBy: $orderBy, orderDirection: $orderDirection) {
-          id
-          mnstrName
-          mnstrDescription
-          mnstrQrCode
-          currentLevel
-          currentExperience
-          experienceToNextLevel
-          currentHealth
-          maxHealth
-          currentAttack
-          maxAttack
-          currentDefense
-          maxDefense
-          currentIntelligence
-          maxIntelligence
-          currentSpeed
-          maxSpeed
-          currentMagic
-          maxMagic
-        }
-      }
-    }
-    ''';
+    final orderBy = proto_mnstr.MnstrOrderBy.values.firstWhere(
+      (e) => e.name == order.orderBy.name,
+    );
+    final orderDirection = proto_mnstr.MnstrOrderDirection.values.firstWhere(
+      (e) => e.name == order.orderDirection.name,
+    );
 
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${auth.token}',
-    };
+    debugPrint('orderBy: $orderBy');
+    debugPrint('orderDirection: $orderDirection');
 
-    final variables = {
-      'orderBy': orderBy,
-      'orderDirection': orderDirection,
-    };
+    final request = proto_mnstr.ListMnstrsRequest(
+      token: auth.token,
+      orderBy: orderBy,
+      orderDirection: orderDirection,
+    );
+
+    final channel = ClientChannel(
+      endpoints.apiHost,
+      port: endpoints.apiPort,
+      options: const ChannelOptions(
+        credentials: ChannelCredentials.insecure(),
+      ),
+    );
+
+    final monsters = <Monster>[];
 
     try {
-      final response = await graphql(
-        url: endpoints.baseUrl,
-        query: document,
-        headers: headers,
-        variables: variables,
-      );
-
-      if (response['errors'] != null) {
-        return "There was an error getting the monsters";
+      final response = await proto_mnstr_grpc.MnstrServiceClient(
+        channel,
+      ).list(request);
+      if (response.mnstrs.isNotEmpty) {
+        for (var mnstr in response.mnstrs) {
+          monsters.add(Monster.fromProto(mnstr));
+        }
       }
-
-      final monsters = <Monster>[];
-      for (var e in response['data']['mnstrs']['list']) {
-        monsters.add(Monster.fromJson(e as Map<String, dynamic>));
-      }
-      state = monsters;
-      debugPrint('monsters: ${monsters.length}');
-
-      return null;
     } catch (e, stackTrace) {
       debugPrint('getMonsters error: $e, $stackTrace');
       return "There was an error getting the monsters";
     }
+
+    state = monsters;
+    return null;
   }
 }
 
@@ -124,67 +102,32 @@ class ManageGetByQRNotifier extends Notifier<Monster?> {
       state = mnstr;
       return null;
     }
-
-    final document = r'''
-    query getMonsterByQRCode($mnstrQrCode: String!) {
-      mnstrs {
-        qrCode(mnstrQrCode: $mnstrQrCode) {
-          id
-          mnstrName
-          mnstrDescription
-          mnstrQrCode
-          currentLevel
-          currentExperience
-          currentHealth
-          maxHealth
-          currentAttack
-          maxAttack
-          currentDefense
-          maxDefense
-          currentIntelligence
-          maxIntelligence
-          currentSpeed
-          maxSpeed
-          currentMagic
-          maxMagic
-          experienceToNextLevel
-        }
-      }
-    }
-    ''';
-
-    final variables = {'mnstrQrCode': qrCode};
-
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${auth.token}',
-    };
-
     try {
-      final response = await graphql(
-        url: endpoints.baseUrl,
-        query: document,
-        variables: variables,
-        headers: headers,
+      final channel = ClientChannel(
+        endpoints.apiHost,
+        port: endpoints.apiPort,
+        options: const ChannelOptions(
+          credentials: ChannelCredentials.insecure(),
+        ),
       );
-
-      if (response['errors'] != null) {
-        return "There was an error getting the monster by QR code";
+      final response =
+          await proto_mnstr_grpc.MnstrServiceClient(
+            channel,
+          ).getByQrCode(
+            proto_mnstr.GetMnstrByQrCodeRequest(
+              token: auth.token,
+              mnstrQrCode: qrCode,
+            ),
+          );
+      if (response.hasMnstr()) {
+        state = Monster.fromProto(response.mnstr);
+        return null;
       }
-
-      if (response['data']['mnstrs']['qrCode'] == null) {
-        return "Monster not found";
-      }
-
-      final monster = Monster.fromJson(response['data']['mnstrs']['qrCode']);
-
-      state = monster;
-
-      return null;
     } catch (e, stackTrace) {
       debugPrint('getByQR error: $e, $stackTrace');
       return "There was an error getting the monster by QR code";
     }
+    return "Monster not found";
   }
 }
 
@@ -215,111 +158,44 @@ class ManageEditNotifier extends Notifier<Monster?> {
       return null;
     }
 
-    final document = r'''
-    mutation editMonster(
-      $id: String!,
-      $mnstrName: String,
-      $mnstrDescription: String,
-      $mnstrQrCode: String,
-      $currentHealth: Int,
-      $maxHealth: Int,
-      $currentAttack: Int,
-      $maxAttack: Int,
-      $currentDefense: Int,
-      $maxDefense: Int,
-      $currentIntelligence: Int,
-      $maxIntelligence: Int,
-      $currentSpeed: Int,
-      $maxSpeed: Int,
-      $currentMagic: Int,
-      $maxMagic: Int,
-    ) {
-      mnstrs {
-        update(
-          id: $id,
-          mnstrName: $mnstrName,
-          mnstrDescription: $mnstrDescription,
-          mnstrQrCode: $mnstrQrCode,
-          currentHealth: $currentHealth,
-          maxHealth: $maxHealth,
-          currentAttack: $currentAttack,
-          maxAttack: $maxAttack,
-          currentDefense: $currentDefense,
-          maxDefense: $maxDefense,
-          currentIntelligence: $currentIntelligence,
-          maxIntelligence: $maxIntelligence,
-          currentSpeed: $currentSpeed,
-          maxSpeed: $maxSpeed,
-          currentMagic: $currentMagic,
-          maxMagic: $maxMagic,
-        ) {
-          id
-          mnstrName
-          mnstrDescription
-          mnstrQrCode
-          currentLevel
-          currentExperience
-          currentHealth
-          maxHealth
-          currentAttack
-          maxAttack
-          currentDefense
-          maxDefense
-          currentIntelligence
-          maxIntelligence
-          currentSpeed
-          maxSpeed
-          currentMagic
-          maxMagic
-        }
-      }
-    }
-    ''';
-
-    final variables = {
-      'id': monster.id,
-      'mnstrName': monster.mnstrName,
-      'mnstrDescription': monster.mnstrDescription,
-      'mnstrQrCode': monster.mnstrQrCode,
-      'currentHealth': monster.currentHealth,
-      'maxHealth': monster.maxHealth,
-      'currentAttack': monster.currentAttack,
-      'maxAttack': monster.maxAttack,
-      'currentDefense': monster.currentDefense,
-      'maxDefense': monster.maxDefense,
-      'currentIntelligence': monster.currentIntelligence,
-      'maxIntelligence': monster.maxIntelligence,
-      'currentSpeed': monster.currentSpeed,
-      'maxSpeed': monster.maxSpeed,
-      'currentMagic': monster.currentMagic,
-      'maxMagic': monster.maxMagic,
-    };
-
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${auth.token}',
-    };
-
     try {
-      final response = await graphql(
-        url: endpoints.baseUrl,
-        query: document,
-        variables: variables,
-        headers: headers,
+      final channel = ClientChannel(
+        endpoints.apiHost,
+        port: endpoints.apiPort,
+        options: const ChannelOptions(
+          credentials: ChannelCredentials.insecure(),
+        ),
       );
-
-      if (response['errors'] != null) {
-        return "There was an error editing the monster";
+      final request = proto_mnstr.UpdateMnstrRequest(
+        token: auth.token,
+        id: monster.id,
+        mnstrName: monster.mnstrName,
+        mnstrDescription: monster.mnstrDescription,
+        currentHealth: monster.currentHealth,
+        maxHealth: monster.maxHealth,
+        currentAttack: monster.currentAttack,
+        maxAttack: monster.maxAttack,
+        currentDefense: monster.currentDefense,
+        maxDefense: monster.maxDefense,
+        currentIntelligence: monster.currentIntelligence,
+        maxIntelligence: monster.maxIntelligence,
+        currentSpeed: monster.currentSpeed,
+        maxSpeed: monster.maxSpeed,
+        currentMagic: monster.currentMagic,
+        maxMagic: monster.maxMagic,
+      );
+      final response = await proto_mnstr_grpc.MnstrServiceClient(
+        channel,
+      ).update(request);
+      if (response.hasMnstr()) {
+        state = Monster.fromProto(response.mnstr);
+        return null;
       }
-
-      final monster = Monster.fromJson(response['data']['mnstrs']['update']);
-      state = monster;
-
-      return null;
     } catch (e, stackTrace) {
       debugPrint('editMonster error: $e, $stackTrace');
       return "There was an error editing the monster";
     }
+    return "There was an error editing the monster";
   }
 }
 

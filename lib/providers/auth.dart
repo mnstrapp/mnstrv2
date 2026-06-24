@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:grpc/grpc.dart';
-import 'package:mnstrv2/proto/session.pbgrpc.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,6 +10,9 @@ import 'local_storage.dart';
 import 'session_users.dart';
 import '../config/endpoints.dart' as endpoints;
 import 'sync.dart';
+
+import '../proto/session.pb.dart' as proto_session;
+import '../proto/session.pbgrpc.dart' as proto_session_grpc;
 
 final authProvider = NotifierProvider<AuthNotifier, Auth?>(
   () => AuthNotifier(),
@@ -27,7 +29,10 @@ class AuthNotifier extends Notifier<Auth?> {
   }
 
   Future<String?> login(String email, String password) async {
-    final request = LoginRequest(email: email, password: password);
+    final request = proto_session.LoginRequest(
+      email: email,
+      password: password,
+    );
     final channel = ClientChannel(
       endpoints.apiHost,
       port: endpoints.apiPort,
@@ -36,7 +41,9 @@ class AuthNotifier extends Notifier<Auth?> {
       ),
     );
     try {
-      final response = await SessionServiceClient(channel).login(request);
+      final response = await proto_session_grpc.SessionServiceClient(
+        channel,
+      ).login(request);
       debugPrint(response.toString());
       final auth = Auth(
         id: response.session.id,
@@ -66,7 +73,7 @@ class AuthNotifier extends Notifier<Auth?> {
       return null;
     }
 
-    final request = LogoutRequest(token: auth.token);
+    final request = proto_session.LogoutRequest(token: auth.token);
     final channel = ClientChannel(
       endpoints.apiHost,
       port: endpoints.apiPort,
@@ -74,7 +81,9 @@ class AuthNotifier extends Notifier<Auth?> {
         credentials: ChannelCredentials.insecure(),
       ),
     );
-    final response = await SessionServiceClient(channel).logout(request);
+    final response = await proto_session_grpc.SessionServiceClient(
+      channel,
+    ).logout(request);
     if (response.success) {
       await removeAuth();
       await removeSessionUser();

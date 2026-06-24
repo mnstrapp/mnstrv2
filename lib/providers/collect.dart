@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:grpc/grpc.dart';
 
 import '../providers/auth.dart';
 import '../models/monster.dart';
 import '../config/endpoints.dart' as endpoints;
-import '../utils/graphql.dart';
 import 'local_storage.dart';
+
+import '../proto/mnstr.pb.dart' as proto_mnstr;
+import '../proto/mnstr.pbgrpc.dart' as proto_mnstr_grpc;
 
 final collectProvider = NotifierProvider<CollectNotifier, Monster?>(
   () => CollectNotifier(),
@@ -31,112 +34,43 @@ class CollectNotifier extends Notifier<Monster?> {
       return null;
     }
 
-    final document = r'''
-    mutation createMonster(
-      $mnstrQrCode: String,
-      $mnstrName: String,
-      $mnstrDescription: String,
-      $currentHealth: Int,
-      $maxHealth: Int,
-      $currentAttack: Int,
-      $maxAttack: Int,
-      $currentDefense: Int,
-      $maxDefense: Int,
-      $currentIntelligence: Int,
-      $maxIntelligence: Int,
-      $currentSpeed: Int,
-      $maxSpeed: Int,
-      $currentMagic: Int,
-      $maxMagic: Int,
-    ) {
-      mnstrs {
-        create(
-          mnstrName: $mnstrName,
-          mnstrDescription: $mnstrDescription,
-          currentHealth: $currentHealth,
-          maxHealth: $maxHealth,
-          currentAttack: $currentAttack,
-          maxAttack: $maxAttack,
-          currentDefense: $currentDefense,
-          maxDefense: $maxDefense,
-          currentIntelligence: $currentIntelligence,
-          maxIntelligence: $maxIntelligence,
-          currentSpeed: $currentSpeed,
-          maxSpeed: $maxSpeed,
-          currentMagic: $currentMagic,
-          maxMagic: $maxMagic,
-          mnstrQrCode: $mnstrQrCode,
-        ) {
-          id
-          mnstrName
-          mnstrDescription
-          mnstrQrCode
-          currentLevel
-          currentExperience
-          currentHealth
-          maxHealth
-          currentAttack
-          maxAttack
-          currentDefense
-          maxDefense
-          currentIntelligence
-          maxIntelligence
-          currentSpeed
-          maxSpeed
-          currentMagic
-          maxMagic
-          experienceToNextLevel
-        }
-      }
-    }
-    ''';
-
-    final variables = {
-      'mnstrQrCode': monster.mnstrQrCode ?? '',
-      'mnstrName': monster.mnstrName ?? '',
-      'mnstrDescription': monster.mnstrDescription ?? '',
-      'currentLevel': monster.currentLevel ?? 0,
-      'currentExperience': monster.currentExperience ?? 0,
-      'experienceToNextLevel': monster.experienceToNextLevel ?? 0,
-      'currentHealth': monster.currentHealth ?? 0,
-      'maxHealth': monster.maxHealth ?? 0,
-      'currentAttack': monster.currentAttack ?? 0,
-      'maxAttack': monster.maxAttack ?? 0,
-      'currentDefense': monster.currentDefense ?? 0,
-      'maxDefense': monster.maxDefense ?? 0,
-      'currentIntelligence': monster.currentIntelligence ?? 0,
-      'maxIntelligence': monster.maxIntelligence ?? 0,
-      'currentSpeed': monster.currentSpeed ?? 0,
-      'maxSpeed': monster.maxSpeed ?? 0,
-      'currentMagic': monster.currentMagic ?? 0,
-      'maxMagic': monster.maxMagic ?? 0,
-    };
-
-    final headers = {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ${auth.token}',
-    };
-
     try {
-      final response = await graphql(
-        url: endpoints.baseUrl,
-        query: document,
-        variables: variables,
-        headers: headers,
+      final channel = ClientChannel(
+        endpoints.apiHost,
+        port: endpoints.apiPort,
+        options: const ChannelOptions(
+          credentials: ChannelCredentials.insecure(),
+        ),
       );
-
-      if (response['errors'] != null) {
-        debugPrint('[createMonster] Error: ${response['errors']}');
-        return "There was an error creating the monster";
+      final request = proto_mnstr.CreateMnstrRequest(
+        token: auth.token,
+        mnstrName: monster.mnstrName,
+        mnstrDescription: monster.mnstrDescription,
+        mnstrQrCode: monster.mnstrQrCode,
+        currentHealth: monster.currentHealth,
+        maxHealth: monster.maxHealth,
+        currentAttack: monster.currentAttack,
+        maxAttack: monster.maxAttack,
+        currentDefense: monster.currentDefense,
+        maxDefense: monster.maxDefense,
+        currentIntelligence: monster.currentIntelligence,
+        maxIntelligence: monster.maxIntelligence,
+        currentSpeed: monster.currentSpeed,
+        maxSpeed: monster.maxSpeed,
+        currentMagic: monster.currentMagic,
+        maxMagic: monster.maxMagic,
+      );
+      final response = await proto_mnstr_grpc.MnstrServiceClient(
+        channel,
+      ).create(request);
+      if (response.hasMnstr()) {
+        state = Monster.fromProto(response.mnstr);
+        return null;
       }
-
-      final monster = Monster.fromJson(response['data']['mnstrs']['create']);
-      state = monster;
-
-      return null;
     } catch (e, stackTrace) {
       debugPrint('[createMonster] Error: $e, stackTrace: $stackTrace');
       return "There was an error creating the monster";
     }
+    return "There was an error creating the monster";
   }
 }

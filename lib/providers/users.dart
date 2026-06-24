@@ -1,28 +1,17 @@
-import 'package:json_annotation/json_annotation.dart';
 import 'package:riverpod/riverpod.dart';
 import 'package:flutter/foundation.dart';
+import 'package:grpc/grpc.dart';
 
-import '../config/endpoints.dart';
+import '../config/endpoints.dart' as endpoints;
 import '../models/user.dart';
-import '../utils/graphql.dart';
 import 'auth.dart';
 
-part 'users.g.dart';
+import '../proto/session.pb.dart' as proto_session;
+import '../proto/session.pbgrpc.dart' as proto_session_grpc;
 
 final userProvider = AsyncNotifierProvider<UserNotifier, User?>(
   () => UserNotifier(),
 );
-
-@JsonSerializable()
-class UserResponse {
-  String? error;
-  User? user;
-
-  UserResponse({this.error, this.user});
-
-  factory UserResponse.fromJson(Map<String, dynamic> json) =>
-      _$UserResponseFromJson(json);
-}
 
 class UserNotifier extends AsyncNotifier<User?> {
   UserNotifier();
@@ -39,30 +28,22 @@ class UserNotifier extends AsyncNotifier<User?> {
       return "There was an error deleting the account";
     }
 
-    final document = r'''
-        mutation unregister {
-          users {
-            unregister
-          }
-        }
-      ''';
-
-    final headers = {
-      'Authorization': 'Bearer ${auth.token}',
-    };
-
     try {
-      final response = await graphql(
-        url: baseUrl,
-        query: document,
-        headers: headers,
+      final request = proto_session.UnregisterRequest(token: auth.token);
+      final channel = ClientChannel(
+        endpoints.apiHost,
+        port: endpoints.apiPort,
+        options: const ChannelOptions(
+          credentials: ChannelCredentials.insecure(),
+        ),
       );
-
-      if (response['data']['users']['unregister']) {
+      final response = await proto_session_grpc.SessionServiceClient(
+        channel,
+      ).unregister(request);
+      if (response.success) {
         return null;
-      } else {
-        return "Failed to delete account";
       }
+      return "Failed to delete account";
     } catch (e, stackTrace) {
       debugPrint('deleteAccount error: $e, $stackTrace');
       return "Failed to delete account";

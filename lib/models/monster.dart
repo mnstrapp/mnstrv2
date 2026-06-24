@@ -1,4 +1,5 @@
 import '../shared/monster_model.dart';
+import '../proto/mnstr.pb.dart' as proto_mnstr;
 
 enum Stat { health, attack, defense, speed, magic, intelligence }
 
@@ -146,6 +147,29 @@ class Monster {
     'archivedAt': archivedAt?.toIso8601String(),
     'experienceToNextLevel': experienceToNextLevel,
   };
+
+  static Monster fromProto(proto_mnstr.Mnstr mnstr) => Monster(
+    id: mnstr.id,
+    userId: mnstr.userId,
+    mnstrName: mnstr.mnstrName,
+    mnstrDescription: mnstr.mnstrDescription,
+    mnstrQrCode: mnstr.mnstrQrCode,
+    currentLevel: mnstr.currentLevel,
+    currentExperience: mnstr.currentExperience,
+    currentHealth: mnstr.currentHealth,
+    maxHealth: mnstr.maxHealth,
+    currentAttack: mnstr.currentAttack,
+    maxAttack: mnstr.maxAttack,
+    currentDefense: mnstr.currentDefense,
+    maxDefense: mnstr.maxDefense,
+    currentIntelligence: mnstr.currentIntelligence,
+    maxIntelligence: mnstr.maxIntelligence,
+    currentSpeed: mnstr.currentSpeed,
+    maxSpeed: mnstr.maxSpeed,
+    currentMagic: mnstr.currentMagic,
+    maxMagic: mnstr.maxMagic,
+    experienceToNextLevel: mnstr.experienceToNextLevel,
+  );
 
   Map<String, Object?> toDb() => {
     'id': id,

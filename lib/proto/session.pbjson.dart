@@ -224,3 +224,28 @@ const VerifyPhoneResponse$json = {
 final $typed_data.Uint8List verifyPhoneResponseDescriptor =
     $convert.base64Decode(
         'ChNWZXJpZnlQaG9uZVJlc3BvbnNlEhgKB3N1Y2Nlc3MYASABKAhSB3N1Y2Nlc3M=');
+
+@$core.Deprecated('Use unregisterRequestDescriptor instead')
+const UnregisterRequest$json = {
+  '1': 'UnregisterRequest',
+  '2': [
+    {'1': 'token', '3': 1, '4': 1, '5': 9, '10': 'token'},
+  ],
+};
+
+/// Descriptor for `UnregisterRequest`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List unregisterRequestDescriptor = $convert
+    .base64Decode('ChFVbnJlZ2lzdGVyUmVxdWVzdBIUCgV0b2tlbhgBIAEoCVIFdG9rZW4=');
+
+@$core.Deprecated('Use unregisterResponseDescriptor instead')
+const UnregisterResponse$json = {
+  '1': 'UnregisterResponse',
+  '2': [
+    {'1': 'success', '3': 1, '4': 1, '5': 8, '10': 'success'},
+  ],
+};
+
+/// Descriptor for `UnregisterResponse`. Decode as a `google.protobuf.DescriptorProto`.
+final $typed_data.Uint8List unregisterResponseDescriptor =
+    $convert.base64Decode(
+        'ChJVbnJlZ2lzdGVyUmVzcG9uc2USGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2Vzcw==');

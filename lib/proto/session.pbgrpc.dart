@@ -81,6 +81,13 @@ class SessionServiceClient extends $grpc.Client {
     return $createUnaryCall(_$verifyPhone, request, options: options);
   }
 
+  $grpc.ResponseFuture<$0.UnregisterResponse> unregister(
+    $0.UnregisterRequest request, {
+    $grpc.CallOptions? options,
+  }) {
+    return $createUnaryCall(_$unregister, request, options: options);
+  }
+
   // method descriptors
 
   static final _$register =
@@ -117,6 +124,11 @@ class SessionServiceClient extends $grpc.Client {
           '/mnstrv2.SessionService/VerifyPhone',
           ($0.VerifyPhoneRequest value) => value.writeToBuffer(),
           $0.VerifyPhoneResponse.fromBuffer);
+  static final _$unregister =
+      $grpc.ClientMethod<$0.UnregisterRequest, $0.UnregisterResponse>(
+          '/mnstrv2.SessionService/Unregister',
+          ($0.UnregisterRequest value) => value.writeToBuffer(),
+          $0.UnregisterResponse.fromBuffer);
 }
 
 @$pb.GrpcServiceName('mnstrv2.SessionService')
@@ -181,6 +193,13 @@ abstract class SessionServiceBase extends $grpc.Service {
             ($core.List<$core.int> value) =>
                 $0.VerifyPhoneRequest.fromBuffer(value),
             ($0.VerifyPhoneResponse value) => value.writeToBuffer()));
+    $addMethod($grpc.ServiceMethod<$0.UnregisterRequest, $0.UnregisterResponse>(
+        'Unregister',
+        unregister_Pre,
+        false,
+        false,
+        ($core.List<$core.int> value) => $0.UnregisterRequest.fromBuffer(value),
+        ($0.UnregisterResponse value) => value.writeToBuffer()));
   }
 
   $async.Future<$0.RegisterResponse> register_Pre($grpc.ServiceCall $call,
@@ -240,4 +259,12 @@ abstract class SessionServiceBase extends $grpc.Service {
 
   $async.Future<$0.VerifyPhoneResponse> verifyPhone(
       $grpc.ServiceCall call, $0.VerifyPhoneRequest request);
+
+  $async.Future<$0.UnregisterResponse> unregister_Pre($grpc.ServiceCall $call,
+      $async.Future<$0.UnregisterRequest> $request) async {
+    return unregister($call, await $request);
+  }
+
+  $async.Future<$0.UnregisterResponse> unregister(
+      $grpc.ServiceCall call, $0.UnregisterRequest request);
 }
