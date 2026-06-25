@@ -201,6 +201,11 @@ class ManageEditNotifier extends Notifier<Monster?> {
       ).update(request);
       if (response.hasMnstr()) {
         state = Monster.fromProto(response.mnstr);
+        final error = await ref.read(manageProvider.notifier).getMonsters();
+        if (error != null) {
+          debugPrint('[editMonster] Error: $error, ${StackTrace.current}');
+          return error;
+        }
         return null;
       }
     } catch (e, stackTrace) {
