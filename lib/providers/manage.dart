@@ -33,18 +33,30 @@ class ManageNotifier extends Notifier<List<Monster>> {
 
     final order = ref.read(manageOrderProvider);
 
-    debugPrint('order.orderBy: ${order.orderBy.name}');
-    debugPrint('order.orderDirection: ${order.orderDirection.name}');
+    final orderBy = switch (order.orderBy) {
+      ManageOrderBy.createdAt =>
+        proto_mnstr.MnstrOrderBy.MNSTR_ORDER_BY_CREATED_AT,
+      ManageOrderBy.updatedAt =>
+        proto_mnstr.MnstrOrderBy.MNSTR_ORDER_BY_UPDATED_AT,
+      ManageOrderBy.name => proto_mnstr.MnstrOrderBy.MNSTR_ORDER_BY_NAME,
+      ManageOrderBy.level => proto_mnstr.MnstrOrderBy.MNSTR_ORDER_BY_LEVEL,
+      ManageOrderBy.experience =>
+        proto_mnstr.MnstrOrderBy.MNSTR_ORDER_BY_EXPERIENCE,
+      ManageOrderBy.health => proto_mnstr.MnstrOrderBy.MNSTR_ORDER_BY_HEALTH,
+      ManageOrderBy.attack => proto_mnstr.MnstrOrderBy.MNSTR_ORDER_BY_ATTACK,
+      ManageOrderBy.defense => proto_mnstr.MnstrOrderBy.MNSTR_ORDER_BY_DEFENSE,
+      ManageOrderBy.intelligence =>
+        proto_mnstr.MnstrOrderBy.MNSTR_ORDER_BY_INTELLIGENCE,
+      ManageOrderBy.speed => proto_mnstr.MnstrOrderBy.MNSTR_ORDER_BY_SPEED,
+      ManageOrderBy.magic => proto_mnstr.MnstrOrderBy.MNSTR_ORDER_BY_MAGIC,
+    };
 
-    final orderBy = proto_mnstr.MnstrOrderBy.values.firstWhere(
-      (e) => e.name == order.orderBy.name,
-    );
-    final orderDirection = proto_mnstr.MnstrOrderDirection.values.firstWhere(
-      (e) => e.name == order.orderDirection.name,
-    );
-
-    debugPrint('orderBy: $orderBy');
-    debugPrint('orderDirection: $orderDirection');
+    final orderDirection = switch (order.orderDirection) {
+      ManageOrderDirection.asc =>
+        proto_mnstr.MnstrOrderDirection.MNSTR_ORDER_DIRECTION_ASC,
+      ManageOrderDirection.desc =>
+        proto_mnstr.MnstrOrderDirection.MNSTR_ORDER_DIRECTION_DESC,
+    };
 
     final request = proto_mnstr.ListMnstrsRequest(
       token: auth.token,
