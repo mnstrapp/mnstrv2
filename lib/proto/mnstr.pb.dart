@@ -43,7 +43,7 @@ class Mnstr extends $pb.GeneratedMessage {
     $core.int? maxMagic,
     $core.int? experienceToNextLevel,
   }) {
-    final result = create();
+    final result = Mnstr._();
     if (id != null) result.id = id;
     if (userId != null) result.userId = userId;
     if (mnstrName != null) result.mnstrName = mnstrName;
@@ -73,15 +73,15 @@ class Mnstr extends $pb.GeneratedMessage {
 
   factory Mnstr.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Mnstr()..mergeFromBuffer(data, registry);
   factory Mnstr.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Mnstr()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Mnstr',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
+      createEmptyInstance: Mnstr.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOS(2, _omitFieldNames ? '' : 'userId')
     ..aOS(3, _omitFieldNames ? '' : 'mnstrName')
@@ -114,12 +114,14 @@ class Mnstr extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Mnstr() / Mnstr.new instead')
   static Mnstr create() => Mnstr._();
+  static $pb.GeneratedMessage $_createMessage() => Mnstr._();
   @$core.override
-  Mnstr createEmptyInstance() => create();
+  Mnstr createEmptyInstance() => Mnstr._();
   @$core.pragma('dart2js:noInline')
-  static Mnstr getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Mnstr>(create);
+  static Mnstr getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Mnstr>(Mnstr.$_createMessage);
   static Mnstr? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -324,7 +326,7 @@ class MnstrInput extends $pb.GeneratedMessage {
     $core.int? currentMagic,
     $core.int? maxMagic,
   }) {
-    final result = create();
+    final result = MnstrInput._();
     if (id != null) result.id = id;
     if (mnstrName != null) result.mnstrName = mnstrName;
     if (mnstrDescription != null) result.mnstrDescription = mnstrDescription;
@@ -351,15 +353,15 @@ class MnstrInput extends $pb.GeneratedMessage {
 
   factory MnstrInput.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      MnstrInput()..mergeFromBuffer(data, registry);
   factory MnstrInput.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      MnstrInput()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'MnstrInput',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
+      createEmptyInstance: MnstrInput.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOS(3, _omitFieldNames ? '' : 'mnstrName')
     ..aOS(4, _omitFieldNames ? '' : 'mnstrDescription')
@@ -390,12 +392,14 @@ class MnstrInput extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use MnstrInput() / MnstrInput.new instead')
   static MnstrInput create() => MnstrInput._();
+  static $pb.GeneratedMessage $_createMessage() => MnstrInput._();
   @$core.override
-  MnstrInput createEmptyInstance() => create();
+  MnstrInput createEmptyInstance() => MnstrInput._();
   @$core.pragma('dart2js:noInline')
   static MnstrInput getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<MnstrInput>(create);
+      $pb.GeneratedMessage.$_defaultFor<MnstrInput>(MnstrInput.$_createMessage);
   static MnstrInput? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -565,7 +569,7 @@ class BatchMnstrInput extends $pb.GeneratedMessage {
   factory BatchMnstrInput({
     $core.Iterable<MnstrInput>? mnstrs,
   }) {
-    final result = create();
+    final result = BatchMnstrInput._();
     if (mnstrs != null) result.mnstrs.addAll(mnstrs);
     return result;
   }
@@ -574,17 +578,17 @@ class BatchMnstrInput extends $pb.GeneratedMessage {
 
   factory BatchMnstrInput.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      BatchMnstrInput()..mergeFromBuffer(data, registry);
   factory BatchMnstrInput.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      BatchMnstrInput()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'BatchMnstrInput',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
+      createEmptyInstance: BatchMnstrInput.$_createMessage)
     ..pPM<MnstrInput>(1, _omitFieldNames ? '' : 'mnstrs',
-        subBuilder: MnstrInput.create)
+        subBuilder: MnstrInput.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -598,12 +602,15 @@ class BatchMnstrInput extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use BatchMnstrInput() / BatchMnstrInput.new instead')
   static BatchMnstrInput create() => BatchMnstrInput._();
+  static $pb.GeneratedMessage $_createMessage() => BatchMnstrInput._();
   @$core.override
-  BatchMnstrInput createEmptyInstance() => create();
+  BatchMnstrInput createEmptyInstance() => BatchMnstrInput._();
   @$core.pragma('dart2js:noInline')
-  static BatchMnstrInput getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<BatchMnstrInput>(create);
+  static BatchMnstrInput getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<BatchMnstrInput>(
+          BatchMnstrInput.$_createMessage);
   static BatchMnstrInput? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -616,7 +623,7 @@ class ListMnstrsRequest extends $pb.GeneratedMessage {
     MnstrOrderBy? orderBy,
     MnstrOrderDirection? orderDirection,
   }) {
-    final result = create();
+    final result = ListMnstrsRequest._();
     if (token != null) result.token = token;
     if (orderBy != null) result.orderBy = orderBy;
     if (orderDirection != null) result.orderDirection = orderDirection;
@@ -627,15 +634,15 @@ class ListMnstrsRequest extends $pb.GeneratedMessage {
 
   factory ListMnstrsRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      ListMnstrsRequest()..mergeFromBuffer(data, registry);
   factory ListMnstrsRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      ListMnstrsRequest()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListMnstrsRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
+      createEmptyInstance: ListMnstrsRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'token')
     ..aE<MnstrOrderBy>(2, _omitFieldNames ? '' : 'orderBy',
         enumValues: MnstrOrderBy.values)
@@ -654,12 +661,15 @@ class ListMnstrsRequest extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ListMnstrsRequest() / ListMnstrsRequest.new instead')
   static ListMnstrsRequest create() => ListMnstrsRequest._();
+  static $pb.GeneratedMessage $_createMessage() => ListMnstrsRequest._();
   @$core.override
-  ListMnstrsRequest createEmptyInstance() => create();
+  ListMnstrsRequest createEmptyInstance() => ListMnstrsRequest._();
   @$core.pragma('dart2js:noInline')
-  static ListMnstrsRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ListMnstrsRequest>(create);
+  static ListMnstrsRequest getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ListMnstrsRequest>(
+          ListMnstrsRequest.$_createMessage);
   static ListMnstrsRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -694,7 +704,7 @@ class ListMnstrsResponse extends $pb.GeneratedMessage {
   factory ListMnstrsResponse({
     $core.Iterable<Mnstr>? mnstrs,
   }) {
-    final result = create();
+    final result = ListMnstrsResponse._();
     if (mnstrs != null) result.mnstrs.addAll(mnstrs);
     return result;
   }
@@ -703,16 +713,17 @@ class ListMnstrsResponse extends $pb.GeneratedMessage {
 
   factory ListMnstrsResponse.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      ListMnstrsResponse()..mergeFromBuffer(data, registry);
   factory ListMnstrsResponse.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      ListMnstrsResponse()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'ListMnstrsResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
-    ..pPM<Mnstr>(1, _omitFieldNames ? '' : 'mnstrs', subBuilder: Mnstr.create)
+      createEmptyInstance: ListMnstrsResponse.$_createMessage)
+    ..pPM<Mnstr>(1, _omitFieldNames ? '' : 'mnstrs',
+        subBuilder: Mnstr.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -726,12 +737,15 @@ class ListMnstrsResponse extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use ListMnstrsResponse() / ListMnstrsResponse.new instead')
   static ListMnstrsResponse create() => ListMnstrsResponse._();
+  static $pb.GeneratedMessage $_createMessage() => ListMnstrsResponse._();
   @$core.override
-  ListMnstrsResponse createEmptyInstance() => create();
+  ListMnstrsResponse createEmptyInstance() => ListMnstrsResponse._();
   @$core.pragma('dart2js:noInline')
   static ListMnstrsResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ListMnstrsResponse>(create);
+      $pb.GeneratedMessage.$_defaultFor<ListMnstrsResponse>(
+          ListMnstrsResponse.$_createMessage);
   static ListMnstrsResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -743,7 +757,7 @@ class GetMnstrByQrCodeRequest extends $pb.GeneratedMessage {
     $core.String? token,
     $core.String? mnstrQrCode,
   }) {
-    final result = create();
+    final result = GetMnstrByQrCodeRequest._();
     if (token != null) result.token = token;
     if (mnstrQrCode != null) result.mnstrQrCode = mnstrQrCode;
     return result;
@@ -753,15 +767,15 @@ class GetMnstrByQrCodeRequest extends $pb.GeneratedMessage {
 
   factory GetMnstrByQrCodeRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      GetMnstrByQrCodeRequest()..mergeFromBuffer(data, registry);
   factory GetMnstrByQrCodeRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      GetMnstrByQrCodeRequest()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'GetMnstrByQrCodeRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
+      createEmptyInstance: GetMnstrByQrCodeRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'token')
     ..aOS(2, _omitFieldNames ? '' : 'mnstrQrCode')
     ..hasRequiredFields = false;
@@ -778,12 +792,16 @@ class GetMnstrByQrCodeRequest extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use GetMnstrByQrCodeRequest() / GetMnstrByQrCodeRequest.new instead')
   static GetMnstrByQrCodeRequest create() => GetMnstrByQrCodeRequest._();
+  static $pb.GeneratedMessage $_createMessage() => GetMnstrByQrCodeRequest._();
   @$core.override
-  GetMnstrByQrCodeRequest createEmptyInstance() => create();
+  GetMnstrByQrCodeRequest createEmptyInstance() => GetMnstrByQrCodeRequest._();
   @$core.pragma('dart2js:noInline')
   static GetMnstrByQrCodeRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<GetMnstrByQrCodeRequest>(create);
+      $pb.GeneratedMessage.$_defaultFor<GetMnstrByQrCodeRequest>(
+          GetMnstrByQrCodeRequest.$_createMessage);
   static GetMnstrByQrCodeRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -809,7 +827,7 @@ class GetMnstrByQrCodeResponse extends $pb.GeneratedMessage {
   factory GetMnstrByQrCodeResponse({
     Mnstr? mnstr,
   }) {
-    final result = create();
+    final result = GetMnstrByQrCodeResponse._();
     if (mnstr != null) result.mnstr = mnstr;
     return result;
   }
@@ -818,16 +836,17 @@ class GetMnstrByQrCodeResponse extends $pb.GeneratedMessage {
 
   factory GetMnstrByQrCodeResponse.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      GetMnstrByQrCodeResponse()..mergeFromBuffer(data, registry);
   factory GetMnstrByQrCodeResponse.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      GetMnstrByQrCodeResponse()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'GetMnstrByQrCodeResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
-    ..aOM<Mnstr>(1, _omitFieldNames ? '' : 'mnstr', subBuilder: Mnstr.create)
+      createEmptyInstance: GetMnstrByQrCodeResponse.$_createMessage)
+    ..aOM<Mnstr>(1, _omitFieldNames ? '' : 'mnstr',
+        subBuilder: Mnstr.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -842,12 +861,17 @@ class GetMnstrByQrCodeResponse extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use GetMnstrByQrCodeResponse() / GetMnstrByQrCodeResponse.new instead')
   static GetMnstrByQrCodeResponse create() => GetMnstrByQrCodeResponse._();
+  static $pb.GeneratedMessage $_createMessage() => GetMnstrByQrCodeResponse._();
   @$core.override
-  GetMnstrByQrCodeResponse createEmptyInstance() => create();
+  GetMnstrByQrCodeResponse createEmptyInstance() =>
+      GetMnstrByQrCodeResponse._();
   @$core.pragma('dart2js:noInline')
   static GetMnstrByQrCodeResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<GetMnstrByQrCodeResponse>(create);
+      $pb.GeneratedMessage.$_defaultFor<GetMnstrByQrCodeResponse>(
+          GetMnstrByQrCodeResponse.$_createMessage);
   static GetMnstrByQrCodeResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -867,7 +891,7 @@ class CollectMnstrRequest extends $pb.GeneratedMessage {
     $core.String? token,
     $core.String? mnstrQrCode,
   }) {
-    final result = create();
+    final result = CollectMnstrRequest._();
     if (token != null) result.token = token;
     if (mnstrQrCode != null) result.mnstrQrCode = mnstrQrCode;
     return result;
@@ -877,15 +901,15 @@ class CollectMnstrRequest extends $pb.GeneratedMessage {
 
   factory CollectMnstrRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      CollectMnstrRequest()..mergeFromBuffer(data, registry);
   factory CollectMnstrRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      CollectMnstrRequest()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'CollectMnstrRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
+      createEmptyInstance: CollectMnstrRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'token')
     ..aOS(2, _omitFieldNames ? '' : 'mnstrQrCode')
     ..hasRequiredFields = false;
@@ -901,12 +925,16 @@ class CollectMnstrRequest extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core
+      .Deprecated('Use CollectMnstrRequest() / CollectMnstrRequest.new instead')
   static CollectMnstrRequest create() => CollectMnstrRequest._();
+  static $pb.GeneratedMessage $_createMessage() => CollectMnstrRequest._();
   @$core.override
-  CollectMnstrRequest createEmptyInstance() => create();
+  CollectMnstrRequest createEmptyInstance() => CollectMnstrRequest._();
   @$core.pragma('dart2js:noInline')
   static CollectMnstrRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<CollectMnstrRequest>(create);
+      $pb.GeneratedMessage.$_defaultFor<CollectMnstrRequest>(
+          CollectMnstrRequest.$_createMessage);
   static CollectMnstrRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -932,7 +960,7 @@ class CollectMnstrResponse extends $pb.GeneratedMessage {
   factory CollectMnstrResponse({
     Mnstr? mnstr,
   }) {
-    final result = create();
+    final result = CollectMnstrResponse._();
     if (mnstr != null) result.mnstr = mnstr;
     return result;
   }
@@ -941,16 +969,17 @@ class CollectMnstrResponse extends $pb.GeneratedMessage {
 
   factory CollectMnstrResponse.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      CollectMnstrResponse()..mergeFromBuffer(data, registry);
   factory CollectMnstrResponse.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      CollectMnstrResponse()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'CollectMnstrResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
-    ..aOM<Mnstr>(1, _omitFieldNames ? '' : 'mnstr', subBuilder: Mnstr.create)
+      createEmptyInstance: CollectMnstrResponse.$_createMessage)
+    ..aOM<Mnstr>(1, _omitFieldNames ? '' : 'mnstr',
+        subBuilder: Mnstr.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -964,12 +993,16 @@ class CollectMnstrResponse extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use CollectMnstrResponse() / CollectMnstrResponse.new instead')
   static CollectMnstrResponse create() => CollectMnstrResponse._();
+  static $pb.GeneratedMessage $_createMessage() => CollectMnstrResponse._();
   @$core.override
-  CollectMnstrResponse createEmptyInstance() => create();
+  CollectMnstrResponse createEmptyInstance() => CollectMnstrResponse._();
   @$core.pragma('dart2js:noInline')
   static CollectMnstrResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<CollectMnstrResponse>(create);
+      $pb.GeneratedMessage.$_defaultFor<CollectMnstrResponse>(
+          CollectMnstrResponse.$_createMessage);
   static CollectMnstrResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1003,7 +1036,7 @@ class CreateMnstrRequest extends $pb.GeneratedMessage {
     $core.int? currentMagic,
     $core.int? maxMagic,
   }) {
-    final result = create();
+    final result = CreateMnstrRequest._();
     if (token != null) result.token = token;
     if (mnstrName != null) result.mnstrName = mnstrName;
     if (mnstrDescription != null) result.mnstrDescription = mnstrDescription;
@@ -1028,15 +1061,15 @@ class CreateMnstrRequest extends $pb.GeneratedMessage {
 
   factory CreateMnstrRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      CreateMnstrRequest()..mergeFromBuffer(data, registry);
   factory CreateMnstrRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      CreateMnstrRequest()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'CreateMnstrRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
+      createEmptyInstance: CreateMnstrRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'token')
     ..aOS(2, _omitFieldNames ? '' : 'mnstrName')
     ..aOS(3, _omitFieldNames ? '' : 'mnstrDescription')
@@ -1066,12 +1099,15 @@ class CreateMnstrRequest extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use CreateMnstrRequest() / CreateMnstrRequest.new instead')
   static CreateMnstrRequest create() => CreateMnstrRequest._();
+  static $pb.GeneratedMessage $_createMessage() => CreateMnstrRequest._();
   @$core.override
-  CreateMnstrRequest createEmptyInstance() => create();
+  CreateMnstrRequest createEmptyInstance() => CreateMnstrRequest._();
   @$core.pragma('dart2js:noInline')
   static CreateMnstrRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<CreateMnstrRequest>(create);
+      $pb.GeneratedMessage.$_defaultFor<CreateMnstrRequest>(
+          CreateMnstrRequest.$_createMessage);
   static CreateMnstrRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1223,7 +1259,7 @@ class CreateMnstrResponse extends $pb.GeneratedMessage {
   factory CreateMnstrResponse({
     Mnstr? mnstr,
   }) {
-    final result = create();
+    final result = CreateMnstrResponse._();
     if (mnstr != null) result.mnstr = mnstr;
     return result;
   }
@@ -1232,16 +1268,17 @@ class CreateMnstrResponse extends $pb.GeneratedMessage {
 
   factory CreateMnstrResponse.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      CreateMnstrResponse()..mergeFromBuffer(data, registry);
   factory CreateMnstrResponse.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      CreateMnstrResponse()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'CreateMnstrResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
-    ..aOM<Mnstr>(1, _omitFieldNames ? '' : 'mnstr', subBuilder: Mnstr.create)
+      createEmptyInstance: CreateMnstrResponse.$_createMessage)
+    ..aOM<Mnstr>(1, _omitFieldNames ? '' : 'mnstr',
+        subBuilder: Mnstr.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1255,12 +1292,16 @@ class CreateMnstrResponse extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core
+      .Deprecated('Use CreateMnstrResponse() / CreateMnstrResponse.new instead')
   static CreateMnstrResponse create() => CreateMnstrResponse._();
+  static $pb.GeneratedMessage $_createMessage() => CreateMnstrResponse._();
   @$core.override
-  CreateMnstrResponse createEmptyInstance() => create();
+  CreateMnstrResponse createEmptyInstance() => CreateMnstrResponse._();
   @$core.pragma('dart2js:noInline')
   static CreateMnstrResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<CreateMnstrResponse>(create);
+      $pb.GeneratedMessage.$_defaultFor<CreateMnstrResponse>(
+          CreateMnstrResponse.$_createMessage);
   static CreateMnstrResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1280,7 +1321,7 @@ class CreateMnstrBatchRequest extends $pb.GeneratedMessage {
     $core.String? token,
     BatchMnstrInput? mnstrs,
   }) {
-    final result = create();
+    final result = CreateMnstrBatchRequest._();
     if (token != null) result.token = token;
     if (mnstrs != null) result.mnstrs = mnstrs;
     return result;
@@ -1290,18 +1331,18 @@ class CreateMnstrBatchRequest extends $pb.GeneratedMessage {
 
   factory CreateMnstrBatchRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      CreateMnstrBatchRequest()..mergeFromBuffer(data, registry);
   factory CreateMnstrBatchRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      CreateMnstrBatchRequest()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'CreateMnstrBatchRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
+      createEmptyInstance: CreateMnstrBatchRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'token')
     ..aOM<BatchMnstrInput>(2, _omitFieldNames ? '' : 'mnstrs',
-        subBuilder: BatchMnstrInput.create)
+        subBuilder: BatchMnstrInput.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1316,12 +1357,16 @@ class CreateMnstrBatchRequest extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use CreateMnstrBatchRequest() / CreateMnstrBatchRequest.new instead')
   static CreateMnstrBatchRequest create() => CreateMnstrBatchRequest._();
+  static $pb.GeneratedMessage $_createMessage() => CreateMnstrBatchRequest._();
   @$core.override
-  CreateMnstrBatchRequest createEmptyInstance() => create();
+  CreateMnstrBatchRequest createEmptyInstance() => CreateMnstrBatchRequest._();
   @$core.pragma('dart2js:noInline')
   static CreateMnstrBatchRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<CreateMnstrBatchRequest>(create);
+      $pb.GeneratedMessage.$_defaultFor<CreateMnstrBatchRequest>(
+          CreateMnstrBatchRequest.$_createMessage);
   static CreateMnstrBatchRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1349,7 +1394,7 @@ class CreateMnstrBatchResponse extends $pb.GeneratedMessage {
   factory CreateMnstrBatchResponse({
     $core.Iterable<Mnstr>? mnstrs,
   }) {
-    final result = create();
+    final result = CreateMnstrBatchResponse._();
     if (mnstrs != null) result.mnstrs.addAll(mnstrs);
     return result;
   }
@@ -1358,16 +1403,17 @@ class CreateMnstrBatchResponse extends $pb.GeneratedMessage {
 
   factory CreateMnstrBatchResponse.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      CreateMnstrBatchResponse()..mergeFromBuffer(data, registry);
   factory CreateMnstrBatchResponse.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      CreateMnstrBatchResponse()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'CreateMnstrBatchResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
-    ..pPM<Mnstr>(1, _omitFieldNames ? '' : 'mnstrs', subBuilder: Mnstr.create)
+      createEmptyInstance: CreateMnstrBatchResponse.$_createMessage)
+    ..pPM<Mnstr>(1, _omitFieldNames ? '' : 'mnstrs',
+        subBuilder: Mnstr.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1382,12 +1428,17 @@ class CreateMnstrBatchResponse extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use CreateMnstrBatchResponse() / CreateMnstrBatchResponse.new instead')
   static CreateMnstrBatchResponse create() => CreateMnstrBatchResponse._();
+  static $pb.GeneratedMessage $_createMessage() => CreateMnstrBatchResponse._();
   @$core.override
-  CreateMnstrBatchResponse createEmptyInstance() => create();
+  CreateMnstrBatchResponse createEmptyInstance() =>
+      CreateMnstrBatchResponse._();
   @$core.pragma('dart2js:noInline')
   static CreateMnstrBatchResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<CreateMnstrBatchResponse>(create);
+      $pb.GeneratedMessage.$_defaultFor<CreateMnstrBatchResponse>(
+          CreateMnstrBatchResponse.$_createMessage);
   static CreateMnstrBatchResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1413,7 +1464,7 @@ class UpdateMnstrRequest extends $pb.GeneratedMessage {
     $core.int? currentMagic,
     $core.int? maxMagic,
   }) {
-    final result = create();
+    final result = UpdateMnstrRequest._();
     if (token != null) result.token = token;
     if (id != null) result.id = id;
     if (mnstrName != null) result.mnstrName = mnstrName;
@@ -1438,15 +1489,15 @@ class UpdateMnstrRequest extends $pb.GeneratedMessage {
 
   factory UpdateMnstrRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      UpdateMnstrRequest()..mergeFromBuffer(data, registry);
   factory UpdateMnstrRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      UpdateMnstrRequest()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'UpdateMnstrRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
+      createEmptyInstance: UpdateMnstrRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'token')
     ..aOS(2, _omitFieldNames ? '' : 'id')
     ..aOS(3, _omitFieldNames ? '' : 'mnstrName')
@@ -1476,12 +1527,15 @@ class UpdateMnstrRequest extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use UpdateMnstrRequest() / UpdateMnstrRequest.new instead')
   static UpdateMnstrRequest create() => UpdateMnstrRequest._();
+  static $pb.GeneratedMessage $_createMessage() => UpdateMnstrRequest._();
   @$core.override
-  UpdateMnstrRequest createEmptyInstance() => create();
+  UpdateMnstrRequest createEmptyInstance() => UpdateMnstrRequest._();
   @$core.pragma('dart2js:noInline')
   static UpdateMnstrRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<UpdateMnstrRequest>(create);
+      $pb.GeneratedMessage.$_defaultFor<UpdateMnstrRequest>(
+          UpdateMnstrRequest.$_createMessage);
   static UpdateMnstrRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1633,7 +1687,7 @@ class UpdateMnstrResponse extends $pb.GeneratedMessage {
   factory UpdateMnstrResponse({
     Mnstr? mnstr,
   }) {
-    final result = create();
+    final result = UpdateMnstrResponse._();
     if (mnstr != null) result.mnstr = mnstr;
     return result;
   }
@@ -1642,16 +1696,17 @@ class UpdateMnstrResponse extends $pb.GeneratedMessage {
 
   factory UpdateMnstrResponse.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      UpdateMnstrResponse()..mergeFromBuffer(data, registry);
   factory UpdateMnstrResponse.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      UpdateMnstrResponse()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'UpdateMnstrResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
-    ..aOM<Mnstr>(1, _omitFieldNames ? '' : 'mnstr', subBuilder: Mnstr.create)
+      createEmptyInstance: UpdateMnstrResponse.$_createMessage)
+    ..aOM<Mnstr>(1, _omitFieldNames ? '' : 'mnstr',
+        subBuilder: Mnstr.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1665,12 +1720,16 @@ class UpdateMnstrResponse extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core
+      .Deprecated('Use UpdateMnstrResponse() / UpdateMnstrResponse.new instead')
   static UpdateMnstrResponse create() => UpdateMnstrResponse._();
+  static $pb.GeneratedMessage $_createMessage() => UpdateMnstrResponse._();
   @$core.override
-  UpdateMnstrResponse createEmptyInstance() => create();
+  UpdateMnstrResponse createEmptyInstance() => UpdateMnstrResponse._();
   @$core.pragma('dart2js:noInline')
   static UpdateMnstrResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<UpdateMnstrResponse>(create);
+      $pb.GeneratedMessage.$_defaultFor<UpdateMnstrResponse>(
+          UpdateMnstrResponse.$_createMessage);
   static UpdateMnstrResponse? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1690,7 +1749,7 @@ class UpdateMnstrBatchRequest extends $pb.GeneratedMessage {
     $core.String? token,
     BatchMnstrInput? mnstrs,
   }) {
-    final result = create();
+    final result = UpdateMnstrBatchRequest._();
     if (token != null) result.token = token;
     if (mnstrs != null) result.mnstrs = mnstrs;
     return result;
@@ -1700,18 +1759,18 @@ class UpdateMnstrBatchRequest extends $pb.GeneratedMessage {
 
   factory UpdateMnstrBatchRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      UpdateMnstrBatchRequest()..mergeFromBuffer(data, registry);
   factory UpdateMnstrBatchRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      UpdateMnstrBatchRequest()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'UpdateMnstrBatchRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
+      createEmptyInstance: UpdateMnstrBatchRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'token')
     ..aOM<BatchMnstrInput>(2, _omitFieldNames ? '' : 'mnstrs',
-        subBuilder: BatchMnstrInput.create)
+        subBuilder: BatchMnstrInput.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1726,12 +1785,16 @@ class UpdateMnstrBatchRequest extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use UpdateMnstrBatchRequest() / UpdateMnstrBatchRequest.new instead')
   static UpdateMnstrBatchRequest create() => UpdateMnstrBatchRequest._();
+  static $pb.GeneratedMessage $_createMessage() => UpdateMnstrBatchRequest._();
   @$core.override
-  UpdateMnstrBatchRequest createEmptyInstance() => create();
+  UpdateMnstrBatchRequest createEmptyInstance() => UpdateMnstrBatchRequest._();
   @$core.pragma('dart2js:noInline')
   static UpdateMnstrBatchRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<UpdateMnstrBatchRequest>(create);
+      $pb.GeneratedMessage.$_defaultFor<UpdateMnstrBatchRequest>(
+          UpdateMnstrBatchRequest.$_createMessage);
   static UpdateMnstrBatchRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -1759,7 +1822,7 @@ class UpdateMnstrBatchResponse extends $pb.GeneratedMessage {
   factory UpdateMnstrBatchResponse({
     $core.Iterable<Mnstr>? mnstrs,
   }) {
-    final result = create();
+    final result = UpdateMnstrBatchResponse._();
     if (mnstrs != null) result.mnstrs.addAll(mnstrs);
     return result;
   }
@@ -1768,16 +1831,17 @@ class UpdateMnstrBatchResponse extends $pb.GeneratedMessage {
 
   factory UpdateMnstrBatchResponse.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      UpdateMnstrBatchResponse()..mergeFromBuffer(data, registry);
   factory UpdateMnstrBatchResponse.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      UpdateMnstrBatchResponse()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'UpdateMnstrBatchResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
-    ..pPM<Mnstr>(1, _omitFieldNames ? '' : 'mnstrs', subBuilder: Mnstr.create)
+      createEmptyInstance: UpdateMnstrBatchResponse.$_createMessage)
+    ..pPM<Mnstr>(1, _omitFieldNames ? '' : 'mnstrs',
+        subBuilder: Mnstr.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -1792,12 +1856,17 @@ class UpdateMnstrBatchResponse extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated(
+      'Use UpdateMnstrBatchResponse() / UpdateMnstrBatchResponse.new instead')
   static UpdateMnstrBatchResponse create() => UpdateMnstrBatchResponse._();
+  static $pb.GeneratedMessage $_createMessage() => UpdateMnstrBatchResponse._();
   @$core.override
-  UpdateMnstrBatchResponse createEmptyInstance() => create();
+  UpdateMnstrBatchResponse createEmptyInstance() =>
+      UpdateMnstrBatchResponse._();
   @$core.pragma('dart2js:noInline')
   static UpdateMnstrBatchResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<UpdateMnstrBatchResponse>(create);
+      $pb.GeneratedMessage.$_defaultFor<UpdateMnstrBatchResponse>(
+          UpdateMnstrBatchResponse.$_createMessage);
   static UpdateMnstrBatchResponse? _defaultInstance;
 
   @$pb.TagNumber(1)

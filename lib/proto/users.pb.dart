@@ -32,7 +32,7 @@ class User extends $pb.GeneratedMessage {
     $core.Iterable<$1.Mnstr>? mnstrs,
     $2.Wallet? wallet,
   }) {
-    final result = create();
+    final result = User._();
     if (id != null) result.id = id;
     if (displayName != null) result.displayName = displayName;
     if (email != null) result.email = email;
@@ -51,15 +51,15 @@ class User extends $pb.GeneratedMessage {
 
   factory User.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      User()..mergeFromBuffer(data, registry);
   factory User.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      User()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'User',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
+      createEmptyInstance: User.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOS(2, _omitFieldNames ? '' : 'displayName')
     ..aOS(3, _omitFieldNames ? '' : 'email')
@@ -69,9 +69,9 @@ class User extends $pb.GeneratedMessage {
     ..aI(7, _omitFieldNames ? '' : 'experienceToNextLevel')
     ..aI(8, _omitFieldNames ? '' : 'coins')
     ..pPM<$1.Mnstr>(9, _omitFieldNames ? '' : 'mnstrs',
-        subBuilder: $1.Mnstr.create)
+        subBuilder: $1.Mnstr.$_createMessage)
     ..aOM<$2.Wallet>(10, _omitFieldNames ? '' : 'wallet',
-        subBuilder: $2.Wallet.create)
+        subBuilder: $2.Wallet.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -84,12 +84,14 @@ class User extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use User() / User.new instead')
   static User create() => User._();
+  static $pb.GeneratedMessage $_createMessage() => User._();
   @$core.override
-  User createEmptyInstance() => create();
+  User createEmptyInstance() => User._();
   @$core.pragma('dart2js:noInline')
-  static User getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<User>(create);
+  static User getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<User>(User.$_createMessage);
   static User? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -183,7 +185,7 @@ class MyUserRequest extends $pb.GeneratedMessage {
   factory MyUserRequest({
     $core.String? token,
   }) {
-    final result = create();
+    final result = MyUserRequest._();
     if (token != null) result.token = token;
     return result;
   }
@@ -192,15 +194,15 @@ class MyUserRequest extends $pb.GeneratedMessage {
 
   factory MyUserRequest.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      MyUserRequest()..mergeFromBuffer(data, registry);
   factory MyUserRequest.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      MyUserRequest()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'MyUserRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
+      createEmptyInstance: MyUserRequest.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'token')
     ..hasRequiredFields = false;
 
@@ -215,12 +217,15 @@ class MyUserRequest extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use MyUserRequest() / MyUserRequest.new instead')
   static MyUserRequest create() => MyUserRequest._();
+  static $pb.GeneratedMessage $_createMessage() => MyUserRequest._();
   @$core.override
-  MyUserRequest createEmptyInstance() => create();
+  MyUserRequest createEmptyInstance() => MyUserRequest._();
   @$core.pragma('dart2js:noInline')
-  static MyUserRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<MyUserRequest>(create);
+  static MyUserRequest getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<MyUserRequest>(
+          MyUserRequest.$_createMessage);
   static MyUserRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -237,7 +242,7 @@ class MyUserResponse extends $pb.GeneratedMessage {
   factory MyUserResponse({
     User? user,
   }) {
-    final result = create();
+    final result = MyUserResponse._();
     if (user != null) result.user = user;
     return result;
   }
@@ -246,16 +251,17 @@ class MyUserResponse extends $pb.GeneratedMessage {
 
   factory MyUserResponse.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      MyUserResponse()..mergeFromBuffer(data, registry);
   factory MyUserResponse.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      MyUserResponse()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'MyUserResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
-    ..aOM<User>(1, _omitFieldNames ? '' : 'user', subBuilder: User.create)
+      createEmptyInstance: MyUserResponse.$_createMessage)
+    ..aOM<User>(1, _omitFieldNames ? '' : 'user',
+        subBuilder: User.$_createMessage)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -269,12 +275,15 @@ class MyUserResponse extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use MyUserResponse() / MyUserResponse.new instead')
   static MyUserResponse create() => MyUserResponse._();
+  static $pb.GeneratedMessage $_createMessage() => MyUserResponse._();
   @$core.override
-  MyUserResponse createEmptyInstance() => create();
+  MyUserResponse createEmptyInstance() => MyUserResponse._();
   @$core.pragma('dart2js:noInline')
-  static MyUserResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<MyUserResponse>(create);
+  static MyUserResponse getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<MyUserResponse>(
+          MyUserResponse.$_createMessage);
   static MyUserResponse? _defaultInstance;
 
   @$pb.TagNumber(1)

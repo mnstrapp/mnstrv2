@@ -1,29 +1,27 @@
-import 'dart:convert';
-import 'dart:developer';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:uuid/uuid.dart';
 
+import '../providers/battle.dart';
 import '../providers/session_users.dart';
+import '../proto/battles.pb.dart' as proto;
 import '../shared/layout_scaffold.dart';
 import '../ui/button.dart';
 import '../utils/color.dart';
-import 'data.dart';
-import 'battle_status.dart';
+import 'battle_state.dart';
 
+/// The battle lobby: other players, and challenges sent and received.
 class BattleQueueView extends ConsumerStatefulWidget {
-  final Function(BattleQueue) onLog;
-  final Function(Function(String)) onListen;
-  final Function(BattleQueue) onSend;
-  final Function(Function(String)) onDispose;
+  final BattleClient client;
+
+  /// Called with the new battle when the player accepts a challenge.
+  final void Function(proto.BattleState state) onBattleStarted;
 
   const BattleQueueView({
     super.key,
-    required this.onLog,
-    required this.onListen,
-    required this.onSend,
-    required this.onDispose,
+    required this.client,
+    required this.onBattleStarted,
   });
 
   @override
@@ -31,206 +29,126 @@ class BattleQueueView extends ConsumerStatefulWidget {
 }
 
 class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
-  List<BattleStatus> _battleStatuses = [];
-  List<BattleQueue> _challenges = [];
-  final Map<String, (BattleQueue, VoidCallback)> _sentChallenges = {};
-  bool _showChallenges = false;
+  List<proto.BattleStatus> _lobby = [];
+  LobbyChallenges _challenges = const LobbyChallenges();
+  StreamSubscription<proto.BattleEvent>? _events;
+  StreamSubscription<BattleConnection>? _connection;
 
-  void _onChallenge(BattleQueue battleQueue, VoidCallback callback) {
-    setState(() {
-      _sentChallenges[battleQueue.data!.id!] = (
-        battleQueue,
-        callback,
-      );
-    });
-    widget.onSend(battleQueue);
-  }
+  BattleClient get _client => widget.client;
 
-  void _acceptChallenge(int index) {
-    final user = ref.read(sessionUserProvider);
-    if (user == null) {
-      return;
-    }
-
-    final data = BattleQueueData(
-      action: BattleQueueDataAction.accept,
-      userId: _challenges[index].data?.userId,
-      userName: _challenges[index].data?.userName,
-      opponentId: user.id,
-      opponentName: user.displayName,
-      message: 'accept challenge',
-    );
-    final battleQueue = BattleQueue(
-      action: BattleQueueAction.accept,
-      userId: user.id,
-      data: data,
-      channel: BattleQueueChannel.lobby,
-    );
-    widget.onSend(battleQueue);
-
-    setState(() {
-      _challenges.removeAt(index);
-    });
-  }
-
-  void _rejectChallenge(int index) {
-    final user = ref.read(sessionUserProvider);
-    if (user == null) {
-      return;
-    }
-
-    final data = BattleQueueData(
-      action: BattleQueueDataAction.reject,
-      id: _challenges[index].data?.id,
-      userId: _challenges[index].data?.userId,
-      userName: _challenges[index].data?.userName,
-      opponentId: user.id,
-      opponentName: user.displayName,
-      message: 'reject challenge',
-    );
-    final battleQueue = BattleQueue(
-      action: BattleQueueAction.reject,
-      userId: user.id,
-      data: data,
-      channel: BattleQueueChannel.lobby,
-    );
-    widget.onSend(battleQueue);
-
-    setState(() {
-      _challenges.removeAt(index);
-    });
-  }
-
-  void _getBattleStatuses() {
-    final user = ref.read(sessionUserProvider);
-    if (user == null) {
-      return;
-    }
-    final data = BattleQueueData(
-      action: BattleQueueDataAction.list,
-      userId: user.id,
-      userName: user.displayName,
-      message: 'list lobby players',
-    );
-    final battleQueue = BattleQueue(
-      action: BattleQueueAction.list,
-      userId: user.id,
-      data: data,
-      channel: BattleQueueChannel.lobby,
-    );
-    widget.onSend(battleQueue);
-  }
-
-  void _handleMessage(String message) {
+  void _showError(Object error) {
     if (!mounted) {
       return;
     }
+    final message = error is BattleException
+        ? error.message
+        : 'Something went wrong. Please try again.';
+    LayoutScaffold.addError(context, message);
+  }
 
+  Future<void> _refreshLobby() async {
+    try {
+      final lobby = await _client.listPlayers();
+      if (mounted) {
+        setState(() {
+          _lobby = lobby;
+        });
+      }
+    } catch (error) {
+      _showError(error);
+    }
+  }
+
+  void _handleEvent(proto.BattleEvent event) {
     final user = ref.read(sessionUserProvider);
-    if (user == null) {
+    if (!mounted || user?.id == null) {
       return;
     }
+    setState(() {
+      _lobby = applyLobbyEvent(_lobby, event, user!.id!);
+      _challenges = _challenges.apply(event);
+    });
+  }
 
-    final battleQueue = BattleQueue.fromJson(jsonDecode(message));
-
-    switch (battleQueue.action) {
-      case BattleQueueAction.joined:
-        log('[handle message] joined');
-        log(
-          '[handle message] userId: ${battleQueue.data?.userId} != ${user.id}',
-        );
-        log('[handle message] battleQueue: ${battleQueue.toJson()}');
-        if (battleQueue.data?.userId != user.id) {
-          _getBattleStatuses();
-        }
-        break;
-      case BattleQueueAction.left:
-        if (battleQueue.data?.userId != user.id) {
-          _getBattleStatuses();
-        }
-        break;
-      case BattleQueueAction.list:
-        log('[handle message] list');
-        log(
-          '[handle message] userId: ${battleQueue.data?.userId} != ${user.id}',
-        );
-        log('[handle message] battleQueue: ${battleQueue.toJson()}');
-        if (battleQueue.data?.data == null) {
-          return;
-        }
-        final data = jsonDecode(battleQueue.data?.data as String);
-        List<BattleStatus> battleStatuses = [];
-        for (var e in data) {
-          final battleStatus = BattleStatus.fromJson(e);
-          if (battleStatus.userId == user.id) {
-            // continue;
-          }
-          battleStatuses.add(battleStatus);
-        }
+  Future<void> _challenge(proto.BattleStatus status) async {
+    try {
+      final challengeId = await _client.challenge(status.userId);
+      if (mounted) {
         setState(() {
-          _battleStatuses = battleStatuses;
+          _challenges = _challenges.withSent(status.userId, challengeId);
         });
-        break;
-      case BattleQueueAction.challenge:
-        if (battleQueue.data?.opponentId == user.id) {
-          setState(() {
-            _showChallenges = true;
-            _challenges = [..._challenges, battleQueue];
-          });
-        }
-        break;
-      case BattleQueueAction.cancel:
-        if (battleQueue.data?.opponentId == user.id) {
-          setState(() {
-            _challenges.removeWhere(
-              (challenge) => challenge.data?.id == battleQueue.data?.id,
-            );
-            if (_challenges.isEmpty) {
-              _showChallenges = false;
-            }
-          });
-        }
-        break;
-      case BattleQueueAction.reject:
-        if (battleQueue.data?.userId == user.id) {
-          final callback = _sentChallenges[battleQueue.data?.id];
-          if (callback != null) {
-            callback.$2();
-          }
-          setState(() {
-            _sentChallenges.remove(battleQueue.data?.id);
-          });
-        }
-        break;
-      case BattleQueueAction.accept:
-        if (battleQueue.data?.userId == user.id) {
-          final callback = _sentChallenges[battleQueue.data?.id];
-          if (callback != null) {
-            callback.$2();
-          }
-          setState(() {
-            _sentChallenges.remove(battleQueue.data?.id);
-          });
-        }
-        _getBattleStatuses();
-        break;
-      default:
-        break;
+      }
+    } catch (error) {
+      _showError(error);
+    }
+  }
+
+  Future<void> _cancel(proto.BattleStatus status) async {
+    final challengeId = _challenges.sent[status.userId];
+    setState(() {
+      _challenges = _challenges.withoutSent(status.userId);
+    });
+    if (challengeId == null) {
+      return;
+    }
+    try {
+      await _client.cancelChallenge(
+        challengeId: challengeId,
+        opponentId: status.userId,
+      );
+    } catch (error) {
+      _showError(error);
+    }
+  }
+
+  Future<void> _accept(proto.ChallengeReceived challenge) async {
+    setState(() {
+      _challenges = _challenges.withoutReceived(challenge.challengeId);
+    });
+    try {
+      final state = await _client.acceptChallenge(
+        challengeId: challenge.challengeId,
+        challengerId: challenge.challenger.userId,
+      );
+      widget.onBattleStarted(state);
+    } catch (error) {
+      _showError(error);
+    }
+  }
+
+  Future<void> _reject(proto.ChallengeReceived challenge) async {
+    setState(() {
+      _challenges = _challenges.withoutReceived(challenge.challengeId);
+    });
+    try {
+      await _client.rejectChallenge(
+        challengeId: challenge.challengeId,
+        challengerId: challenge.challenger.userId,
+      );
+    } catch (error) {
+      _showError(error);
     }
   }
 
   @override
   void initState() {
     super.initState();
-    widget.onListen(_handleMessage);
+    _events = _client.events.listen(_handleEvent);
+    _connection = _client.connectionChanges.listen((connection) {
+      // A new stream is a new lobby entry: reload who is here.
+      if (connection == BattleConnection.connected) {
+        _refreshLobby();
+      }
+    });
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _getBattleStatuses();
+      _refreshLobby();
     });
   }
 
   @override
   void dispose() {
-    widget.onDispose(_handleMessage);
+    _events?.cancel();
+    _connection?.cancel();
     super.dispose();
   }
 
@@ -239,19 +157,19 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
     return Column(
       spacing: 8,
       children: [
-        if (_showChallenges)
-          ..._challenges.asMap().entries.map(
-            (entry) => _ChallengeWidget(
-              challenge: entry.value,
-              onAccept: () => _acceptChallenge(entry.key),
-              onReject: () => _rejectChallenge(entry.key),
-            ),
+        ..._challenges.received.map(
+          (challenge) => _ChallengeWidget(
+            challenge: challenge,
+            onAccept: () => _accept(challenge),
+            onReject: () => _reject(challenge),
           ),
-        ..._battleStatuses.map(
-          (battleStatus) => _BattleStatusWidget(
-            battleStatus: battleStatus,
-            onSend: widget.onSend,
-            onChallenge: _onChallenge,
+        ),
+        ..._lobby.map(
+          (status) => _BattleStatusWidget(
+            battleStatus: status,
+            waiting: _challenges.sent.containsKey(status.userId),
+            onChallenge: () => _challenge(status),
+            onCancel: () => _cancel(status),
           ),
         ),
       ],
@@ -259,89 +177,24 @@ class _BattleQueueViewState extends ConsumerState<BattleQueueView> {
   }
 }
 
-class _BattleStatusWidget extends ConsumerStatefulWidget {
-  final BattleStatus battleStatus;
-  final Function(BattleQueue) onSend;
-  final Function(BattleQueue, VoidCallback) onChallenge;
+class _BattleStatusWidget extends StatefulWidget {
+  final proto.BattleStatus battleStatus;
+  final bool waiting;
+  final Future<void> Function() onChallenge;
+  final Future<void> Function() onCancel;
 
   const _BattleStatusWidget({
     required this.battleStatus,
-    required this.onSend,
+    required this.waiting,
     required this.onChallenge,
+    required this.onCancel,
   });
 
   @override
-  ConsumerState<_BattleStatusWidget> createState() =>
-      _BattleStatusWidgetState();
+  State<_BattleStatusWidget> createState() => _BattleStatusWidgetState();
 }
 
-class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
-  bool _waiting = false;
-  BattleQueue? _challengeMade;
-
-  void _challenge() {
-    final user = ref.read(sessionUserProvider);
-    if (user == null) {
-      return;
-    }
-
-    setState(() {
-      _waiting = true;
-    });
-
-    final data = BattleQueueData(
-      action: BattleQueueDataAction.challenge,
-      id: Uuid().v4(),
-      userId: user.id,
-      userName: user.displayName,
-      opponentId: widget.battleStatus.userId,
-      opponentName: widget.battleStatus.displayName,
-      message: 'challenge ${widget.battleStatus.displayName}',
-    );
-    final battleQueue = BattleQueue(
-      action: BattleQueueAction.challenge,
-      userId: user.id,
-      data: data,
-      channel: BattleQueueChannel.lobby,
-    );
-    _challengeMade = battleQueue;
-    widget.onChallenge(battleQueue, () {
-      setState(() {
-        _waiting = false;
-      });
-    });
-  }
-
-  void _cancel() {
-    final user = ref.read(sessionUserProvider);
-    if (user == null) {
-      return;
-    }
-
-    log('[battle status cancel handler] id: ${_challengeMade?.data?.id}');
-
-    final data = BattleQueueData(
-      action: BattleQueueDataAction.cancel,
-      id: _challengeMade?.data?.id,
-      userId: user.id,
-      userName: user.displayName,
-      opponentId: widget.battleStatus.userId,
-      opponentName: widget.battleStatus.displayName,
-      message: 'cancel challenge ${widget.battleStatus.displayName}',
-    );
-    final battleQueue = BattleQueue(
-      action: BattleQueueAction.cancel,
-      userId: user.id,
-      data: data,
-      channel: BattleQueueChannel.lobby,
-    );
-    widget.onSend(battleQueue);
-    setState(() {
-      _waiting = false;
-      _challengeMade = null;
-    });
-  }
-
+class _BattleStatusWidgetState extends State<_BattleStatusWidget> {
   void setShowStatBar() {
     LayoutScaffold.of(
       context,
@@ -358,23 +211,19 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final user = ref.watch(sessionUserProvider);
-    if (user == null) {
-      return const SizedBox.shrink();
-    }
-
     final theme = Theme.of(context);
     final size = MediaQuery.sizeOf(context);
-    final statusColor = switch (widget.battleStatus.status) {
-      BattleStatusState.inQueue => Colors.green,
-      BattleStatusState.inBattle => Colors.yellow,
-      BattleStatusState.watching => Colors.grey,
-      null => Colors.red,
+    final status = widget.battleStatus.status;
+    final statusColor = switch (status) {
+      proto.BattleStatusState.BATTLE_STATUS_STATE_IN_QUEUE => Colors.green,
+      proto.BattleStatusState.BATTLE_STATUS_STATE_IN_BATTLE => Colors.yellow,
+      proto.BattleStatusState.BATTLE_STATUS_STATE_WATCHING => Colors.grey,
+      _ => Colors.red,
     };
-    final canBattle = widget.battleStatus.status == BattleStatusState.inQueue;
+    final canBattle =
+        status == proto.BattleStatusState.BATTLE_STATUS_STATE_IN_QUEUE;
     final battling =
-        widget.battleStatus.opponentId == widget.battleStatus.userId;
-    final inBattle = widget.battleStatus.opponentId != null;
+        status == proto.BattleStatusState.BATTLE_STATUS_STATE_IN_BATTLE;
 
     return Container(
       height: 40,
@@ -392,27 +241,25 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
             color: statusColor,
           ),
           Text(
-            widget.battleStatus.displayName ?? 'unknown',
+            widget.battleStatus.displayName.isEmpty
+                ? 'unknown'
+                : widget.battleStatus.displayName,
             style: theme.textTheme.labelLarge?.copyWith(
               color: theme.colorScheme.surface,
             ),
           ),
           Spacer(),
-          if (canBattle && !_waiting && !battling)
+          if (canBattle && !widget.waiting)
             UIButton(
-              onPressed: inBattle ? () {} : _challenge,
+              onPressedAsync: widget.onChallenge,
               text: 'Battle',
               icon: Icons.play_arrow_rounded,
-              backgroundColor: inBattle
-                  ? Colors.grey
-                  : darkenColor(theme.colorScheme.primary, 0.1),
-              foregroundColor: inBattle
-                  ? lightenColor(theme.colorScheme.onSurface, 0.3)
-                  : theme.colorScheme.onPrimary,
+              backgroundColor: darkenColor(theme.colorScheme.primary, 0.1),
+              foregroundColor: theme.colorScheme.onPrimary,
             ),
-          if (canBattle && _waiting)
+          if (canBattle && widget.waiting)
             UIButton(
-              onPressed: _cancel,
+              onPressedAsync: widget.onCancel,
               text: 'Cancel',
               icon: Icons.hourglass_empty_rounded,
               backgroundColor: darkenColor(theme.colorScheme.primary, 0.1),
@@ -430,10 +277,10 @@ class _BattleStatusWidgetState extends ConsumerState<_BattleStatusWidget> {
   }
 }
 
-class _ChallengeWidget extends ConsumerWidget {
-  final BattleQueue challenge;
-  final Function() onAccept;
-  final Function() onReject;
+class _ChallengeWidget extends StatelessWidget {
+  final proto.ChallengeReceived challenge;
+  final Future<void> Function() onAccept;
+  final Future<void> Function() onReject;
 
   const _ChallengeWidget({
     required this.challenge,
@@ -442,7 +289,7 @@ class _ChallengeWidget extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return Container(
@@ -467,7 +314,7 @@ class _ChallengeWidget extends ConsumerWidget {
         spacing: 16,
         children: [
           Text(
-            '${challenge.data?.userName} has challenged you to a battle',
+            '${challenge.challenger.displayName} has challenged you to a battle',
             style: theme.textTheme.labelLarge?.copyWith(
               color: theme.colorScheme.onPrimary,
             ),
@@ -476,13 +323,13 @@ class _ChallengeWidget extends ConsumerWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               UIButton(
-                onPressed: onReject,
+                onPressedAsync: onReject,
                 text: 'Reject',
                 icon: Icons.cancel_rounded,
                 backgroundColor: Colors.transparent,
               ),
               UIButton(
-                onPressed: onAccept,
+                onPressedAsync: onAccept,
                 text: 'Accept',
                 icon: Icons.play_arrow_rounded,
               ),

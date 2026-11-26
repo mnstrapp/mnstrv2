@@ -1,40 +1,36 @@
-import 'dart:convert';
-import 'dart:developer' show log;
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_symbols_icons/symbols.dart';
 
 import '../manage/list.dart';
+import '../models/monster.dart';
+import '../providers/battle.dart';
 import '../providers/manage.dart';
 import '../providers/session_users.dart';
+import '../proto/battles.pb.dart' as proto;
 import '../shared/layout_scaffold.dart';
 import '../shared/mnstr_list.dart';
 import '../shared/monster_view.dart';
 import '../shared/stat_bar_container.dart';
 import '../ui/button.dart';
 import '../utils/color.dart';
-import 'data.dart';
-import '../models/monster.dart';
-import 'game_data.dart';
+import 'battle_state.dart';
 
+/// One battle, from choosing a mnstr to the result screen.
+///
+/// All battle state comes from the server: the [initialState] the battle
+/// started with, then the state carried by each event and action response.
 class BattleVsView extends ConsumerStatefulWidget {
-  final Function(Function(String)) onListen;
-  final Function(BattleQueue) onSend;
-  final Function(BattleQueue) onLog;
-  final Function(Function(String)) onDispose;
-  final Function(GameData) onGameEnded;
-  final Function() reconnect;
-  final BattleQueue? battleQueue;
+  final BattleClient client;
+  final proto.BattleState initialState;
+  final VoidCallback onGameEnded;
 
   const BattleVsView({
     super.key,
-    required this.onListen,
-    required this.onSend,
-    required this.onLog,
-    required this.onDispose,
-    required this.reconnect,
-    required this.battleQueue,
+    required this.client,
+    required this.initialState,
     required this.onGameEnded,
   });
 
@@ -43,175 +39,178 @@ class BattleVsView extends ConsumerStatefulWidget {
 }
 
 class _BattleVsViewState extends ConsumerState<BattleVsView> {
-  Monster? _challengerMnstr;
-  Monster? _opponentMnstr;
-  List<Monster>? _challengerMnstrs;
-  List<Monster>? _opponentMnstrs;
-  String? _userId;
-  String? _userName;
-  String? _challengerId;
-  String? _opponentId;
-  GameData? _gameData;
-  BattleQueue? _battleQueue;
+  late proto.BattleState _state;
+  List<Monster> _choices = [];
   bool _choosingMnstr = true;
-  bool _inBattle = false;
-  bool _isChallenger = false;
-  bool _isLoading = false;
   ManageOrder? _order;
+  TurnOutcome _outcome = TurnOutcome.none;
+  proto.GameEnded? _gameEnded;
+  String? _busyMessage;
+  StreamSubscription<proto.BattleEvent>? _events;
 
-  Future<void> _initUser() async {
-    final user = ref.read(sessionUserProvider);
-    if (user == null) {
+  BattleClient get _client => widget.client;
+
+  String? get _userId => ref.read(sessionUserProvider)?.id;
+
+  String get _battleId => _state.battleId;
+
+  void _showError(Object error) {
+    if (!mounted) {
+      return;
+    }
+    final message = error is BattleException
+        ? error.message
+        : 'Something went wrong. Please try again.';
+    LayoutScaffold.addError(context, message);
+  }
+
+  void _applyState(proto.BattleState state) {
+    final userId = _userId;
+    if (userId == null || state.battleId != _battleId) {
+      return;
+    }
+    _state = state;
+    final choices = state.myChoices(userId);
+    if (choices.isNotEmpty) {
+      _choices = _sorted(choices);
+    }
+    if (state.hasChosen(userId)) {
+      _choosingMnstr = false;
+    }
+  }
+
+  void _applyGameEnded(proto.GameEnded ended) {
+    if (ended.state.battleId != _battleId) {
+      return;
+    }
+    _applyState(ended.state);
+    _gameEnded = ended;
+    _busyMessage = null;
+    _outcome = TurnOutcome.none;
+  }
+
+  void _handleEvent(proto.BattleEvent event) {
+    final userId = _userId;
+    if (!mounted || userId == null || battleIdOf(event) != _battleId) {
       return;
     }
     setState(() {
-      _userId = user.id;
-      _userName = user.displayName;
-      _isChallenger = _battleQueue?.data?.userId == user.id;
+      switch (event.whichPayload()) {
+        case proto.BattleEvent_Payload.turnTaken:
+          _applyState(event.turnTaken.state);
+          _outcome = outcomeFor(event.turnTaken.result, userId);
+          if (event.turnTaken.result.actorUserId == userId) {
+            _busyMessage = null;
+          }
+          break;
+        case proto.BattleEvent_Payload.gameEnded:
+          _applyGameEnded(event.gameEnded);
+          break;
+        case proto.BattleEvent_Payload.error:
+          _busyMessage = null;
+          LayoutScaffold.addError(context, event.error.message);
+          break;
+        default:
+          final state = battleStateOf(event);
+          if (state != null) {
+            _applyState(state);
+          }
+      }
     });
+  }
+
+  List<Monster> _sorted(List<Monster> mnstrs) {
+    final ManageOrder order = _order ?? ref.read(manageOrderProvider);
+    return sortMnstrs(mnstrs, order.orderBy, order.orderDirection);
   }
 
   Future<void> _chooseMnstr(Monster mnstr) async {
-    final isChallenger = _isChallenger;
-
+    final mnstrId = mnstr.id;
+    if (mnstrId == null) {
+      return;
+    }
     setState(() {
-      if (isChallenger) {
-        _challengerMnstr = mnstr;
-      } else {
-        _opponentMnstr = mnstr;
-      }
       _choosingMnstr = false;
     });
-    final battleQueue = await _buildBattleQueue();
-    widget.onSend(battleQueue);
-  }
-
-  Future<BattleQueue> _buildBattleQueue() async {
-    final data = BattleQueueData(
-      action: BattleQueueDataAction.mnstrChosen,
-      userId: _isChallenger ? _userId : _battleQueue!.data!.opponentId,
-      userName: _isChallenger ? _userName : _battleQueue!.data!.opponentName,
-      opponentId: !_isChallenger ? _userId : _battleQueue!.data?.opponentId,
-      opponentName: !_isChallenger
-          ? _userName
-          : _battleQueue!.data!.opponentName,
-      userMnstrId: _isChallenger
-          ? _challengerMnstr?.id
-          : _battleQueue!.data!.userMnstrId,
-      opponentMnstrId: !_isChallenger
-          ? _opponentMnstr?.id
-          : _battleQueue!.data!.opponentMnstrId,
-      message: 'Mnstr chosen',
-      data: jsonEncode(
-        GameData(
-          challengerMnstr: _isChallenger
-              ? _challengerMnstr
-              : _gameData?.challengerMnstr,
-          opponentMnstr: !_isChallenger
-              ? _opponentMnstr
-              : _gameData?.opponentMnstr,
-          battleId: _gameData?.battleId,
-        ).toJson(),
-      ),
-    );
-    final battleQueue = BattleQueue(
-      action: BattleQueueAction.mnstrChosen,
-      userId: _userId,
-      data: data,
-      channel: BattleQueueChannel.battle,
-    );
-    log('[build battle queue] _isChallenger: $_isChallenger');
-    log('[build battle queue] _userId: $_userId');
-    log('[build battle queue] _userName: $_userName');
-    log(
-      '[build battle queue] battle queue data: ${battleQueue.data?.toJson()}',
-    );
-    log('[build battle queue] battle queue: ${battleQueue.toJson()}');
-    return battleQueue;
-  }
-
-  Future<void> _handleMessage(String message) async {
-    final battleQueue = BattleQueue.fromJson(jsonDecode(message));
-    if (battleQueue.action == BattleQueueAction.ping) {
-      return;
-    }
-
-    if (battleQueue.data!.userId != _userId &&
-        battleQueue.data!.opponentId != _userId) {
-      log('\n\n[handle message] not user or opponent\n\n');
-      log('[handle message] userId: ${battleQueue.data?.userId} != $_userId');
-      log(
-        '[handle message] opponentId: ${battleQueue.data?.opponentId} != $_userId',
+    try {
+      final state = await _client.chooseMnstr(
+        battleId: _battleId,
+        mnstrId: mnstrId,
       );
-      log('[handle message] battleQueue: ${battleQueue.toJson()}');
-      return;
-    }
-
-    setState(() {
-      _battleQueue = battleQueue;
-    });
-
-    switch (battleQueue.action) {
-      case BattleQueueAction.mnstrChosen:
-        if (battleQueue.data!.data == null) {
-          log('[mnstr chosen] data is null');
-          break;
-        }
-        final data = jsonDecode(battleQueue.data!.data!);
-        final gameData = GameData.fromJson(data);
-        setState(() {
-          if (gameData.challengerMnstr != null) {
-            _challengerMnstr = gameData.challengerMnstr;
-          }
-          if (gameData.opponentMnstr != null) {
-            _opponentMnstr = gameData.opponentMnstr;
-          }
-        });
-        break;
-      case BattleQueueAction.gameStarted:
-        final data = jsonDecode(battleQueue.data!.data!);
-        final gameData = GameData.fromJson(data);
-
-        setState(() {
-          _gameData = gameData;
-          _inBattle = true;
-        });
-        break;
-      default:
-        break;
-    }
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    _battleQueue = widget.battleQueue;
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
-      await _initUser();
-      if (_isChallenger) {
-        _challengerId = _userId;
-        _opponentId = _battleQueue!.data!.opponentId;
-      } else {
-        _challengerId = _battleQueue!.data!.userId;
-        _opponentId = _userId;
+      if (mounted) {
+        setState(() => _applyState(state));
       }
-      final data = jsonDecode(_battleQueue!.data!.data!);
-      _gameData = GameData.fromJson(data);
-      _challengerMnstr = _gameData?.challengerMnstr;
-      _opponentMnstr = _gameData?.opponentMnstr;
-      _challengerMnstrs = _gameData?.challengerMnstrs;
-      _opponentMnstrs = _gameData?.opponentMnstrs;
-      widget.onListen(_handleMessage);
-    });
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _choosingMnstr = true;
+        });
+      }
+      _showError(error);
+    }
   }
 
-  Future<void> _setOrder({
+  Future<void> _turn(
+    String busyMessage,
+    Future<proto.TurnResponse> Function(String battleId) action,
+  ) async {
+    setState(() {
+      _busyMessage = busyMessage;
+      _outcome = TurnOutcome.none;
+    });
+    try {
+      final response = await action(_battleId);
+      if (!mounted) {
+        return;
+      }
+      setState(() {
+        _applyState(response.state);
+        if (response.hasGameEnded()) {
+          _applyGameEnded(response.gameEnded);
+        }
+        _busyMessage = null;
+      });
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _busyMessage = null;
+        });
+      }
+      _showError(error);
+    }
+  }
+
+  Future<void> _attack() => _turn('Attacking...', _client.attack);
+
+  Future<void> _defend() => _turn('Defending...', _client.defend);
+
+  Future<void> _magic() => _turn('Magic...', _client.magic);
+
+  Future<void> _escape() async {
+    setState(() {
+      _busyMessage = 'Escaping from battle...';
+    });
+    try {
+      final ended = await _client.escape(_battleId);
+      if (mounted) {
+        setState(() => _applyGameEnded(ended));
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(() {
+          _busyMessage = null;
+        });
+      }
+      _showError(error);
+    }
+  }
+
+  /// Sorts the mnstrs to choose from on the client, and remembers the order
+  /// for the manage screen too.
+  void _setOrder({
     required ManageOrderBy orderBy,
     required ManageOrderDirection orderDirection,
-  }) async {
-    setState(() {
-      _isLoading = true;
-    });
+  }) {
     ref
         .read(manageOrderProvider.notifier)
         .set(
@@ -220,41 +219,113 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
         );
     setState(() {
       _order = ref.read(manageOrderProvider);
+      _choices = _sorted(_choices);
     });
-    await ref.read(manageProvider.notifier).getMonsters();
-    final monsters = ref.read(manageProvider);
-    if (mounted) {
-      setState(() {
-        _challengerMnstrs = monsters;
-        _opponentMnstrs = monsters;
-        _isLoading = false;
-      });
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _state = widget.initialState;
+    _order = ref.read(manageOrderProvider);
+    final userId = _userId;
+    if (userId != null) {
+      _choices = _sorted(_state.myChoices(userId));
+      _choosingMnstr = !_state.hasChosen(userId);
     }
-    widget.reconnect();
+    _events = _client.events.listen(_handleEvent);
   }
 
   @override
   void dispose() {
-    widget.onDispose(_handleMessage);
+    _events?.cancel();
     super.dispose();
+  }
+
+  Widget _endedWithoutFight(BuildContext context, proto.GameEnded ended) {
+    final theme = Theme.of(context);
+    final won = ended.winnerId == _userId;
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 16,
+        children: [
+          Text(
+            won ? 'Your opponent ran away' : 'You ran away',
+            style: theme.textTheme.displaySmall?.copyWith(
+              color: Colors.white,
+            ),
+          ),
+          UIButton(
+            onPressed: widget.onGameEnded,
+            icon: Symbols.social_leaderboard_rounded,
+            text: 'exit battle',
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _waiting(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        spacing: 16,
+        children: [
+          Text(
+            'Waiting for opponent...',
+            style: theme.textTheme.titleLarge?.copyWith(color: Colors.white),
+          ),
+          UIButton(
+            onPressedAsync: _escape,
+            icon: Icons.directions_run_rounded,
+            text: 'Run away',
+          ),
+        ],
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    List<Monster> mnstrs = [];
-    if (_isChallenger) {
-      mnstrs = _challengerMnstrs ?? [];
-    } else {
-      mnstrs = _opponentMnstrs ?? [];
+    final userId = ref.watch(sessionUserProvider)?.id;
+    if (userId == null) {
+      return const SizedBox.shrink();
     }
 
-    if (mnstrs.isEmpty) {
-      return const Center(child: CircularProgressIndicator());
+    final gameEnded = _gameEnded;
+    final myMnstr = _state.myMnstr(userId);
+    final otherMnstr = _state.otherMnstr(userId);
+    final bothChosen = myMnstr != null && otherMnstr != null;
+
+    if (gameEnded != null && !bothChosen) {
+      return _endedWithoutFight(context, gameEnded);
     }
 
-    bool choosingMnstr = _choosingMnstr;
+    if (bothChosen && (_state.isInProgress || gameEnded != null)) {
+      return BattleVsInGameView(
+        userId: userId,
+        state: _state,
+        myMnstr: myMnstr,
+        otherMnstr: otherMnstr,
+        outcome: _outcome,
+        gameEnded: gameEnded,
+        busyMessage: _busyMessage,
+        onAttack: _attack,
+        onMagic: _magic,
+        onDefend: _defend,
+        onEscape: _escape,
+        onExit: widget.onGameEnded,
+      );
+    }
 
-    final inBattle = _inBattle;
+    final mnstrs = _choices;
+    final choosingMnstr = _choosingMnstr;
+
+    if (!choosingMnstr || mnstrs.isEmpty) {
+      return _waiting(context);
+    }
 
     final size = MediaQuery.sizeOf(context);
 
@@ -267,493 +338,157 @@ class _BattleVsViewState extends ConsumerState<BattleVsView> {
       ),
     );
 
-    return choosingMnstr && mnstrs.isNotEmpty
-        ? SizedBox(
-            height: size.height,
-            width: size.width,
-            child: _isLoading
-                ? const Center(child: CircularProgressIndicator())
-                : Stack(
+    return SizedBox(
+      height: size.height,
+      width: size.width,
+      child: Stack(
+        children: [
+          MnstrList(
+            // showName: false,
+            monsters: mnstrs,
+            onTap: _chooseMnstr,
+            filter: (mnstr) {
+              return mnstr.currentHealth != null && mnstr.currentHealth! > 0;
+            },
+            overlayBuilder: (mnstr) {
+              final m = mnstr.toMonsterModel();
+              final color = darkenColor(
+                Color.lerp(m.color, Colors.black, 0.1) ?? Colors.black,
+                0.3,
+              );
+              return Stack(
+                children: [
+                  Positioned(
+                    bottom: 16,
+                    left: 16,
+                    right: 16,
+                    child: UIButton(
+                      height: 48,
+                      onPressed: () {
+                        _chooseMnstr(mnstr);
+                      },
+                      icon: Icons.play_arrow_rounded,
+                      backgroundColor: color,
+                      text: 'Choose',
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+          Positioned(
+            bottom: 80,
+            left: 0,
+            right: 0,
+            child: SafeArea(
+              child: Center(
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  margin: const EdgeInsets.only(
+                    left: 32,
+                    right: 32,
+                  ),
+                  child: Row(
+                    spacing: 8,
                     children: [
-                      MnstrList(
-                        // showName: false,
-                        monsters: mnstrs,
-                        onTap: _chooseMnstr,
-                        filter: (mnstr) {
-                          return mnstr.currentHealth != null &&
-                              mnstr.currentHealth! > 0;
-                        },
-                        overlayBuilder: (mnstr) {
-                          final m = mnstr.toMonsterModel();
-                          final color = darkenColor(
-                            Color.lerp(m.color, Colors.black, 0.1) ??
-                                Colors.black,
-                            0.3,
-                          );
-                          return Stack(
-                            children: [
-                              Positioned(
-                                bottom: 16,
-                                left: 16,
-                                right: 16,
-                                child: UIButton(
-                                  height: 48,
-                                  onPressed: () {
-                                    _chooseMnstr(mnstr);
-                                  },
-                                  icon: Icons.play_arrow_rounded,
-                                  backgroundColor: color,
-                                  text: 'Choose',
-                                ),
+                      Icon(Icons.sort_rounded),
+                      DropdownMenu(
+                        inputDecorationTheme: inputDecorationTheme,
+                        dropdownMenuEntries: ManageOrderBy.values
+                            .map(
+                              (e) => DropdownMenuEntry(
+                                value: e,
+                                label: e.name,
                               ),
-                            ],
+                            )
+                            .toList(),
+                        enableFilter: true,
+                        initialSelection:
+                            _order?.orderBy ?? ManageOrderBy.updatedAt,
+                        onSelected: (value) {
+                          _setOrder(
+                            orderBy: value ?? ManageOrderBy.updatedAt,
+                            orderDirection:
+                                _order?.orderDirection ??
+                                ManageOrderDirection.desc,
                           );
                         },
                       ),
-                      Positioned(
-                        bottom: 80,
-                        left: 0,
-                        right: 0,
-                        child: SafeArea(
-                          child: Center(
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.5),
-                                borderRadius: BorderRadius.circular(20),
+                      DropdownMenu(
+                        inputDecorationTheme: inputDecorationTheme,
+                        dropdownMenuEntries: ManageOrderDirection.values
+                            .map(
+                              (e) => DropdownMenuEntry(
+                                value: e,
+                                label: e.name,
                               ),
-                              padding: const EdgeInsets.all(8),
-                              margin: const EdgeInsets.only(
-                                left: 32,
-                                right: 32,
-                              ),
-                              child: Row(
-                                spacing: 8,
-                                children: [
-                                  Icon(Icons.sort_rounded),
-                                  DropdownMenu(
-                                    inputDecorationTheme: inputDecorationTheme,
-                                    dropdownMenuEntries: ManageOrderBy.values
-                                        .map(
-                                          (e) => DropdownMenuEntry(
-                                            value: e,
-                                            label: e.name,
-                                          ),
-                                        )
-                                        .toList(),
-                                    enableFilter: true,
-                                    initialSelection:
-                                        _order?.orderBy ??
-                                        ManageOrderBy.updatedAt,
-                                    onSelected: (value) {
-                                      _setOrder(
-                                        orderBy:
-                                            value ?? ManageOrderBy.updatedAt,
-                                        orderDirection:
-                                            _order?.orderDirection ??
-                                            ManageOrderDirection.desc,
-                                      );
-                                    },
-                                  ),
-                                  DropdownMenu(
-                                    inputDecorationTheme: inputDecorationTheme,
-                                    dropdownMenuEntries: ManageOrderDirection
-                                        .values
-                                        .map(
-                                          (e) => DropdownMenuEntry(
-                                            value: e,
-                                            label: e.name,
-                                          ),
-                                        )
-                                        .toList(),
-                                    enableFilter: true,
-                                    initialSelection:
-                                        _order?.orderDirection ??
-                                        ManageOrderDirection.desc,
-                                    onSelected: (value) {
-                                      _setOrder(
-                                        orderBy:
-                                            _order?.orderBy ??
-                                            ManageOrderBy.updatedAt,
-                                        orderDirection:
-                                            value ?? ManageOrderDirection.desc,
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
+                            )
+                            .toList(),
+                        enableFilter: true,
+                        initialSelection:
+                            _order?.orderDirection ?? ManageOrderDirection.desc,
+                        onSelected: (value) {
+                          _setOrder(
+                            orderBy: _order?.orderBy ?? ManageOrderBy.updatedAt,
+                            orderDirection: value ?? ManageOrderDirection.desc,
+                          );
+                        },
                       ),
                     ],
                   ),
-          )
-        : inBattle
-        ? BattleVsInGameView(
-            challengerId: _challengerId,
-            opponentId: _opponentId,
-            gameData: _gameData!,
-            onListen: widget.onListen,
-            onSend: widget.onSend,
-            onLog: widget.onLog,
-            onDispose: widget.onDispose,
-            onGameEnded: widget.onGameEnded,
-          )
-        : const Center(child: Text('Waiting for opponent...'));
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
-class BattleVsInGameView extends ConsumerStatefulWidget {
-  final String? challengerId;
-  final String? opponentId;
-  final GameData gameData;
-  final Function(Function(String)) onListen;
-  final Function(BattleQueue) onSend;
-  final Function(BattleQueue) onLog;
-  final Function(Function(String)) onDispose;
-  final Function(GameData) onGameEnded;
+class BattleVsInGameView extends StatefulWidget {
+  final String userId;
+  final proto.BattleState state;
+  final Monster myMnstr;
+  final Monster otherMnstr;
+  final TurnOutcome outcome;
+  final proto.GameEnded? gameEnded;
+  final String? busyMessage;
+  final Future<void> Function() onAttack;
+  final Future<void> Function() onMagic;
+  final Future<void> Function() onDefend;
+  final Future<void> Function() onEscape;
+  final VoidCallback onExit;
 
   const BattleVsInGameView({
     super.key,
-    required this.challengerId,
-    required this.opponentId,
-    required this.gameData,
-    required this.onListen,
-    required this.onSend,
-    required this.onLog,
-    required this.onDispose,
-    required this.onGameEnded,
+    required this.userId,
+    required this.state,
+    required this.myMnstr,
+    required this.otherMnstr,
+    required this.outcome,
+    required this.gameEnded,
+    required this.busyMessage,
+    required this.onAttack,
+    required this.onMagic,
+    required this.onDefend,
+    required this.onEscape,
+    required this.onExit,
   });
 
   @override
-  ConsumerState<BattleVsInGameView> createState() => _BattleVsInGameViewState();
+  State<BattleVsInGameView> createState() => _BattleVsInGameViewState();
 }
 
-class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
-  GameData? _gameData;
-  String? _winnerId;
-  bool _isLoading = false;
-  String? _loadingAction;
-  String? _turnUserId;
-  bool _attacked = false;
-  bool _defended = false;
-  bool _magicAttacked = false;
-  int _damage = 0;
-
-  void _handleMessage(String message) {
-    final user = ref.watch(sessionUserProvider);
-    if (user == null) {
-      return;
-    }
-
-    final battleQueue = BattleQueue.fromJson(jsonDecode(message));
-    final data = jsonDecode(battleQueue.data!.data!);
-    final gameData = GameData.fromJson(data);
-    if (battleQueue.data?.userId != widget.challengerId &&
-        battleQueue.data?.userId != widget.opponentId) {
-      log('[handle message] not user or opponent');
-      log(
-        '[handle message] userId: ${battleQueue.data?.userId} != ${widget.challengerId}',
-      );
-      log(
-        '[handle message] opponentId: ${battleQueue.data?.opponentId} != ${widget.opponentId}',
-      );
-      log('[handle message] battleQueue: ${battleQueue.toJson()}');
-      log('[handle message] game data: ${gameData.toJson()}');
-      if (gameData.turnUserId != user.id) {
-        return;
-      }
-    }
-
-    switch (battleQueue.action) {
-      case BattleQueueAction.gameEnded:
-        setState(() {
-          _gameData = gameData;
-          _winnerId = gameData.winnerId;
-          _isLoading = false;
-          _attacked = false;
-          _defended = false;
-          _magicAttacked = false;
-          _damage = 0;
-        });
-        break;
-      case BattleQueueAction.attack:
-        final user = ref.watch(sessionUserProvider);
-        if (user == null) {
-          return;
-        }
-        final data = jsonDecode(battleQueue.data!.data!);
-        final gameData = GameData.fromJson(data);
-        log('[handle attack] gameData: ${gameData.toJson()}');
-        log(
-          '[handle attack] gameData.turnUserId: ${gameData.turnUserId}, user.id: ${user.id}',
-        );
-        setState(() {
-          _gameData = gameData;
-          _isLoading = false;
-          _turnUserId = gameData.turnUserId;
-          if (gameData.turnUserId == user.id) {
-            if (gameData.battleLogData?.hit != null &&
-                gameData.battleLogData!.hit!) {
-              _attacked = true;
-              _defended = false;
-              _magicAttacked = false;
-              _damage = gameData.battleLogData?.damage ?? 0;
-            } else {
-              _attacked = false;
-              _defended = true;
-              _magicAttacked = false;
-            }
-          } else {
-            _attacked = false;
-            _defended = false;
-            _magicAttacked = false;
-          }
-        });
-        break;
-      case BattleQueueAction.defend:
-        final user = ref.watch(sessionUserProvider);
-        if (user == null) {
-          return;
-        }
-        final data = jsonDecode(battleQueue.data!.data!);
-        final gameData = GameData.fromJson(data);
-        setState(() {
-          _gameData = gameData;
-          _isLoading = false;
-          _turnUserId = gameData.turnUserId;
-          if (gameData.turnUserId == user.id) {
-            _defended = true;
-            _attacked = false;
-            _magicAttacked = false;
-          } else {
-            _attacked = false;
-            _defended = false;
-            _magicAttacked = false;
-          }
-        });
-        break;
-      case BattleQueueAction.magic:
-        final user = ref.watch(sessionUserProvider);
-        if (user == null) {
-          return;
-        }
-        final data = jsonDecode(battleQueue.data!.data!);
-        final gameData = GameData.fromJson(data);
-        setState(() {
-          _gameData = gameData;
-          _isLoading = false;
-          _turnUserId = gameData.turnUserId;
-          if (gameData.turnUserId == user.id) {
-            if (gameData.battleLogData?.hit != null &&
-                gameData.battleLogData!.hit!) {
-              _attacked = false;
-              _defended = false;
-              _magicAttacked = true;
-              _damage = gameData.battleLogData?.damage ?? 0;
-            } else {
-              _attacked = false;
-              _defended = true;
-              _magicAttacked = false;
-            }
-          } else {
-            _attacked = false;
-            _defended = false;
-            _magicAttacked = false;
-          }
-        });
-        break;
-      default:
-        break;
-    }
-  }
-
-  void _escape() {
-    final user = ref.watch(sessionUserProvider);
-    if (user == null) {
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _loadingAction = 'Escaping from battle...';
-    });
-
-    String? winnerId;
-    if (widget.gameData.opponentMnstr?.userId == user.id) {
-      winnerId = widget.gameData.challengerMnstr?.userId;
-    } else {
-      winnerId = widget.gameData.opponentMnstr?.userId;
-    }
-
-    final gameData = GameData(
-      battleId: widget.gameData.battleId,
-      challengerMnstr: widget.gameData.challengerMnstr,
-      opponentMnstr: widget.gameData.opponentMnstr,
-      winnerId: winnerId,
-    );
-    final data = BattleQueueData(
-      userId: user.id,
-      userName: user.displayName,
-      action: BattleQueueDataAction.escape,
-      message: 'Escape from battle',
-      data: jsonEncode(gameData.toJson()),
-    );
-    final battleQueue = BattleQueue(
-      action: BattleQueueAction.escape,
-      userId: widget.challengerId,
-      data: data,
-      channel: BattleQueueChannel.battle,
-    );
-    widget.onSend(battleQueue);
-  }
-
-  void _attack() {
-    final user = ref.watch(sessionUserProvider);
-    if (user == null) {
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _loadingAction = 'Attacking...';
-    });
-
-    String? turnUserId;
-    if (_turnUserId != user.id) {
-      turnUserId = user.id;
-    } else {
-      if (_turnUserId == widget.opponentId) {
-        turnUserId = widget.challengerId;
-      } else {
-        turnUserId = widget.opponentId;
-      }
-    }
-
-    final gameData = GameData(
-      battleId: widget.gameData.battleId,
-      challengerMnstr: _gameData!.challengerMnstr,
-      opponentMnstr: _gameData!.opponentMnstr,
-      turnUserId: turnUserId,
-    );
-    final data = BattleQueueData(
-      userId: user.id,
-      userName: user.displayName,
-      action: BattleQueueDataAction.attack,
-      message: 'Attack',
-      data: jsonEncode(gameData.toJson()),
-    );
-    final battleQueue = BattleQueue(
-      action: BattleQueueAction.attack,
-      userId: widget.challengerId,
-      data: data,
-      channel: BattleQueueChannel.battle,
-    );
-    widget.onSend(battleQueue);
-  }
-
-  void _defend() {
-    final user = ref.watch(sessionUserProvider);
-    if (user == null) {
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _loadingAction = 'Defending...';
-    });
-
-    String? turnUserId;
-    if (_turnUserId != user.id) {
-      turnUserId = user.id;
-    } else {
-      if (_turnUserId == widget.opponentId) {
-        turnUserId = widget.challengerId;
-      } else {
-        turnUserId = widget.opponentId;
-      }
-    }
-
-    final gameData = GameData(
-      battleId: widget.gameData.battleId,
-      challengerMnstr: _gameData!.challengerMnstr,
-      opponentMnstr: _gameData!.opponentMnstr,
-      turnUserId: turnUserId,
-    );
-    final data = BattleQueueData(
-      userId: user.id,
-      userName: user.displayName,
-      action: BattleQueueDataAction.defend,
-      message: 'Defend',
-      data: jsonEncode(gameData.toJson()),
-    );
-    final battleQueue = BattleQueue(
-      action: BattleQueueAction.defend,
-      userId: widget.challengerId,
-      data: data,
-      channel: BattleQueueChannel.battle,
-    );
-    widget.onSend(battleQueue);
-  }
-
-  void _magic() {
-    final user = ref.watch(sessionUserProvider);
-    if (user == null) {
-      return;
-    }
-
-    setState(() {
-      _isLoading = true;
-      _loadingAction = 'Magic...';
-    });
-
-    String? turnUserId;
-    if (_turnUserId != user.id) {
-      turnUserId = user.id;
-    } else {
-      if (_turnUserId == widget.opponentId) {
-        turnUserId = widget.challengerId;
-      } else {
-        turnUserId = widget.opponentId;
-      }
-    }
-
-    final gameData = GameData(
-      battleId: widget.gameData.battleId,
-      challengerMnstr: _gameData!.challengerMnstr,
-      opponentMnstr: _gameData!.opponentMnstr,
-      turnUserId: turnUserId,
-    );
-
-    final data = BattleQueueData(
-      userId: user.id,
-      userName: user.displayName,
-      action: BattleQueueDataAction.magic,
-      message: 'Magic',
-      data: jsonEncode(gameData.toJson()),
-    );
-
-    final battleQueue = BattleQueue(
-      action: BattleQueueAction.magic,
-      userId: widget.challengerId,
-      data: data,
-      channel: BattleQueueChannel.battle,
-    );
-    widget.onSend(battleQueue);
-  }
-
-  Future<void> _setBackgroundColor() async {
-    final user = ref.watch(sessionUserProvider);
-    if (user == null) {
-      return;
-    }
-
-    final isChallenger = widget.challengerId == user.id;
+class _BattleVsInGameViewState extends State<BattleVsInGameView> {
+  void _setBackgroundColor() {
     final theme = Theme.of(context);
-    final opponentMnstr = isChallenger
-        ? _gameData!.opponentMnstr
-        : _gameData!.challengerMnstr;
-    final color = opponentMnstr?.toMonsterModel().color ?? theme.primaryColor;
+    final color =
+        widget.otherMnstr.toMonsterModel().color ?? theme.primaryColor;
     LayoutScaffold.of(
       context,
     ).setBackgroundColor(
@@ -770,42 +505,32 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
   @override
   void initState() {
     super.initState();
-    _gameData = widget.gameData;
-    _turnUserId = widget.gameData.turnUserId;
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
       _setBackgroundColor();
       _removeStatBar();
-      widget.onListen(_handleMessage);
     });
   }
 
   @override
-  void dispose() {
-    widget.onDispose(_handleMessage);
-    super.dispose();
-  }
-
-  @override
   Widget build(BuildContext context) {
-    final user = ref.watch(sessionUserProvider);
-    if (user == null) {
-      return const SizedBox.shrink();
-    }
-
-    final isChallenger = widget.challengerId == user.id;
-
-    final challengerMnstr = isChallenger
-        ? _gameData!.challengerMnstr
-        : _gameData!.opponentMnstr;
-    final opponentMnstr = isChallenger
-        ? _gameData!.opponentMnstr
-        : _gameData!.challengerMnstr;
+    final challengerMnstr = widget.myMnstr;
+    final opponentMnstr = widget.otherMnstr;
+    final gameEnded = widget.gameEnded;
+    final won = gameEnded?.winnerId == widget.userId;
+    final isMyTurn =
+        gameEnded == null &&
+        widget.busyMessage == null &&
+        widget.state.isMyTurn(widget.userId);
+    final outcome = widget.outcome;
     final size = MediaQuery.sizeOf(context);
 
     final theme = Theme.of(context);
     final buttonColor = darkenColor(
       Color.lerp(
-            challengerMnstr?.toMonsterModel().color ?? theme.primaryColor,
+            challengerMnstr.toMonsterModel().color ?? theme.primaryColor,
             Colors.white,
             0.25,
           ) ??
@@ -823,17 +548,15 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
     final statBarWidth =
         size.width - (statBarMargin.left + statBarMargin.right);
 
-    final winnerMnstr = _winnerId == user.id ? challengerMnstr : opponentMnstr;
+    final winnerMnstr = won ? challengerMnstr : opponentMnstr;
 
-    final loserMnstr = _winnerId == user.id ? opponentMnstr : challengerMnstr;
+    final loserMnstr = won ? opponentMnstr : challengerMnstr;
 
-    final xpAwarded = _winnerId == user.id
-        ? _gameData!.winnerXpAwarded
-        : _gameData!.loserXpAwarded;
-
-    final coinsAwarded = _winnerId == user.id
-        ? _gameData!.winnerCoinsAwarded
-        : _gameData!.loserCoinsAwarded;
+    final rewards = gameEnded == null
+        ? null
+        : rewardsFor(gameEnded, widget.userId);
+    final xpAwarded = rewards?.xpAwarded ?? 0;
+    final coinsAwarded = rewards?.coinsAwarded ?? 0;
 
     return Stack(
       children: [
@@ -842,7 +565,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
           left: 0,
           right: 0,
           child: MonsterView(
-            monster: opponentMnstr!.toMonsterModel(),
+            monster: opponentMnstr.toMonsterModel(),
             monsterScale: 1.25,
             size: Size(size.width, size.height),
           ),
@@ -866,14 +589,14 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
           right: 0,
           bottom: -size.height * 0.68,
           child: MonsterView(
-            monster: challengerMnstr!.toMonsterModel(),
+            monster: challengerMnstr.toMonsterModel(),
             size: Size(size.width, size.height),
             monsterScale: 2.5,
             backside: true,
           ),
         ),
 
-        if (_turnUserId == user.id)
+        if (isMyTurn)
           Positioned(
             right: 16,
             bottom: 70,
@@ -883,7 +606,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                 Tooltip(
                   message: 'Attack',
                   child: UIButton(
-                    onPressed: _attack,
+                    onPressedAsync: widget.onAttack,
                     icon: Symbols.swords_rounded,
                     height: 40,
                     backgroundColor: buttonColor,
@@ -893,7 +616,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                 Tooltip(
                   message: 'Magic',
                   child: UIButton(
-                    onPressed: _magic,
+                    onPressedAsync: widget.onMagic,
                     icon: Symbols.magic_button_rounded,
                     height: 40,
                     backgroundColor: buttonColor,
@@ -903,7 +626,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                 Tooltip(
                   message: 'Defend',
                   child: UIButton(
-                    onPressed: _defend,
+                    onPressedAsync: widget.onDefend,
                     icon: Icons.shield_moon_rounded,
                     height: 40,
                     backgroundColor: buttonColor,
@@ -913,7 +636,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                 Tooltip(
                   message: 'Escape from battle',
                   child: UIButton(
-                    onPressed: _escape,
+                    onPressedAsync: widget.onEscape,
                     icon: Icons.directions_run_rounded,
                     height: 40,
                     backgroundColor: buttonColor,
@@ -934,7 +657,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
             padding: statBarPadding,
           ),
         ),
-        if (_winnerId != null)
+        if (gameEnded != null)
           Positioned(
             top: 0,
             bottom: 0,
@@ -955,7 +678,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                     mainAxisSize: MainAxisSize.min,
                     spacing: 16,
                     children: [
-                      if (_winnerId == user.id) ...[
+                      if (won) ...[
                         Text(
                           'You defeated',
                           style: theme.textTheme.displaySmall?.copyWith(
@@ -963,13 +686,13 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                           ),
                         ),
                         Text(
-                          loserMnstr?.mnstrName ?? 'your opponent',
+                          loserMnstr.mnstrName ?? 'your opponent',
                           style: theme.textTheme.displayMedium?.copyWith(
                             color: Colors.white,
                           ),
                         ),
                       ],
-                      if (_winnerId != user.id) ...[
+                      if (!won) ...[
                         Text(
                           'You were defeated by',
                           style: theme.textTheme.displaySmall?.copyWith(
@@ -977,7 +700,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                           ),
                         ),
                         Text(
-                          winnerMnstr?.mnstrName ?? 'your opponent',
+                          winnerMnstr.mnstrName ?? 'your opponent',
                           style: theme.textTheme.displayMedium?.copyWith(
                             color: Colors.white,
                           ),
@@ -1008,7 +731,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                       ),
                       UIButton(
                         onPressed: () {
-                          widget.onGameEnded(_gameData!);
+                          widget.onExit();
                         },
                         icon: Symbols.social_leaderboard_rounded,
                         height: 40,
@@ -1022,7 +745,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
               ),
             ),
           ),
-        if (_attacked)
+        if (outcome.overlay == TurnOverlay.attacked)
           Positioned(
             top: 0,
             bottom: 0,
@@ -1044,7 +767,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                       height: size.width * 0.8,
                     ),
                     Text(
-                      '-$_damage',
+                      '-${outcome.damage}',
                       style: theme.textTheme.displayLarge?.copyWith(
                         color: Colors.yellow,
                       ),
@@ -1054,7 +777,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
               ),
             ),
           ),
-        if (_defended)
+        if (outcome.overlay == TurnOverlay.defended)
           Positioned(
             top: 0,
             bottom: 0,
@@ -1086,7 +809,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
               ),
             ),
           ),
-        if (_magicAttacked)
+        if (outcome.overlay == TurnOverlay.magicAttacked)
           Positioned(
             top: 0,
             bottom: 0,
@@ -1111,7 +834,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                       height: 60,
                     ),
                     Text(
-                      '-$_damage',
+                      '-${outcome.damage}',
                       style: theme.textTheme.displayLarge?.copyWith(
                         color: Colors.yellow,
                       ),
@@ -1121,7 +844,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
               ),
             ),
           ),
-        if (_isLoading)
+        if (widget.busyMessage != null)
           Positioned(
             top: 0,
             bottom: 0,
@@ -1141,7 +864,7 @@ class _BattleVsInGameViewState extends ConsumerState<BattleVsInGameView> {
                   spacing: 16,
                   children: [
                     Text(
-                      _loadingAction ?? 'Processing...',
+                      widget.busyMessage!,
                       style: theme.textTheme.displaySmall?.copyWith(
                         color: Colors.white,
                       ),
