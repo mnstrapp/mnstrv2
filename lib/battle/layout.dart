@@ -1,20 +1,18 @@
-import 'dart:convert';
-import 'dart:developer';
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:web_socket_channel/web_socket_channel.dart';
 
 import '../auth/login.dart';
-import '../config/endpoints.dart';
 import '../providers/auth.dart';
+import '../providers/battle.dart';
 import '../providers/manage.dart';
 import '../providers/session_users.dart';
+import '../proto/battles.pb.dart' as proto;
 import '../shared/empty_message.dart';
 import '../shared/layout_scaffold.dart';
 import '../ui/button.dart';
 import '../utils/color.dart';
-import 'data.dart';
 import 'queue.dart';
 import 'vs.dart';
 
@@ -30,6 +28,8 @@ class BattleMessage {
   BattleMessage({this.type = BattleMessageType.message, this.message = ''});
 }
 
+/// The battle area: holds the `Join` event stream open and shows the lobby
+/// or the current battle.
 class BattleLayoutView extends ConsumerStatefulWidget {
   const BattleLayoutView({super.key});
 
@@ -38,260 +38,163 @@ class BattleLayoutView extends ConsumerStatefulWidget {
 }
 
 class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
-  WebSocketChannel? _socket;
+  late final BattleClient _client;
+  final List<StreamSubscription<Object>> _subscriptions = [];
   bool _isLoading = false;
-  bool _isJoined = false;
-  bool _reconnect = false;
-  bool _isInBattle = false;
+  BattleConnection _connection = BattleConnection.disconnected;
+  bool _canReconnect = false;
   List<BattleMessage> _messages = [];
-  final List<Function(String)> _listeners = [];
-  BattleQueue? _battleQueue;
+
+  /// The battle the player is in, if any.
+  proto.BattleState? _battle;
   final GlobalKey<LayoutScaffoldState> layoutKey =
       GlobalKey<LayoutScaffoldState>();
 
-  void _keepConnection() {
+  void _log(String message, {bool error = false}) {
     if (!mounted) {
       return;
     }
-    if (_socket == null) {
-      _connect();
-      return;
-    }
-
-    final user = ref.read(sessionUserProvider);
-    if (user == null) {
-      return;
-    }
-    final data = BattleQueueData(
-      userId: user.id,
-      userName: user.displayName,
-      message: 'ping',
-      action: BattleQueueDataAction.ping,
-    );
-    final battleQueue = BattleQueue(
-      action: BattleQueueAction.ping,
-      userId: user.id,
-      data: data,
-      channel: BattleQueueChannel.lobby,
-    );
-    try {
-      _socket?.sink.add(jsonEncode(battleQueue.toJson()));
-    } catch (e) {
-      _connect();
-    }
-    Future.delayed(const Duration(seconds: 1), () {
-      _keepConnection();
+    setState(() {
+      _messages = [
+        ..._messages,
+        BattleMessage(
+          type: error ? BattleMessageType.error : BattleMessageType.message,
+          message: message,
+        ),
+      ];
     });
   }
 
-  void _log(BattleQueue battleQueue) {
-    final user = ref.read(sessionUserProvider);
-    if (user == null) {
+  void _startBattle(proto.BattleState state) {
+    if (!mounted) {
       return;
     }
-    battleQueue.data?.userName ??= user.displayName;
-    battleQueue.data?.userId ??= user.id;
-    battleQueue.userId ??= user.id;
-
-    final newMessage = BattleMessage();
-
-    if (battleQueue.data?.message != null) {
-      newMessage.type = BattleMessageType.message;
-      newMessage.message =
-          '[${battleQueue.data?.userName}] ${battleQueue.data?.message as String}';
-    }
-    if (battleQueue.data?.error != null) {
-      newMessage.type = BattleMessageType.error;
-      newMessage.message =
-          '[${battleQueue.data?.userName}] ${battleQueue.data?.error as String}';
+    if (_battle != null && _battle!.battleId == state.battleId) {
+      return;
     }
     setState(() {
-      _messages = [..._messages, newMessage];
+      _battle = state;
     });
   }
 
-  void _broadcast(String message) {
-    for (var listener in _listeners) {
-      listener(message);
-    }
-  }
-
-  Future<void> _handleMessage(String message) async {
-    final user = ref.read(sessionUserProvider);
-    if (user == null) {
-      return;
-    }
-
-    final battleQueue = BattleQueue.fromJson(jsonDecode(message));
-    if (battleQueue.action == BattleQueueAction.ping) {
-      return;
-    }
-    // _log(battleQueue);
-    _broadcast(message);
-    debugPrint('battleQueue: ${battleQueue.toJson()}');
-
-    switch (battleQueue.action) {
-      case BattleQueueAction.joined:
-        if (battleQueue.data?.userId == user.id) {
-          setState(() {
-            _isJoined = true;
-          });
+  void _handleEvent(proto.BattleEvent event) {
+    final userId = ref.read(sessionUserProvider)?.id;
+    switch (event.whichPayload()) {
+      case proto.BattleEvent_Payload.gameStarted:
+        _startBattle(event.gameStarted.state);
+        break;
+      case proto.BattleEvent_Payload.rejoined:
+        if (event.rejoined.userId == userId) {
+          _startBattle(event.rejoined.state);
         }
         break;
-      case BattleQueueAction.left:
-        if (battleQueue.data?.userId == user.id) {
-          setState(() {
-            _isJoined = false;
-            _reconnect = true;
-            _isInBattle = false;
-          });
+      case proto.BattleEvent_Payload.error:
+        if (!event.error.hasBattleId()) {
+          layoutKey.currentState?.addError(event.error.message);
+          _log(event.error.message, error: true);
         }
-        break;
-      case BattleQueueAction.gameStarted:
-        setState(() {
-          if (battleQueue.data?.userId == user.id ||
-              battleQueue.data?.opponentId == user.id) {
-            _isInBattle = true;
-            _battleQueue = battleQueue;
-          }
-        });
         break;
       default:
         break;
     }
   }
 
-  void _addListener(Function(String) listener) {
-    if (_listeners.contains(listener)) {
+  void _handleConnection(BattleConnection connection) {
+    if (!mounted) {
       return;
     }
-    _listeners.add(listener);
-  }
-
-  void _removeListener(Function(String) listener) {
-    _listeners.remove(listener);
-  }
-
-  void _sendMessage(BattleQueue battleQueue) {
-    _socket?.sink.add(jsonEncode(battleQueue.toJson()));
-  }
-
-  Future<void> _connect() async {
-    final session = await getAuth();
-    if (session == null) {
-      log('session is null');
-      return;
+    setState(() {
+      _connection = connection;
+      if (connection == BattleConnection.connected) {
+        _canReconnect = false;
+      }
+    });
+    switch (connection) {
+      case BattleConnection.connecting:
+        _log('Connecting to battle queue');
+        break;
+      case BattleConnection.connected:
+        _log('Connected to battle queue');
+        // A dropped stream took the player out of the lobby; put them back
+        // into the battle they were fighting.
+        final battle = _battle;
+        if (battle != null) {
+          _rejoin(battle.battleId);
+        }
+        break;
+      case BattleConnection.reconnecting:
+        _log('Reconnecting to battle queue', error: true);
+        break;
+      case BattleConnection.disconnected:
+        setState(() {
+          _canReconnect = true;
+        });
+        break;
     }
+  }
 
+  void _handleStreamError(BattleException error) {
+    layoutKey.currentState?.addError(error.message);
+    _log(error.message, error: true);
+  }
+
+  Future<void> _rejoin(String battleId) async {
     try {
-      if (mounted) {
+      final state = await _client.rejoin(battleId);
+      if (mounted && _battle?.battleId == battleId) {
         setState(() {
-          _messages = [
-            ..._messages,
-            BattleMessage(
-              type: BattleMessageType.message,
-              message: 'Connecting to battle queue',
-            ),
-          ];
-        });
-        _socket = WebSocketChannel.connect(
-          Uri.parse('$wsUrl/battle_queue/${session.token}'),
-        );
-      }
-      if (mounted) {
-        setState(() {
-          _messages = [
-            ..._messages,
-            BattleMessage(
-              type: BattleMessageType.message,
-              message: 'Connected to battle queue',
-            ),
-          ];
+          _battle = state;
         });
       }
-      _socket?.stream.listen(
-        (message) {
-          if (mounted) {
-            _handleMessage(message);
-          }
-        },
-        onDone: () {
-          layoutKey.currentState?.addError('Socket is disconnected');
-          if (_socket?.closeCode == null) {
-            return;
-          }
-          if (mounted) {
-            setState(() {
-              _messages = [
-                ..._messages,
-                BattleMessage(
-                  type: BattleMessageType.error,
-                  message: 'Socket is disconnected',
-                ),
-              ];
-              _isJoined = false;
-              _reconnect = true;
-              _isInBattle = false;
-            });
-          }
-        },
-        onError: (error) {
-          layoutKey.currentState?.addError('Socket error: $error');
-          if (mounted) {
-            setState(() {
-              _messages = [
-                ..._messages,
-                BattleMessage(
-                  type: BattleMessageType.error,
-                  message: 'Socket error: $error',
-                ),
-              ];
-              _isJoined = false;
-              _reconnect = true;
-              _isInBattle = false;
-            });
-          }
-        },
-      );
-    } catch (e, stackTrace) {
-      debugPrint('Battle socket error: $e, $stackTrace');
-      layoutKey.currentState?.addError('Socket error: $e');
-      setState(() {
-        _messages = [
-          ..._messages,
-          BattleMessage(
-            type: BattleMessageType.error,
-            message: 'Socket error: $e',
-          ),
-        ];
-        _isJoined = false;
-        _reconnect = true;
-        _isInBattle = false;
-      });
+    } on BattleException catch (error) {
+      // The battle ended while the player was away.
+      _log(error.message, error: true);
+      if (mounted) {
+        setState(() {
+          _battle = null;
+        });
+      }
     }
-    _keepConnection();
   }
 
-  @override
-  void dispose() {
-    _socket?.sink.close();
-    super.dispose();
+  void _connect() {
+    setState(() {
+      _canReconnect = false;
+    });
+    _client.connect();
+  }
+
+  Future<void> _onGameEnded() async {
+    setState(() {
+      _battle = null;
+    });
+    // Rewards changed the player's mnstrs.
+    await ref.read(manageProvider.notifier).getMonsters();
   }
 
   @override
   void initState() {
     super.initState();
+    _client = ref.read(battleClientProvider);
+    _connection = _client.connection;
+    _subscriptions.addAll([
+      _client.events.listen(_handleEvent),
+      _client.connectionChanges.listen(_handleConnection),
+      _client.streamErrors.listen(_handleStreamError),
+    ]);
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       setState(() {
         _isLoading = true;
       });
       await ref.read(manageProvider.notifier).getMonsters();
       await ref.read(authProvider.notifier).ensureAuth();
-
+      if (!mounted) {
+        return;
+      }
       setState(() {
         _isLoading = false;
       });
-      final mnstrs = ref.watch(manageProvider);
+      final mnstrs = ref.read(manageProvider);
       if (mnstrs.isEmpty) {
         return;
       }
@@ -301,6 +204,16 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
       }
       _connect();
     });
+  }
+
+  @override
+  void dispose() {
+    for (final subscription in _subscriptions) {
+      subscription.cancel();
+    }
+    // Closing the stream takes the player out of the lobby.
+    _client.disconnect();
+    super.dispose();
   }
 
   @override
@@ -353,46 +266,17 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
       return const EmptyMessage();
     }
 
+    final battle = _battle;
+    final isJoined = _connection == BattleConnection.connected;
+
     return LayoutScaffold(
       key: layoutKey,
-      child: _isInBattle
+      child: battle != null
           ? BattleVsView(
-              onListen: _addListener,
-              onSend: _sendMessage,
-              onLog: _log,
-              onDispose: _removeListener,
-              battleQueue: _battleQueue,
-              onGameEnded: (_) {
-                setState(() {
-                  _isInBattle = false;
-                  _battleQueue = null;
-                });
-                final battleQueueData = BattleQueueData(
-                  action: BattleQueueDataAction.connect,
-                  userId: _battleQueue?.data?.userId,
-                  userName: _battleQueue?.data?.userName,
-                );
-                final battleQueue = BattleQueue(
-                  action: BattleQueueAction.joined,
-                  userId: _battleQueue?.data?.userId,
-                  data: battleQueueData,
-                  channel: BattleQueueChannel.lobby,
-                );
-                _socket?.sink.add(jsonEncode(battleQueue.toJson()));
-              },
-              reconnect: () {
-                _connect();
-                setState(() {
-                  _reconnect = false;
-                  _messages = [
-                    ..._messages,
-                    BattleMessage(
-                      type: BattleMessageType.message,
-                      message: 'Reconnecting to battle queue',
-                    ),
-                  ];
-                });
-              },
+              key: ValueKey(battle.battleId),
+              client: _client,
+              initialState: battle,
+              onGameEnded: _onGameEnded,
             )
           : SafeArea(
               child: _isLoading
@@ -412,30 +296,16 @@ class _BattleLayoutViewState extends ConsumerState<BattleLayoutView> {
                         children: [
                           if (_messages.isNotEmpty)
                             _BattleMessages(messages: _messages),
-                          if (_reconnect)
+                          if (_canReconnect)
                             UIButton(
-                              onPressedAsync: () async {
-                                setState(() {
-                                  _reconnect = false;
-                                  _messages = [
-                                    ..._messages,
-                                    BattleMessage(
-                                      type: BattleMessageType.message,
-                                      message: 'Reconnecting to battle queue',
-                                    ),
-                                  ];
-                                });
-                                await _connect();
-                              },
+                              onPressed: _connect,
                               text: 'Reconnect',
                               icon: Icons.refresh,
                             ),
-                          if (_isJoined && !_isInBattle)
+                          if (isJoined)
                             BattleQueueView(
-                              onListen: _addListener,
-                              onSend: _sendMessage,
-                              onLog: _log,
-                              onDispose: _removeListener,
+                              client: _client,
+                              onBattleStarted: _startBattle,
                             ),
                         ],
                       ),

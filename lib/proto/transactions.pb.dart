@@ -32,7 +32,7 @@ class Transaction extends $pb.GeneratedMessage {
     $core.String? createdAt,
     $core.String? updatedAt,
   }) {
-    final result = create();
+    final result = Transaction._();
     if (id != null) result.id = id;
     if (walletId != null) result.walletId = walletId;
     if (amount != null) result.amount = amount;
@@ -49,15 +49,15 @@ class Transaction extends $pb.GeneratedMessage {
 
   factory Transaction.fromBuffer($core.List<$core.int> data,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
+      Transaction()..mergeFromBuffer(data, registry);
   factory Transaction.fromJson($core.String json,
           [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
+      Transaction()..mergeFromJson(json, registry);
 
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'Transaction',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
+      createEmptyInstance: Transaction.$_createMessage)
     ..aOS(1, _omitFieldNames ? '' : 'id')
     ..aOS(2, _omitFieldNames ? '' : 'walletId')
     ..aI(3, _omitFieldNames ? '' : 'amount')
@@ -82,12 +82,15 @@ class Transaction extends $pb.GeneratedMessage {
   $pb.BuilderInfo get info_ => _i;
 
   @$core.pragma('dart2js:noInline')
+  @$core.Deprecated('Use Transaction() / Transaction.new instead')
   static Transaction create() => Transaction._();
+  static $pb.GeneratedMessage $_createMessage() => Transaction._();
   @$core.override
-  Transaction createEmptyInstance() => create();
+  Transaction createEmptyInstance() => Transaction._();
   @$core.pragma('dart2js:noInline')
-  static Transaction getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<Transaction>(create);
+  static Transaction getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Transaction>(
+          Transaction.$_createMessage);
   static Transaction? _defaultInstance;
 
   @$pb.TagNumber(1)
@@ -170,386 +173,6 @@ class Transaction extends $pb.GeneratedMessage {
   $core.bool hasUpdatedAt() => $_has(8);
   @$pb.TagNumber(9)
   void clearUpdatedAt() => $_clearField(9);
-}
-
-class CreateTransactionRequest extends $pb.GeneratedMessage {
-  factory CreateTransactionRequest({
-    $core.String? walletId,
-    $core.int? amount,
-    TransactionType? transactionType,
-  }) {
-    final result = create();
-    if (walletId != null) result.walletId = walletId;
-    if (amount != null) result.amount = amount;
-    if (transactionType != null) result.transactionType = transactionType;
-    return result;
-  }
-
-  CreateTransactionRequest._();
-
-  factory CreateTransactionRequest.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory CreateTransactionRequest.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'CreateTransactionRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'walletId')
-    ..aI(2, _omitFieldNames ? '' : 'amount')
-    ..aE<TransactionType>(3, _omitFieldNames ? '' : 'transactionType',
-        enumValues: TransactionType.values)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  CreateTransactionRequest clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  CreateTransactionRequest copyWith(
-          void Function(CreateTransactionRequest) updates) =>
-      super.copyWith((message) => updates(message as CreateTransactionRequest))
-          as CreateTransactionRequest;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static CreateTransactionRequest create() => CreateTransactionRequest._();
-  @$core.override
-  CreateTransactionRequest createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static CreateTransactionRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<CreateTransactionRequest>(create);
-  static CreateTransactionRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get walletId => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set walletId($core.String value) => $_setString(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasWalletId() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearWalletId() => $_clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.int get amount => $_getIZ(1);
-  @$pb.TagNumber(2)
-  set amount($core.int value) => $_setSignedInt32(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasAmount() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearAmount() => $_clearField(2);
-
-  @$pb.TagNumber(3)
-  TransactionType get transactionType => $_getN(2);
-  @$pb.TagNumber(3)
-  set transactionType(TransactionType value) => $_setField(3, value);
-  @$pb.TagNumber(3)
-  $core.bool hasTransactionType() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearTransactionType() => $_clearField(3);
-}
-
-class CreateTransactionResponse extends $pb.GeneratedMessage {
-  factory CreateTransactionResponse({
-    Transaction? transaction,
-  }) {
-    final result = create();
-    if (transaction != null) result.transaction = transaction;
-    return result;
-  }
-
-  CreateTransactionResponse._();
-
-  factory CreateTransactionResponse.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory CreateTransactionResponse.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'CreateTransactionResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
-    ..aOM<Transaction>(1, _omitFieldNames ? '' : 'transaction',
-        subBuilder: Transaction.create)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  CreateTransactionResponse clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  CreateTransactionResponse copyWith(
-          void Function(CreateTransactionResponse) updates) =>
-      super.copyWith((message) => updates(message as CreateTransactionResponse))
-          as CreateTransactionResponse;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static CreateTransactionResponse create() => CreateTransactionResponse._();
-  @$core.override
-  CreateTransactionResponse createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static CreateTransactionResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<CreateTransactionResponse>(create);
-  static CreateTransactionResponse? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  Transaction get transaction => $_getN(0);
-  @$pb.TagNumber(1)
-  set transaction(Transaction value) => $_setField(1, value);
-  @$pb.TagNumber(1)
-  $core.bool hasTransaction() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearTransaction() => $_clearField(1);
-  @$pb.TagNumber(1)
-  Transaction ensureTransaction() => $_ensure(0);
-}
-
-class GetTransactionRequest extends $pb.GeneratedMessage {
-  factory GetTransactionRequest({
-    $core.String? id,
-  }) {
-    final result = create();
-    if (id != null) result.id = id;
-    return result;
-  }
-
-  GetTransactionRequest._();
-
-  factory GetTransactionRequest.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory GetTransactionRequest.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'GetTransactionRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
-    ..aOS(1, _omitFieldNames ? '' : 'id')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  GetTransactionRequest clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  GetTransactionRequest copyWith(
-          void Function(GetTransactionRequest) updates) =>
-      super.copyWith((message) => updates(message as GetTransactionRequest))
-          as GetTransactionRequest;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static GetTransactionRequest create() => GetTransactionRequest._();
-  @$core.override
-  GetTransactionRequest createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static GetTransactionRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<GetTransactionRequest>(create);
-  static GetTransactionRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get id => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set id($core.String value) => $_setString(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasId() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearId() => $_clearField(1);
-}
-
-class GetTransactionResponse extends $pb.GeneratedMessage {
-  factory GetTransactionResponse({
-    Transaction? transaction,
-  }) {
-    final result = create();
-    if (transaction != null) result.transaction = transaction;
-    return result;
-  }
-
-  GetTransactionResponse._();
-
-  factory GetTransactionResponse.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory GetTransactionResponse.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'GetTransactionResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
-    ..aOM<Transaction>(1, _omitFieldNames ? '' : 'transaction',
-        subBuilder: Transaction.create)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  GetTransactionResponse clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  GetTransactionResponse copyWith(
-          void Function(GetTransactionResponse) updates) =>
-      super.copyWith((message) => updates(message as GetTransactionResponse))
-          as GetTransactionResponse;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static GetTransactionResponse create() => GetTransactionResponse._();
-  @$core.override
-  GetTransactionResponse createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static GetTransactionResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<GetTransactionResponse>(create);
-  static GetTransactionResponse? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  Transaction get transaction => $_getN(0);
-  @$pb.TagNumber(1)
-  set transaction(Transaction value) => $_setField(1, value);
-  @$pb.TagNumber(1)
-  $core.bool hasTransaction() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearTransaction() => $_clearField(1);
-  @$pb.TagNumber(1)
-  Transaction ensureTransaction() => $_ensure(0);
-}
-
-class ListTransactionsRequest extends $pb.GeneratedMessage {
-  factory ListTransactionsRequest({
-    $core.int? page,
-    $core.int? limit,
-    $core.String? walletId,
-  }) {
-    final result = create();
-    if (page != null) result.page = page;
-    if (limit != null) result.limit = limit;
-    if (walletId != null) result.walletId = walletId;
-    return result;
-  }
-
-  ListTransactionsRequest._();
-
-  factory ListTransactionsRequest.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory ListTransactionsRequest.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ListTransactionsRequest',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
-    ..aI(1, _omitFieldNames ? '' : 'page')
-    ..aI(2, _omitFieldNames ? '' : 'limit')
-    ..aOS(3, _omitFieldNames ? '' : 'walletId')
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ListTransactionsRequest clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ListTransactionsRequest copyWith(
-          void Function(ListTransactionsRequest) updates) =>
-      super.copyWith((message) => updates(message as ListTransactionsRequest))
-          as ListTransactionsRequest;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static ListTransactionsRequest create() => ListTransactionsRequest._();
-  @$core.override
-  ListTransactionsRequest createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static ListTransactionsRequest getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ListTransactionsRequest>(create);
-  static ListTransactionsRequest? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.int get page => $_getIZ(0);
-  @$pb.TagNumber(1)
-  set page($core.int value) => $_setSignedInt32(0, value);
-  @$pb.TagNumber(1)
-  $core.bool hasPage() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearPage() => $_clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.int get limit => $_getIZ(1);
-  @$pb.TagNumber(2)
-  set limit($core.int value) => $_setSignedInt32(1, value);
-  @$pb.TagNumber(2)
-  $core.bool hasLimit() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearLimit() => $_clearField(2);
-
-  @$pb.TagNumber(3)
-  $core.String get walletId => $_getSZ(2);
-  @$pb.TagNumber(3)
-  set walletId($core.String value) => $_setString(2, value);
-  @$pb.TagNumber(3)
-  $core.bool hasWalletId() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearWalletId() => $_clearField(3);
-}
-
-class ListTransactionsResponse extends $pb.GeneratedMessage {
-  factory ListTransactionsResponse({
-    $core.Iterable<Transaction>? transactions,
-  }) {
-    final result = create();
-    if (transactions != null) result.transactions.addAll(transactions);
-    return result;
-  }
-
-  ListTransactionsResponse._();
-
-  factory ListTransactionsResponse.fromBuffer($core.List<$core.int> data,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(data, registry);
-  factory ListTransactionsResponse.fromJson($core.String json,
-          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(json, registry);
-
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      _omitMessageNames ? '' : 'ListTransactionsResponse',
-      package: const $pb.PackageName(_omitMessageNames ? '' : 'mnstrv2'),
-      createEmptyInstance: create)
-    ..pPM<Transaction>(1, _omitFieldNames ? '' : 'transactions',
-        subBuilder: Transaction.create)
-    ..hasRequiredFields = false;
-
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ListTransactionsResponse clone() => deepCopy();
-  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
-  ListTransactionsResponse copyWith(
-          void Function(ListTransactionsResponse) updates) =>
-      super.copyWith((message) => updates(message as ListTransactionsResponse))
-          as ListTransactionsResponse;
-
-  @$core.override
-  $pb.BuilderInfo get info_ => _i;
-
-  @$core.pragma('dart2js:noInline')
-  static ListTransactionsResponse create() => ListTransactionsResponse._();
-  @$core.override
-  ListTransactionsResponse createEmptyInstance() => create();
-  @$core.pragma('dart2js:noInline')
-  static ListTransactionsResponse getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<ListTransactionsResponse>(create);
-  static ListTransactionsResponse? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $pb.PbList<Transaction> get transactions => $_getList(0);
 }
 
 const $core.bool _omitFieldNames =
